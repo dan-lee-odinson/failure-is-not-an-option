@@ -63,9 +63,9 @@ export function norm(s: string): string {
   return s.replace(/\s+/g, ' ').trim();
 }
 
-/** Dedupe key: whitespace-normalized, digit runs and hex fingerprints collapsed. */
+/** Dedupe key: whitespace-normalized, surrounding quotation marks dropped, digit runs and hex fingerprints collapsed. */
 export function dedupeKey(s: string): string {
-  return norm(s).replace(/[0-9a-f]{12,}/g, '#').replace(/\d+/g, '#');
+  return norm(s).replace(/^[“"']+|[”"']+$/g, '').replace(/[0-9a-f]{12,}/g, '#').replace(/\d+/g, '#');
 }
 
 const ENTITIES: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
