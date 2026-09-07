@@ -1,45 +1,77 @@
 {
-  "content_version": "0.4.0",
+  "content_version": "0.5.1",
   "evidence": [
     {
       "id": "g8-ev-rule",
       "kind": "reference",
-      "title": "Terminate the mission after RCS use.",
-      "body": "Once RCS use is reported, the remaining docking and EVA objectives are relinquished and the room plans the contingency return. The selectable return opportunities later in this scenario are fictional.",
+      "title": "Mission termination after RCS activation",
+      "body": "Both rings of the reentry control system have been activated to regain control, and substantial propellant has been used. Under these conditions, mission rules require termination. Cancel the remaining objectives and prepare a contingency return.",
       "simulated": false,
-      "provenance": { "sources": ["H2"], "fiction": ["F7"], "note": "Automatic at briefing; reference. Historical termination principle H2; game selection boundary F7." }
+      "provenance": {
+        "sources": [
+          "H2"
+        ],
+        "fiction": [
+          "F7"
+        ],
+        "note": "Automatic at briefing; reference. Historical termination principle H2; game selection boundary F7."
+      }
     },
     {
       "id": "g8-ev-contact-primer",
       "kind": "reference",
-      "title": "A report is not continuous coverage.",
-      "body": "Separate the last received observation from the spacecraft's current unknown state. The crew must act onboard when contact is unavailable.",
+      "title": "Network coverage and report timing",
+      "body": "The last report tells us what was true when the crew sent it. Between tracking passes, we have no new information about their condition. Keep the report's observation time beside it; mark anything since that time as unconfirmed. The crew must act on their own until the next station acquires their signal.",
       "simulated": false,
-      "provenance": { "sources": ["H1"], "fiction": [], "note": "Automatic at briefing; instructional reference grounded in H1." }
+      "provenance": {
+        "sources": [
+          "H1"
+        ],
+        "fiction": [],
+        "note": "Automatic at briefing; instructional reference grounded in H1."
+      }
     },
     {
       "id": "g8-ev-contact-worksheet",
       "kind": "reference",
-      "title": "Rehearsed contact handoff.",
-      "body": "One desk sends each request; the receiving desk confirms receipt. Record unknown observation times as unknown. A sent instruction is not yet an acknowledged instruction.",
+      "title": "Contact drill: instruction and readback",
+      "body": "Houston CAPCOM sends the instruction to the tracking-ship CAPCOM, who reads it back and confirms receipt. FLIGHT checks the confirmation before treating the instruction as received. Mark missing observation times as unknown.",
       "simulated": false,
-      "provenance": { "sources": [], "fiction": ["F1"], "note": "Acquired by g8-prep-contact; original F1 reference." }
+      "provenance": {
+        "sources": [],
+        "fiction": [
+          "F1"
+        ],
+        "note": "Acquired by g8-prep-contact; original F1 reference. Named practice calls and desk roles are original game exercises, not a claim that these exact rehearsals occurred before Gemini VIII."
+      }
     },
     {
       "id": "g8-ev-recovery-worksheet",
       "kind": "reference",
-      "title": "Rehearsed recovery coordination.",
-      "body": "Assign the final pickup instruction to one desk and rehearse its readback. Keep aircraft support and surface retrieval distinct. A request cannot move a ship instantly.",
+      "title": "Recovery drill: pickup instruction",
+      "body": "Elias passes the aircraft's location report to the DoD recovery coordinator. They identify the desk that will send the ship its pickup instruction and check the readback. Record aircraft support and the ship's arrival separately.",
       "simulated": false,
-      "provenance": { "sources": [], "fiction": ["F2"], "note": "Acquired by g8-prep-recovery; original F2 reference." }
+      "provenance": {
+        "sources": [],
+        "fiction": [
+          "F2"
+        ],
+        "note": "Acquired by g8-prep-recovery; original F2 reference. Named practice calls and desk roles are original game exercises, not a claim that these exact rehearsals occurred before Gemini VIII."
+      }
     },
     {
       "id": "g8-ev-systems-worksheet",
       "kind": "reference",
-      "title": "Rehearsed reserve-warning handoff.",
-      "body": "Separate the observed warning from a diagnosis. Route an operational warning and its protective recommendation together; do not wait for a complete fault explanation.",
+      "title": "Systems drill: low-propellant warning",
+      "body": "Mara reports the RCS propellant warning to FLIGHT and CAPCOM together. She states what the instruments show, what remains uncertain, and the response she recommends for entry. CAPCOM reads the recommendation back before passing it on.",
       "simulated": false,
-      "provenance": { "sources": [], "fiction": ["F3"], "note": "Acquired by g8-prep-systems; original F3 reference." }
+      "provenance": {
+        "sources": [],
+        "fiction": [
+          "F3"
+        ],
+        "note": "Acquired by g8-prep-systems; original F3 reference. Named practice calls and desk roles are original game exercises, not a claim that these exact rehearsals occurred before Gemini VIII."
+      }
     },
     {
       "id": "g8-ev-docked",
@@ -48,7 +80,13 @@
       "body": "The crew have confirmed docking with Agena.",
       "observation": "known",
       "simulated": false,
-      "provenance": { "sources": ["H3"], "fiction": [], "note": "Docking event; H3. No roll data appended during gap." }
+      "provenance": {
+        "sources": [
+          "H3"
+        ],
+        "fiction": [],
+        "note": "Docking event; H3. No roll data appended during gap."
+      }
     },
     {
       "id": "g8-ev-crisis",
@@ -57,7 +95,13 @@
       "body": "The crew report an uncontrolled tumble after undocking. The report reaches the ground through Coastal Sentry Quebec.",
       "observation": "unknown",
       "simulated": false,
-      "provenance": { "sources": ["H1"], "fiction": [], "note": "Crisis receipt only; H1." }
+      "provenance": {
+        "sources": [
+          "H1"
+        ],
+        "fiction": [],
+        "note": "Crisis receipt only; H1."
+      }
     },
     {
       "id": "g8-ev-stabilized",
@@ -66,61 +110,109 @@
       "body": "The crew have used the reentry control system to stabilize the spacecraft. The remaining mission objectives must be relinquished.",
       "observation": "unknown",
       "simulated": false,
-      "provenance": { "sources": ["H2"], "fiction": [], "note": "Later stabilization receipt; H2." }
+      "provenance": {
+        "sources": [
+          "H2"
+        ],
+        "fiction": [],
+        "note": "Later stabilization receipt; H2."
+      }
     },
     {
       "id": "g8-ev-return",
       "kind": "simulated-report",
-      "title": "Two modeled return opportunities.",
-      "body": "Both offered routes terminate the mission and return to the western Pacific. Earlier return ends spacecraft exposure sooner but leaves a long wait for surface pickup. The later opportunity improves pickup coverage and costs another orbit aboard the damaged spacecraft.",
+      "title": "Return opportunities",
+      "body": "Both opportunities return the crew to the western Pacific. An earlier landing gets them off the damaged spacecraft sooner, but the ship is hours away. Another orbit brings them down closer to the recovery force, with less RCS propellant left for entry.",
       "observation": "known",
       "simulated": true,
-      "provenance": { "sources": ["H2"], "fiction": ["F7"], "note": "Automatic at return planning; F7 simulated planning report. Western Pacific historical context only is H2." }
+      "provenance": {
+        "sources": [
+          "H2"
+        ],
+        "fiction": [
+          "F7"
+        ],
+        "note": "Automatic at return planning; F7 simulated planning report. Western Pacific historical context only is H2."
+      }
     },
     {
       "id": "g8-ev-air",
       "kind": "simulated-report",
-      "title": "Recovery support — simulated report.",
-      "body": "Air support is available on either route. In the earlier area, the retrieval ship is still distant. In the later area, recovery forces are concentrated closer to the modeled splashdown point.",
+      "title": "Aircraft and recovery ship positions",
+      "body": "Aircraft can support either return. At the earlier landing point, the nearest ship is hours away. At the later point, the recovery force can reach the capsule sooner.",
       "observation": "known",
       "simulated": true,
-      "provenance": { "sources": [], "fiction": ["F4", "F7"], "note": "Automatic at return planning; F4/F7. No real coordinates or ships assigned." }
+      "provenance": {
+        "sources": [],
+        "fiction": [
+          "F4",
+          "F7"
+        ],
+        "note": "Automatic at return planning; F4/F7. No real coordinates or ships assigned."
+      }
     },
     {
       "id": "g8-ev-reserve",
       "kind": "simulated-report",
-      "title": "Control reserve — simulated report.",
-      "body": "Attitude is stable now. Reserve is limited. An extra orbit buys recovery coverage at the cost of reserve and another critical handoff. An exact remaining-fuel figure is not available in this model.",
+      "title": "RCS propellant remaining",
+      "body": "The spacecraft is stable for now. The reentry control system, or RCS, uses small thrusters to control its attitude during entry. Propellant is limited; using more before entry leaves less for that task. Mara is checking the remaining supply.",
       "observation": "known",
       "simulated": true,
-      "provenance": { "sources": [], "fiction": ["F7"], "note": "Automatic at return planning; F7. This is not actual Gemini VIII telemetry." }
+      "provenance": {
+        "sources": [],
+        "fiction": [
+          "F7"
+        ],
+        "note": "Automatic at return planning; F7. This is not actual Gemini VIII telemetry."
+      }
     },
     {
       "id": "g8-ev-recovery-readback",
       "kind": "simulated-report",
-      "title": "Pickup desk readback — simulated report.",
-      "body": "The rehearsed desks have confirmed which station owns the final pickup instruction. This can avoid an approach being repeated; it cannot remove the ship's transit.",
+      "title": "Pickup instruction confirmed",
+      "body": "Elias and the DoD coordinator have agreed who sends the final pickup instruction to the ship. The readback is complete. This should prevent confusion during the approach, but the ship still has to reach the capsule.",
       "observation": "known",
       "simulated": true,
-      "provenance": { "sources": [], "fiction": ["F2", "F7"], "note": "Automatic at planning only if recovery preparation selected; F2/F7." }
+      "provenance": {
+        "sources": [],
+        "fiction": [
+          "F2",
+          "F7"
+        ],
+        "note": "Automatic at planning only if recovery preparation selected; F2/F7."
+      }
     },
     {
       "id": "g8-ev-systems-readback",
       "kind": "simulated-report",
-      "title": "Warning-routing readback — simulated report.",
-      "body": "The rehearsed desks have agreed how a reserve warning reaches FLIGHT and CAPCOM together. This can avoid repeating the assessment while the entry handoff is under way.",
+      "title": "Warning call checked",
+      "body": "Mara has checked the call with FLIGHT and CAPCOM. Both desks know to expect the RCS warning and her recommendation together, so CAPCOM can pass the instruction without waiting for the assessment to be repeated.",
       "observation": "known",
       "simulated": true,
-      "provenance": { "sources": [], "fiction": ["F3", "F7"], "note": "Automatic at planning only if systems preparation selected; F3/F7." }
+      "provenance": {
+        "sources": [],
+        "fiction": [
+          "F3",
+          "F7"
+        ],
+        "note": "Automatic at planning only if systems preparation selected; F3/F7."
+      }
     },
     {
       "id": "g8-ev-contact-readback",
       "kind": "simulated-report",
-      "title": "Acknowledgement plan — simulated report.",
-      "body": "The next instruction has a named sender and an acknowledgement route. The room will distinguish pending from received. This arrangement serves either return plan.",
+      "title": "Instruction receipt checked",
+      "body": "CAPCOM has identified who sends the next instruction and who confirms its receipt. Until that confirmation comes back, FLIGHT will treat the instruction as pending. The same check applies to either return.",
       "observation": "known",
       "simulated": true,
-      "provenance": { "sources": [], "fiction": ["F1", "F7"], "note": "Automatic at planning only if contact preparation selected; F1/F7." }
+      "provenance": {
+        "sources": [],
+        "fiction": [
+          "F1",
+          "F7"
+        ],
+        "note": "Automatic at planning only if contact preparation selected; F1/F7."
+      }
     },
     {
       "id": "g8-ev-recovered",
@@ -129,15 +221,29 @@
       "body": "Armstrong and Scott have been recovered alive. Their condition and the course of this return are recorded below.",
       "observation": "known",
       "simulated": true,
-      "provenance": { "sources": ["H3"], "fiction": ["F7"], "note": "Only at actual modeled pickup event. Alive recovery has H3 context; branch details F7." }
+      "provenance": {
+        "sources": [
+          "H3"
+        ],
+        "fiction": [
+          "F7"
+        ],
+        "note": "Only at actual modeled pickup event. Alive recovery has H3 context; branch details F7."
+      }
     },
     {
       "id": "g8-ev-postflight-context",
       "kind": "reference",
-      "title": "Disagreement after Gemini VIII.",
-      "body": "AmericaSpace reports that later analysis cleared Armstrong and Scott. Cunningham nevertheless criticized their performance, while Stafford criticized undocking. Kranz instead identified insufficient ground contingency procedures for the docked phase. Borman and Schirra defended the crew.",
+      "title": "Disagreement after Gemini VIII",
+      "body": "Post-flight analysis has cleared Armstrong and Scott of blame. Walt Cunningham has criticized aspects of their performance; Tom Stafford has argued that undocking from Agena was the wrong decision. Gene Kranz has identified a failure on the ground: too few contingency procedures for the docked phase. Frank Borman and Wally Schirra have defended the crew.",
       "simulated": false,
-      "provenance": { "sources": ["H5"], "fiction": [], "note": "Automatic only in the later post-flight scene. Attributed paraphrase of H5, a secondary account; not a transcript or an investigation document reproduced here." }
+      "provenance": {
+        "sources": [
+          "H5"
+        ],
+        "fiction": [],
+        "note": "Automatic only in the later post-flight scene. Attributed paraphrase of H5, a secondary account; not a transcript or an investigation document reproduced here."
+      }
     }
   ]
 }

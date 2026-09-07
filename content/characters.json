@@ -1,5 +1,5 @@
 {
-  "content_version": "0.4.0",
+  "content_version": "0.5.1",
   "characters": [
     {
       "id": "glen-kurtz",
@@ -20,7 +20,12 @@
       "portrait": null,
       "portrayal": "Historical person; fictional relationship toward Glen. Text only. No dialogue is attributed to him in this content.",
       "dramatization": true,
-      "sources": ["H1", "H2", "H4", "H5"]
+      "sources": [
+        "H1",
+        "H2",
+        "H4",
+        "H5"
+      ]
     },
     {
       "id": "scott",
@@ -31,7 +36,12 @@
       "portrait": null,
       "portrayal": "Historical person; fictional relationship toward Glen. Text only. No dialogue is attributed to him in this content.",
       "dramatization": true,
-      "sources": ["H1", "H2", "H4", "H5"]
+      "sources": [
+        "H1",
+        "H2",
+        "H4",
+        "H5"
+      ]
     },
     {
       "id": "cunningham",
@@ -42,7 +52,9 @@
       "portrait": null,
       "portrayal": "Historical criticism attributed to H5; fictional relationship toward Glen. Text only. His reported position is summarized in the context card, never quoted verbatim.",
       "dramatization": true,
-      "sources": ["H5"]
+      "sources": [
+        "H5"
+      ]
     },
     {
       "id": "stafford",
@@ -53,7 +65,9 @@
       "portrait": null,
       "portrayal": "Historical criticism attributed to H5; fictional relationship toward Glen. Text only. His reported position is summarized in the context card, never quoted verbatim.",
       "dramatization": true,
-      "sources": ["H5"]
+      "sources": [
+        "H5"
+      ]
     },
     {
       "id": "g8-capcom",

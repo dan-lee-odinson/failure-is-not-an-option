@@ -1,15 +1,28 @@
 {
-  "content_version": "0.4.0",
+  "content_version": "0.5.1",
   "id": "gemini-9a-briefing",
   "title": "Gemini IX-A",
   "display_title": "Gemini IX-A — ground preparation",
   "node": "g9-plan-decision",
   "confirm_input": "g9-confirm-plan",
   "requires_completion_of": "gemini-8",
-  "constraint_facts": ["g9-recovery-drill-required", "g9-systems-drill-required"],
+  "constraint_facts": [
+    "g9-recovery-drill-required",
+    "g9-systems-drill-required"
+  ],
   "constraint": [
-    { "when": { "fact": "g9-recovery-drill-required" }, "text": "The crew paid for the earlier return with a long sea wait. Recovery rehearsal is required. Choose the other exercise." },
-    { "when": { "fact": "g9-systems-drill-required" }, "text": "The extra orbit carried a critical-reserve warning. Systems-warning rehearsal is required. Choose the other exercise." }
+    {
+      "when": {
+        "fact": "g9-recovery-drill-required"
+      },
+      "text": "The crew paid for the earlier return with a long sea wait. Recovery rehearsal is required. Choose the other exercise."
+    },
+    {
+      "when": {
+        "fact": "g9-systems-drill-required"
+      },
+      "text": "The extra orbit left the crew facing entry with critically low RCS propellant. A systems-warning drill is required. Choose the other exercise."
+    }
   ],
   "trust_labels": {
     "1": "Confidence strengthened",
@@ -17,20 +30,32 @@
     "-1": "Confidence strained",
     "-2": "Confidence damaged"
   },
-  "controllers": ["g8-systems", "g8-recovery"],
-  "astronauts": ["armstrong", "scott", "cunningham", "stafford"],
+  "controllers": [
+    "g8-systems",
+    "g8-recovery"
+  ],
+  "astronauts": [
+    "armstrong",
+    "scott",
+    "cunningham",
+    "stafford"
+  ],
   "status_blocks": [
     {
       "id": "g9-status-corps-divided",
-      "when": { "fact": "g8-corps-division-deepened" },
+      "when": {
+        "fact": "g8-corps-division-deepened"
+      },
       "title": "Astronaut corps divided",
       "text": "Your endorsement of the crew criticism still divides the corps. Armstrong and Scott enter future work with damaged confidence in you; Cunningham and Stafford's support is stronger."
     },
     {
       "id": "g9-status-contingency-work",
-      "when": { "fact": "g8-docked-contingency-work-ordered" },
+      "when": {
+        "fact": "g8-docked-contingency-work-ordered"
+      },
       "title": "Ground contingency work commissioned",
-      "text": "Your crew's confidence has strengthened. The historical criticism remains visible in the source record.",
+      "text": "The crew's confidence in you has strengthened. The critics haven't withdrawn their objections; work on docked-flight contingency procedures is under way.",
       "procedure": "proc-docked-contingencies"
     }
   ],
@@ -38,40 +63,81 @@
     {
       "id": "g9-plan-recovery-systems",
       "label": "Recovery + systems-warning drills.",
-      "benefit": "Rehearse both specialized risks; omit the supplemental acknowledgement drill.",
-      "available_when": { "any": [{ "fact": "g9-recovery-drill-required" }, { "fact": "g9-systems-drill-required" }] },
+      "benefit": "Practice the pickup call and the low-propellant warning; leave out the separate instruction-and-readback drill.",
+      "available_when": {
+        "any": [
+          {
+            "fact": "g9-recovery-drill-required"
+          },
+          {
+            "fact": "g9-systems-drill-required"
+          }
+        ]
+      },
       "disabled_reasons": [],
       "effects": [
-        { "set_fact": "g9-plan-recovery-systems-committed", "label": "Gemini IX-A plan committed: recovery + systems-warning drills" },
-        { "set_fact": "g9-plan-committed", "label": "Gemini IX-A preparation plan committed" }
+        {
+          "set_fact": "g9-plan-recovery-systems-committed",
+          "label": "Gemini IX-A plan committed: recovery + systems-warning drills"
+        },
+        {
+          "set_fact": "g9-plan-committed",
+          "label": "Gemini IX-A preparation plan committed"
+        }
       ]
     },
     {
       "id": "g9-plan-recovery-contact",
       "label": "Recovery + acknowledgement drills.",
-      "benefit": "Strengthen the recovery handoff end to end; omit the supplemental systems-warning drill.",
-      "available_when": { "fact": "g9-recovery-drill-required" },
+      "benefit": "Practice the pickup call and its receipt; leave out the separate low-propellant warning drill.",
+      "available_when": {
+        "fact": "g9-recovery-drill-required"
+      },
       "disabled_reasons": [
-        { "when": { "fact": "g9-systems-drill-required" }, "text": "This mission must include the systems-warning drill after Gemini VIII's reserve warning." }
+        {
+          "when": {
+            "fact": "g9-systems-drill-required"
+          },
+          "text": "This mission must include the systems-warning drill after Gemini VIII's reserve warning."
+        }
       ],
       "effects": [
-        { "set_fact": "g9-plan-recovery-contact-committed", "label": "Gemini IX-A plan committed: recovery + acknowledgement drills" },
-        { "set_fact": "g9-plan-committed", "label": "Gemini IX-A preparation plan committed" }
+        {
+          "set_fact": "g9-plan-recovery-contact-committed",
+          "label": "Gemini IX-A plan committed: recovery + acknowledgement drills"
+        },
+        {
+          "set_fact": "g9-plan-committed",
+          "label": "Gemini IX-A preparation plan committed"
+        }
       ]
     },
     {
       "id": "g9-plan-systems-contact",
       "label": "Systems-warning + acknowledgement drills.",
-      "benefit": "Strengthen the reserve-warning handoff end to end; omit the supplemental recovery drill.",
-      "available_when": { "fact": "g9-systems-drill-required" },
+      "benefit": "Practice the low-propellant warning and confirmation of the entry instruction; leave out the separate pickup drill.",
+      "available_when": {
+        "fact": "g9-systems-drill-required"
+      },
       "disabled_reasons": [
-        { "when": { "fact": "g9-recovery-drill-required" }, "text": "This mission must include the recovery drill after Gemini VIII's prolonged sea recovery." }
+        {
+          "when": {
+            "fact": "g9-recovery-drill-required"
+          },
+          "text": "This mission must include the recovery drill after Gemini VIII's prolonged sea recovery."
+        }
       ],
       "effects": [
-        { "set_fact": "g9-plan-systems-contact-committed", "label": "Gemini IX-A plan committed: systems-warning + acknowledgement drills" },
-        { "set_fact": "g9-plan-committed", "label": "Gemini IX-A preparation plan committed" }
+        {
+          "set_fact": "g9-plan-systems-contact-committed",
+          "label": "Gemini IX-A plan committed: systems-warning + acknowledgement drills"
+        },
+        {
+          "set_fact": "g9-plan-committed",
+          "label": "Gemini IX-A preparation plan committed"
+        }
       ]
     }
   ],
-  "committed_text": "Preparation plan committed. Flight simulation continues in a later build."
+  "committed_text": "Preparation plan committed."
 }

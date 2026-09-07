@@ -3,29 +3,75 @@
   "$id": "https://fno.local/schema/registry.schema.json",
   "title": "Sources, fiction register, labels and notices",
   "type": "object",
-  "required": ["content_version", "labels", "notices", "sources", "fiction"],
+  "required": [
+    "content_version",
+    "labels",
+    "notices",
+    "sources",
+    "fiction"
+  ],
   "properties": {
-    "content_version": { "$ref": "defs.schema.json#/$defs/semver" },
+    "content_version": {
+      "$ref": "defs.schema.json#/$defs/semver"
+    },
     "labels": {
       "type": "object",
-      "required": ["start_notice", "alternate_history_badge", "alternate_history_explanation", "simulated_report", "postflight_header"],
+      "required": [
+        "start_notice",
+        "alternate_history_badge",
+        "alternate_history_explanation",
+        "simulated_report",
+        "postflight_header"
+      ],
       "properties": {
-        "start_notice": { "$ref": "defs.schema.json#/$defs/text" },
-        "alternate_history_badge": { "$ref": "defs.schema.json#/$defs/text" },
-        "alternate_history_explanation": { "$ref": "defs.schema.json#/$defs/text" },
-        "simulated_report": { "$ref": "defs.schema.json#/$defs/text" },
-        "postflight_header": { "$ref": "defs.schema.json#/$defs/text" }
+        "start_notice": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "alternate_history_badge": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "alternate_history_explanation": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "simulated_report": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "postflight_header": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "historical_choice_badge": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "departures_heading": {
+          "$ref": "defs.schema.json#/$defs/text"
+        }
       },
       "additionalProperties": false
     },
     "notices": {
       "type": "object",
-      "required": ["dedication", "project_disclaimer", "ai_disclosure", "dramatization"],
+      "required": [
+        "dedication",
+        "project_disclaimer",
+        "ai_disclosure",
+        "dramatization"
+      ],
       "properties": {
-        "dedication": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/text" } },
-        "project_disclaimer": { "$ref": "defs.schema.json#/$defs/text" },
-        "ai_disclosure": { "$ref": "defs.schema.json#/$defs/text" },
-        "dramatization": { "$ref": "defs.schema.json#/$defs/text" }
+        "dedication": {
+          "type": "array",
+          "items": {
+            "$ref": "defs.schema.json#/$defs/text"
+          }
+        },
+        "project_disclaimer": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "ai_disclosure": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "dramatization": {
+          "$ref": "defs.schema.json#/$defs/text"
+        }
       },
       "additionalProperties": false
     },
@@ -33,13 +79,29 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "title", "url", "note"],
+        "required": [
+          "id",
+          "title",
+          "url",
+          "note"
+        ],
         "properties": {
-          "id": { "type": "string", "pattern": "^H[0-9]+$" },
-          "title": { "$ref": "defs.schema.json#/$defs/text" },
-          "author": { "$ref": "defs.schema.json#/$defs/text" },
-          "url": { "$ref": "defs.schema.json#/$defs/url" },
-          "note": { "$ref": "defs.schema.json#/$defs/text" }
+          "id": {
+            "type": "string",
+            "pattern": "^H[0-9]+$"
+          },
+          "title": {
+            "$ref": "defs.schema.json#/$defs/text"
+          },
+          "author": {
+            "$ref": "defs.schema.json#/$defs/text"
+          },
+          "url": {
+            "$ref": "defs.schema.json#/$defs/url"
+          },
+          "note": {
+            "$ref": "defs.schema.json#/$defs/text"
+          }
         },
         "additionalProperties": false
       }
@@ -48,11 +110,22 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "title", "text"],
+        "required": [
+          "id",
+          "title",
+          "text"
+        ],
         "properties": {
-          "id": { "type": "string", "pattern": "^F[0-9]+$" },
-          "title": { "$ref": "defs.schema.json#/$defs/text" },
-          "text": { "$ref": "defs.schema.json#/$defs/text" }
+          "id": {
+            "type": "string",
+            "pattern": "^F[0-9]+$"
+          },
+          "title": {
+            "$ref": "defs.schema.json#/$defs/text"
+          },
+          "text": {
+            "$ref": "defs.schema.json#/$defs/text"
+          }
         },
         "additionalProperties": false
       }

@@ -115,6 +115,8 @@ export interface PrepChoiceNode {
 }
 
 export interface DecisionNode {
+  /** Presentation metadata; never an eligibility rule. */
+  historical_option?: string;
   type: 'decision';
   id: string;
   prompt: string;
@@ -163,7 +165,8 @@ export interface Phase {
   /** null = unlimited; an integer is the declared budget (SC-02). */
   attention: number | null;
   /** From this phase on, the ALTERNATE HISTORY badge is shown. */
-  alternate_history?: boolean;
+  /** Once active, persists for the rest of this run; absent means false. */
+  alternate_history?: boolean | Condition;
   nodes: Node[];
 }
 
@@ -175,6 +178,8 @@ export interface Outcome {
 }
 
 export interface DebriefRule {
+  section?: 'departures';
+  provenance?: { sources: string[]; fiction: string[]; note: string };
   id: string;
   when: Condition;
   text: string;
@@ -285,6 +290,8 @@ export interface Registry {
   labels: {
     start_notice: string;
     alternate_history_badge: string;
+    historical_choice_badge?: string;
+    departures_heading?: string;
     alternate_history_explanation: string;
     simulated_report: string;
     postflight_header: string;

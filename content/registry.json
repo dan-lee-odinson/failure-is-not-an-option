@@ -1,11 +1,13 @@
 {
-  "content_version": "0.4.0",
+  "content_version": "0.5.1",
   "labels": {
     "start_notice": "A historical mission with fictional return decisions and alternate outcomes.",
     "alternate_history_badge": "ALTERNATE HISTORY",
-    "alternate_history_explanation": "From return planning onward this scenario departs from the historical record. The two selectable return opportunities, the control-reserve warning, the recovery conditions, the crew-condition variations, the controllers' reactions, and the next-mission constraints are fictional game modeling (F7, F8, F9). The post-flight stance and its relationship consequences are fictional (F10). The historical opening — docking, the communications gap, the crew's stabilization of the spacecraft, the termination rule, and a western Pacific recovery — follows the sources H1–H4.",
+    "alternate_history_explanation": "The earlier return order begins the alternate-history route. The later order follows the historical timing: the original mission report (H6, p. 6-9) records western Pacific zone 3 as available on revolutions 6 and 7, with revolution 7 selected. On either route, the game's propellant warning, recovery tradeoff, crew-condition sequence, controllers' reactions, and next-mission constraints are dramatized (F7, F8, F9); matching the timing does not make these consequences a reconstruction of the recovery. The post-flight stance and its relationship consequences are fictional (F10). The historical opening — docking, the communications gap, the crew's stabilization of the spacecraft, the termination rule, and a western Pacific recovery — follows sources H1–H4. Once the earlier order activates ALTERNATE HISTORY, a later historical choice does not reset it.",
     "simulated_report": "Simulated report",
-    "postflight_header": "Historical disagreement; fictional player stance and relationship effects."
+    "postflight_header": "Post-flight discussion",
+    "historical_choice_badge": "HISTORICAL CHOICE",
+    "departures_heading": "Departures from the record"
   },
   "notices": {
     "dedication": [
@@ -36,7 +38,7 @@
       "title": "Project Gemini: A Chronology, Part III(B), March 16 entry",
       "author": "NASA SP-4002",
       "url": "https://www.nasa.gov/history/SP-4002/p3b.htm",
-      "note": "Supports the approximate docking anchor and broad termination/recovery sequence. The source's cited original mission-report pages have not been independently checked. This is not transcript-verified content."
+      "note": "Supports the approximate docking anchor and broad termination/recovery sequence. The source's cited original mission-report pages have not been independently checked. This is not transcript-verified content. Content 0.5.0 separately consults mission-report pp. 6-8–6-11 as H6; this does not verify every page cited by the chronology."
     },
     {
       "id": "H4",
@@ -51,18 +53,79 @@
       "author": "Ben Evans, AmericaSpace",
       "url": "https://www.americaspace.com/2014/03/16/tumbling-end-over-end-the-trauma-of-gemini-viii-part-2/",
       "note": "User-supplied secondary account. Its post-flight discussion supports the attributed positions summarized in the context card, including the reported exoneration. The original memoir/interview passages and timing of each criticism have not been independently verified. No direct quotes are invented; the scene is not presented as a documented meeting. H5 does not support any numerical relationship adjustment or Glen's alternate response."
+    },
+    {
+      "id": "H6",
+      "title": "Gemini Program Mission Report, Gemini VIII (MSC-G-R-66-4), 29 April 1966",
+      "author": "NASA Gemini Mission Evaluation Team",
+      "url": "https://apollojournals.org/alsj/43455667-Gemini-Program-Mission-Report-Gemini-Viii.pdf",
+      "note": "Primary NASA report, archival mirror. Read printed pp. 6-8 through 6-11 (PDF 376–379); visually checked 6-9. Describes zone 3 availability on revolutions 6 and 7, the choice of revolution 7, termination conditions, and real-time versus postflight RCS estimates. Does not establish the game risk tradeoff or six outcomes. Original nasa.gov file URL returned 404 on 2026-09-07."
+    },
+    {
+      "id": "H7",
+      "title": "Gemini VIII voice communications: air-to-ground, ground-to-air and onboard transcription",
+      "author": "NASA-hosted mission transcript",
+      "url": "https://www.nasa.gov/wp-content/uploads/2026/01/gt08-tec.pdf",
+      "note": "Read PDF pp. 75–79; visually checked PDF 77 (printed 76). Used for short calls, readbacks, uncertain reports and crew autonomy, not as dialogue to reproduce. Onboard/air-ground speech is not a complete Houston flight-loop transcript; noisy OCR was checked against the scan. No numeric propellant readings copied into the game."
+    },
+    {
+      "id": "H8",
+      "title": "Failure Is Not an Option — publisher excerpt, Chapter One: The Four-Inch Flight",
+      "author": "Gene Kranz / Simon & Schuster",
+      "url": "https://www.simonandschuster.com/books/Failure-Is-Not-an-Option/Gene-Kranz/9781439148815",
+      "note": "Read authorized Chapter One excerpt on Mercury-era training, communications checks and rehearsals. Used only for working-room cadence and practice context. This is not the Gemini VIII chapter; it does not independently corroborate H5’s postflight criticism. All game dialogue remains original."
     }
   ],
   "fiction": [
-    { "id": "F1", "title": "Contact rehearsal", "text": "Supplemental sender/acknowledgement exercise, readback document and its later ground handoff effects. These are performed fictional rehearsals, not astronaut training prerequisites." },
-    { "id": "F2", "title": "Recovery rehearsal", "text": "Supplemental pickup ownership/readback exercise and the fictional rework it can avoid. Preparation does not move recovery forces closer." },
-    { "id": "F3", "title": "Systems rehearsal", "text": "Supplemental warning-routing exercise, its readback and its operational handoff effects. Preparation does not add control reserve or identify the hardware fault." },
-    { "id": "F4", "title": "Air-support and surface-retrieval reports", "text": "Original abstract status reports, now supporting a real operational choice. No claim to historical ship/aircraft positions." },
-    { "id": "F5", "title": "Recovery coordination events", "text": "The fictional ground ownership clarification, acknowledgement retry and pickup approach consequences. These are explicitly events of the game room, not errors by historical astronauts or operators." },
-    { "id": "F6", "title": "Procedure adoption", "text": "Two original standing-procedure choices and their reference pages. Neither reverses the operational outcome or the next-mission rehearsal constraint." },
-    { "id": "F7", "title": "Alternate return envelope and outcomes", "text": "Both selectable opportunities, extra modeled orbit, ordinal critical-reserve warning, earlier sea wait, concentrated later pickup, all six execution/consequence cases, all crew-condition variations, and the six outcome titles. Both routes are authored to be viable in this simplified scenario and both end with the crew alive. There are no numerical chances or hidden survival roll. Actual orbital feasibility, exact fuel quantities, precise recovery time and medical diagnoses are not asserted. Neither branch is labeled the exact historical result. All figures who execute onboard operations remain competent." },
-    { "id": "F8", "title": "Named fictional controllers and operational relationships", "text": "Mara Voss and Elias Reed, their recommendations, recovery responses, trust-point changes and notes. These are original characters reusing the SYSTEMS and RECOVERY portrait slots. Negative trust never suppresses safety information. The separate user-authorized astronaut relationship branch is F10." },
-    { "id": "F9", "title": "Gemini IX-A planning constraints", "text": "Compulsory recovery or systems rehearsal following the experienced return risk; the three offered two-exercise plans; branch eligibility; and the player's persisted plan commitment. These are operational preparation consequences in the fictional campaign, not the historical IX-A roster, schedule or training program." },
-    { "id": "F10", "title": "Post-flight stance and social consequences", "text": "Glen's two statements; the compressed later discussion scene; blaming the crew versus accepting ground contingency responsibility; Armstrong/Scott trust -2 each and Cunningham/Stafford +1 each plus a deepened corps rift on the blame route; Armstrong/Scott +1 each and critics unchanged on the ground route; all associated narration, facts, notes and IX-A relationship displays; and the concrete commissioned docked-contingency task. These are fictional consequences of the player's choice. The ground-side criticism itself is sourced through H5, but its exact implementation and resulting relationship gains are not asserted as historical events. Choosing to blame the crew does not change their demonstrated actions or the source's reported exoneration. Choosing ground responsibility does not erase the existence of disagreement." }
+    {
+      "id": "F1",
+      "title": "Contact rehearsal",
+      "text": "Supplemental sender/acknowledgement exercise, readback document and its later ground handoff effects. These are performed fictional rehearsals, not astronaut training prerequisites."
+    },
+    {
+      "id": "F2",
+      "title": "Recovery rehearsal",
+      "text": "Supplemental pickup ownership/readback exercise and the fictional rework it can avoid. Preparation does not move recovery forces closer."
+    },
+    {
+      "id": "F3",
+      "title": "Systems rehearsal",
+      "text": "Supplemental warning-routing exercise, its readback and its operational handoff effects. Preparation does not add control reserve or identify the hardware fault."
+    },
+    {
+      "id": "F4",
+      "title": "Air-support and surface-retrieval reports",
+      "text": "Original abstract status reports, now supporting a real operational choice. No claim to historical ship/aircraft positions."
+    },
+    {
+      "id": "F5",
+      "title": "Recovery coordination events",
+      "text": "The fictional ground ownership clarification, acknowledgement retry and pickup approach consequences. These are explicitly events of the game room, not errors by historical astronauts or operators."
+    },
+    {
+      "id": "F6",
+      "title": "Procedure adoption",
+      "text": "Two original standing-procedure choices and their reference pages. Neither reverses the operational outcome or the next-mission rehearsal constraint."
+    },
+    {
+      "id": "F7",
+      "title": "Alternate return envelope and outcomes",
+      "text": "Both selectable opportunities, extra modeled orbit, ordinal critical-reserve warning, earlier sea wait, concentrated later pickup, all six execution/consequence cases, all crew-condition variations, and the six outcome titles. Both routes are authored to be viable in this simplified scenario and both end with the crew alive. There are no numerical chances or hidden survival roll. Actual orbital feasibility, exact fuel quantities, precise recovery time and medical diagnoses are not asserted. Neither branch is labeled the exact historical result. All figures who execute onboard operations remain competent. H6 confirms a historical choice of return revolution; the fictional element is this menu’s specific operational tradeoff and outcomes, not the existence of a timing decision."
+    },
+    {
+      "id": "F8",
+      "title": "Named fictional controllers and operational relationships",
+      "text": "Mara Voss and Elias Reed, their recommendations, recovery responses, trust-point changes and notes. These are original characters reusing the SYSTEMS and RECOVERY portrait slots. Negative trust never suppresses safety information. The separate user-authorized astronaut relationship branch is F10."
+    },
+    {
+      "id": "F9",
+      "title": "Gemini IX-A planning constraints",
+      "text": "Compulsory recovery or systems rehearsal following the experienced return risk; the three offered two-exercise plans; branch eligibility; and the player's persisted plan commitment. These are operational preparation consequences in the fictional campaign, not the historical IX-A roster, schedule or training program."
+    },
+    {
+      "id": "F10",
+      "title": "Post-flight stance and social consequences",
+      "text": "Glen's two statements; the compressed later discussion scene; blaming the crew versus accepting ground contingency responsibility; Armstrong/Scott trust -2 each and Cunningham/Stafford +1 each plus a deepened corps rift on the blame route; Armstrong/Scott +1 each and critics unchanged on the ground route; all associated narration, facts, notes and IX-A relationship displays; and the concrete commissioned docked-contingency task. These are fictional consequences of the player's choice. The ground-side criticism itself is sourced through H5, but its exact implementation and resulting relationship gains are not asserted as historical events. Choosing to blame the crew does not change their demonstrated actions or the source's reported exoneration. Choosing ground responsibility does not erase the existence of disagreement."
+    }
   ]
 }

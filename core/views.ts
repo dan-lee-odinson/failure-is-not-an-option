@@ -93,9 +93,39 @@ function lineView(content: ContentIndex, state: RunState, l: Line): LineView {
   return { speaker: speaker(content, l.speaker), text: l.text, cites: (l.cites ?? []).map((c) => link(content, state, c)) };
 }
 
-function alternateHistoryActive(content: ContentIndex, phaseIndex: number): boolean {
-  for (let i = 0; i <= phaseIndex; i++) if (content.mission.phases[i]?.alternate_history) return true;
-  return false;
+/**
+ * Sticky presentation marker, derived without adding save/domain state.
+ * Project only condition inputs from the existing log, testing completed input
+ * boundaries (and the current boundary). This preserves activation even for
+ * negated conditions that become false later, including after save/replay.
+ * Only phases actually entered can activate a marker.
+ */
+export function alternateHistoryActive(run: Run): boolean {
+  const state: RunState = {
+    ...run.state,
+    ledger: { ...run.state.ledger, facts: { ...run.identity.initial_ledger.facts }, procedures: [...run.identity.initial_ledger.procedures] },
+    mission: { ...run.state.mission, evidence: {}, chosen: [], events_seen: [] },
+  };
+  const markers: (boolean | Condition)[] = [];
+  const active = () => markers.some((m) => m === true || (typeof m === 'object' && evaluate(m, state)));
+  for (const entry of run.log) {
+    if (entry.type === 'input' && active()) return true;
+    if (entry.type === 'phase') {
+      const marker = run.content.mission.phases.find((p) => p.id === entry.phase)?.alternate_history;
+      if (marker !== undefined) markers.push(marker);
+    } else if (entry.type === 'input' && entry.input.kind === 'option') {
+      state.mission.chosen.push({ option: entry.input.option, node: entry.input.node, at_event: entry.seq });
+    } else if (entry.type === 'acquire') {
+      state.mission.evidence[entry.evidence] = { at_event: entry.seq, phase: entry.phase, stage: entry.stage, channel: entry.channel, node: entry.node };
+    } else if (entry.type === 'resolution') {
+      state.mission.events_seen.push(entry.node, entry.resolution);
+    } else if (entry.type === 'effect' && entry.effect === 'set_fact') {
+      state.ledger.facts[entry.fact] = { set_by: state.mission.id, at_event: entry.seq, label: entry.label };
+    } else if (entry.type === 'effect' && entry.effect === 'adopt_procedure') {
+      state.ledger.procedures.push(entry.procedure);
+    }
+  }
+  return active();
 }
 
 function optionView(content: ContentIndex, state: RunState, node: Node, o: Option): OptionView {
@@ -192,7 +222,7 @@ export function describeNode(run: Run): NodeView | null {
   return {
     phase: {
       id: phase.id, title: phase.title, display_time: phase.display_time, contact: phase.contact,
-      alternate_history: alternateHistoryActive(content, phaseIndex), index: phaseIndex, count: content.mission.phases.length,
+      alternate_history: alternateHistoryActive(run), index: phaseIndex, count: content.mission.phases.length,
     },
     attention: phase.attention === null || state.mission.attention === null ? null : { remaining: state.mission.attention, declared: phase.attention },
     node: {
@@ -256,7 +286,7 @@ export interface DebriefView {
     context: EvidenceView | null;
   };
   procedures: { id: string; title: string; text: string; status: string }[];
-  paragraphs: { id: string; text: string }[];
+  paragraphs: { id: string; text: string; section?: 'departures'; provenance?: { sources: string[]; fiction: string[]; note: string } }[];
   events: LogEntry[];
 }
 
@@ -297,7 +327,7 @@ export function describeDebrief(run: Run): DebriefView | null {
     const first = log.find((e) => e.type === 'effect' && e.effect === 'adjust' && e.path === `people.${id}.trust`);
     const before = first && first.type === 'effect' && first.effect === 'adjust' ? first.before : p.trust;
     const c = content.characters.get(id);
-    return { id, display: c?.display ?? id, before, after: p.trust, label: trustLabel(content.followon, p.trust), notes: [...p.notes] };
+    return { id, display: c?.display ?? id, before, after: p.trust, label: trustLabel(content.followon, p.trust), notes: p.notes.map((id) => state.ledger.facts[id]?.label ?? 'No description recorded') };
   };
 
   const constraintFact = layout.constraint_facts.find((f) => Object.prototype.hasOwnProperty.call(state.ledger.facts, f)) ?? null;
@@ -309,7 +339,7 @@ export function describeDebrief(run: Run): DebriefView | null {
   const fo = describeFollowOn(content, state.ledger, done, state.followon.committed);
   const contextEv = describeEvidence(content, state).find((e) => e.id === 'g8-ev-postflight-context') ?? null;
 
-  const paragraphs = content.mission.debrief.filter((r) => evaluate(r.when, state)).map((r) => ({ id: r.id, text: r.text }));
+  const paragraphs = content.mission.debrief.filter((r) => evaluate(r.when, state)).map((r) => ({ id: r.id, text: r.text, section: r.section, provenance: r.provenance }));
 
   return {
     outcome: { id: done.outcome, title: done.title, kind: done.kind },

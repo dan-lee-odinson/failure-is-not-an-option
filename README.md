@@ -4,7 +4,7 @@
 
 **This repository holds FNO-M00**, the first playable increment: one Gemini VIII chapter, *The Weight of the Call*, played from preparation through a fictional return decision, its aftermath, a post-flight accountability scene, a causal debrief, and a small playable Gemini IX-A preparation plan whose options depend on what you did.
 
-Content package **0.4.0** (fingerprint printed by `npm run validate`). Simulation version 0.1.0.
+Content package **0.5.1** (fingerprint printed by `npm run validate`). Simulation version 0.1.0.
 
 ## Notices
 
@@ -73,7 +73,7 @@ docs/      the build handoff, Codex's content package 0.4.0, and the design reco
 
 ## Saving
 
-One browser-storage slot plus JSON export/import. An import is verified before anything is replaced: structure, content version and fingerprint, simulation version, every referenced id, and replay equivalence (the recorded inputs are replayed from the initial ledger and must reproduce the stored state and event-log hash byte for byte). A failed import leaves the existing save untouched and tells the player why. Saves from earlier content versions are rejected with an unsupported-version message; no migration is provided.
+One browser-storage slot plus JSON export/import. An import is verified before anything is replaced: structure, content version and fingerprint, simulation version, every referenced id, and replay equivalence (the recorded inputs are replayed from the initial ledger and must reproduce the stored state and event-log hash byte for byte). A failed import leaves the existing save untouched and tells the player why. Saves from earlier content versions are rejected with an unsupported-version message; no migration is provided. Saves made with content 0.4.0 or 0.5.0 (the M00, M00a and playtest-1 builds) do not import into 0.5.1: the content fingerprint changed and this project does not migrate saves, so keep the older build if an old playthrough needs replaying.
 
 ## Licenses (proposed)
 

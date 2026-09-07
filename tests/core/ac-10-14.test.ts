@@ -64,7 +64,7 @@ describe('AC-11 — Follow-on independence and real action', () => {
         expect(view.constraint_text).toBe('The crew paid for the earlier return with a long sea wait. Recovery rehearsal is required. Choose the other exercise.');
       } else {
         expect(disabled.id).toBe('g9-plan-recovery-contact');
-        expect(view.constraint_text).toBe('The extra orbit carried a critical-reserve warning. Systems-warning rehearsal is required. Choose the other exercise.');
+        expect(view.constraint_text).toBe('The extra orbit left the crew facing entry with critically low RCS propellant. A systems-warning drill is required. Choose the other exercise.');
       }
       // Trust displays with the authored labels; critical information stays visible regardless.
       for (const c of view.controllers) expect(c.label).toBe({ '1': 'Confidence strengthened', '0': 'Working confidence', '-1': 'Confidence strained', '-2': 'Confidence damaged' }[String(c.trust)]);

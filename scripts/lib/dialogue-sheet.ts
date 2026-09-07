@@ -24,7 +24,7 @@ import {
   type ContentIndex, type Input, type LineView,
 } from '../../core';
 import { loadBundle } from './load-content';
-import { render } from '../../app/render';
+import { provenanceLine, render } from '../../app/render';
 import type { Store, UiState } from '../../app/main';
 
 export type Source = 'content' | 'core' | 'app';
@@ -340,7 +340,7 @@ function line(l: LineView, kind: string, id: string): Captured[] {
 }
 
 export function provenanceText(e: { provenance: { note: string; sources: string[]; fiction: string[] } }): string {
-  return `${e.provenance.note}${e.provenance.sources.length ? ` Sources: ${e.provenance.sources.join(', ')}.` : ''}${e.provenance.fiction.length ? ` Fiction register: ${e.provenance.fiction.join(', ')}.` : ''}`;
+  return provenanceLine(e.provenance);
 }
 
 function structuredNode(run: Run): Captured[] {

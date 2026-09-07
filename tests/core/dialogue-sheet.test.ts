@@ -102,7 +102,7 @@ describe('dialogue sheet', () => {
     const csv = readFileSync(resolve(ROOT, 'docs', 'dialogue-sheet.csv'), 'utf8').replace(/\r\n/g, '\n');
     expect(md).toBe(toMarkdown(s));
     expect(csv).toBe(toCsv(s));
-    expect(s.version).toBe('0.4.0');
+    expect(s.version).toBe('0.5.1');
     expect(s.fingerprint).toBe(content().fingerprint);
     expect(s.runs).toBe(56);
   });
@@ -183,15 +183,15 @@ describe('dialogue sheet', () => {
     expect(new Set(keys).size).toBe(keys.length); // no duplicates
     const by = (text: string) => s.rows.find((r) => norm(r.text) === norm(text));
     expect(by('Bring them down at the earlier opportunity.')!.branch).toBe('');
-    expect(by("They're down. My part is not over.")!.branch).toBe('earlier');
-    expect(by('Reserve warning. This is the margin we spent to reach their recovery force.')!.branch).toBe('later');
-    expect(by('The pickup approach is delayed by the two ground handoff corrections. The crew are badly exhausted by the time the retrieval team reaches them; both need help transferring aboard.')!.branch).toBe('earlier q0');
+    expect(by("They're down. We still have to get the ship to them.")!.branch).toBe('earlier');
+    expect(by('Flight, RCS propellant is critically low. They still need those thrusters for entry.')!.branch).toBe('later');
+    expect(by('The desks first settled who would send the pickup instruction, then called again to confirm receipt. That delayed the team\'s approach. By the time help reaches the capsule, both crew members are badly exhausted and need assistance getting aboard.')!.branch).toBe('earlier q0');
     expect(by('I wanted the later return. You gave my team the preparation to make the earlier one work. We still need to practice that sea-recovery problem.')!.branch).toBe('earlier q2');
-    expect(by('Your endorsement gives the critics a stronger position in this fictional timeline. Armstrong and Scott\'s confidence in you falls. A disagreement within the astronaut corps has become a division sharpened by its flight director.')!.branch).toBe('crew-blame');
+    expect(by('Cunningham and Stafford welcome your support. Armstrong and Scott lose confidence in you. The disagreement now divides the astronaut corps more deeply, with its flight director backing the crew\'s critics.')!.branch).toBe('crew-blame');
     expect(by("This mission must include the systems-warning drill after Gemini VIII's reserve warning.")!.branch).toBe('later');
-    expect(by('The handoff board has a blank acknowledgement field for the next report.')!.branch).toBe('contact rehearsal');
+    expect(by('CAPCOM has left the next report\'s receipt blank. Nothing new has come through.')!.branch).toBe('contact rehearsal');
     expect(by('Crew recovered — earlier return, punishing sea wait')!.branch).toBe('earlier q0');
-    expect(by('You carried report provenance into the procedures binder.')!.branch).toBe('lesson: provenance');
+    expect(by('You added report timing and confirmation to the procedures binder.')!.branch).toBe('lesson: provenance');
     expect(s.rows.filter((r) => /^varies/.test(r.branch)).map((r) => r.text), 'rows whose branch could not be named').toEqual([]);
   });
 });
