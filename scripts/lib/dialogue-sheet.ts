@@ -348,6 +348,24 @@ export function provenanceText(e: { provenance: { note: string; sources: string[
   return provenanceLine(e.provenance);
 }
 
+/**
+ * Content strings the History panel no longer renders (FNO-M00c, playtest-2 note 14): the per-item
+ * provenance lines for reports, procedures and departures, the fiction register, the people list and the
+ * mission anchors. They stay on the sheet as `history-hidden` so nothing is deleted or lost to review.
+ */
+export function historyHiddenStrings(content: ContentIndex): Captured[] {
+  const b = content.bundle;
+  const out: Captured[] = [];
+  const add = (id: string, text: string): void => { if (text.trim()) out.push({ kind: 'history-hidden', speaker: '', id, text, source: 'content' }); };
+  for (const e of b.evidence) add(e.id, provenanceLine(e.provenance));
+  for (const p of b.procedures) add(p.id, provenanceLine(p.provenance));
+  for (const r of b.mission.debrief) if (r.provenance) add(r.id, provenanceLine(r.provenance));
+  for (const f of b.registry.fiction) { add(f.id, `${f.id} — ${f.title}.`); add(f.id, f.text); }
+  for (const c of b.characters) add(c.id, c.portrayal);
+  for (const a of b.mission.anchors) add('anchors', a.label);
+  return out;
+}
+
 function structuredNode(run: Run): Captured[] {
   const v = describeNode(run);
   if (!v) return [];
@@ -386,7 +404,7 @@ function structuredNode(run: Run): Captured[] {
   for (const e of describeEvidence(content, run.state)) {
     out.push({ kind: 'evidence.title', speaker: '', id: e.id, text: e.title, source: 'content' });
     if (e.body !== null) out.push({ kind: 'evidence.body', speaker: '', id: e.id, text: e.body, source: 'content' });
-    out.push({ kind: 'evidence.provenance', speaker: '', id: e.id, text: provenanceText(e), source: 'content' });
+    out.push({ kind: 'history-hidden', speaker: '', id: e.id, text: provenanceText(e), source: 'content' });
     out.push({ kind: 'label', speaker: '', id: e.id, text: e.badge, source: 'core' });
     out.push({ kind: 'label', speaker: '', id: e.id, text: e.stage, source: 'content' });
   }
@@ -559,7 +577,7 @@ export class SheetBuilder {
       for (const textSize of ['default', 'large'] as const) {
         const variants: Partial<UiState>[] = [{ screen: 'opening', stage, textSize }];
         if (stage === 'dedication' || stage === 'notices') variants.push({ screen: 'opening', stage, textSize, scrollPaused: true }, { screen: 'opening', stage, textSize, reducedMotion: true });
-        if (stage === 'menu') variants.push({ screen: 'opening', stage, textSize, continueSave: { ok: true } });
+        if (stage === 'menu') variants.push({ screen: 'opening', stage, textSize, continueSave: { ok: true } }, { screen: 'opening', stage, textSize, fullscreen: 'available' }, { screen: 'opening', stage, textSize, fullscreen: 'active' });
         for (const v of variants) this.record(b, {}, structured, render(this.store(null, this.ui(v))));
       }
     });
@@ -577,6 +595,7 @@ export class SheetBuilder {
     this.record(b, dims, structured, render(this.store(run, this.ui())));
     this.record(b, dims, structured, render(this.store(run, this.ui({ open: allEvidence, pinned: allEvidence.slice(0, 1) }))));
     if (allEvidence.length) this.record(b, dims, structured, render(this.store(run, this.ui({ pinHintOpen: true }))));
+    this.record(b, dims, structured, render(this.store(run, this.ui({ idle: true }))));
     this.captureOverlay(run, dims, 'binder');
   }
 
@@ -587,7 +606,8 @@ export class SheetBuilder {
     const screen: UiState['screen'] = run ? (run.state.mission.completed ? 'planning' : 'console') : 'opening';
     const html = render(this.store(run, this.ui({ overlay, screen, stage: 'menu', ...extra })));
     const at = html.indexOf('<div class="overlay-backdrop"');
-    this.record(b, dims, [], at >= 0 ? html.slice(at) : '');
+    // History no longer renders the provenance lines, the fiction register, the people or the anchors; they stay on the sheet as history-hidden.
+    this.record(b, dims, overlay === 'history' ? historyHiddenStrings(this.content) : [], at >= 0 ? html.slice(at) : '');
   }
 
   captureDebrief(run: Run, dims: Dims): void {
@@ -650,7 +670,7 @@ export class SheetBuilder {
     this.captureOverlay(null, {}, 'about');
     this.captureOverlay(null, {}, 'saveload');
     this.captureOverlay(null, {}, 'settings');
-    this.captureOverlay(null, {}, 'settings', { reducedMotion: true, audio: { enabled: true, master: 0.8, music: 1, effects: 1, beds: 1 } });
+    this.captureOverlay(null, {}, 'settings', { reducedMotion: true, audio: { enabled: true, master: 0.8, music: 1, effects: 1, beds: 1 }, hints: false });
     this.captureMessages(root);
 
     const ordered = [...this.buckets.values()].sort((a, b) => a.rank - b.rank);

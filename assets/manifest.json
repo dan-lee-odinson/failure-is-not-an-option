@@ -1,7 +1,7 @@
 {
   "content_version": "0.5.1",
   "manifest_version": "1.0.0",
-  "task": "FNO-M00b",
+  "task": "FNO-M00c",
   "status": "delivered",
   "notes": "Production art exports (Codex art v1.0.0), the Apollo interface kit v002 faces used as label-free control backgrounds behind native buttons with live text, and the game's audio (Dan's soundtrack, the CC0/CC BY soundscape set, and the generated Quindar tones). Image paths are relative to assets/; audio paths are relative to public/audio/. Per-asset status final is the existing schema-compatible equivalent of delivered. Room badge is intentionally blank for the exact v005 SVG overlay. See docs/BUILD-HANDOFF-M00b.md.",
   "assets": [
@@ -453,7 +453,21 @@
       "rights": "Owned by Dan Lee-Odinson under Suno's Pro plan terms (help.suno.com, read 7 September 2026); instrumental, no lyrics; released with the game under a licence to be chosen before publication. Copyright eligibility of AI-made music is uncertain and is not overstated here.",
       "license": "Dan Lee-Odinson (Suno Pro plan); game licence to be chosen before publication",
       "duration_s": 157.814,
-      "origin": "Made by Dan Lee-Odinson on Suno (Pro plan), supplied 7 September 2026; the original MP3 unchanged. Use: Crisis report through the return decision, once (provisional).",
+      "origin": "Made by Dan Lee-Odinson on Suno (Pro plan), supplied 7 September 2026; the original MP3 unchanged. Use: uncued since FNO-M00c (playtest 2, note 9: replaced by Mission in Danger Drum Background); kept in the OST.",
+      "attribution": "Music: Dan Lee-Odinson, produced with Suno Pro, instrumental. Cue points live in app/music-map.json; the file is never re-encoded.",
+      "status": "final"
+    },
+    {
+      "id": "audio-mission-in-danger-drum-background",
+      "filename": "Mission in Danger Drum Background.mp3",
+      "kind": "audio",
+      "format": "mp3",
+      "title": "Mission in Danger Drum Background",
+      "credit": "Mission in Danger Drum Background · made with Suno by Dan Lee-Odinson",
+      "rights": "Owned by Dan Lee-Odinson under Suno's Pro plan terms (help.suno.com, read 7 September 2026); instrumental, no lyrics; released with the game under a licence to be chosen before publication. Copyright eligibility of AI-made music is uncertain and is not overstated here.",
+      "license": "Dan Lee-Odinson (Suno Pro plan); game licence to be chosen before publication",
+      "duration_s": 126.854,
+      "origin": "Made by Dan Lee-Odinson on Suno (Pro plan), supplied 7 September 2026 (playtest 2); the original MP3 unchanged. Use: replaces Mission in Danger as the crisis / return-decision cue from 0:00, once, at cue gain 0.75 (Dan: 25 % lower). Quiet 10 s intro, steady body from 0:10, ends at 2:06; -17.1 LUFS.",
       "attribution": "Music: Dan Lee-Odinson, produced with Suno Pro, instrumental. Cue points live in app/music-map.json; the file is never re-encoded.",
       "status": "final"
     },

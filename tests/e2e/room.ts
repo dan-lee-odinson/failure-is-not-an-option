@@ -61,10 +61,23 @@ export async function assertEmblemPlaced(page: Page): Promise<void> {
   expect(r!.pe).toBe('none');
   expect(r!.hidden).toBe('true');
   expect(unhash(r!.src.split('/').pop() ?? '')).toBe('flight-operations-v005.svg');
-  const plateZ = await page.evaluate(() => Number(getComputedStyle(document.getElementById('plate')!).zIndex));
-  const aboveZ = await page.evaluate(() => { const el = document.querySelector('.console-shell') ?? document.querySelector('.hero-overlay'); return el ? Number(getComputedStyle(el).zIndex) : Infinity; });
-  expect(r!.z).toBeGreaterThan(plateZ);
-  expect(r!.z).toBeLessThan(aboveZ);
+  // M00c: the emblem is part of the room composite — inside the room layer, which sits beneath every panel, card region and status bar.
+  const layering = await page.evaluate(() => {
+    const emblem = document.getElementById('emblem')!;
+    const layer = emblem.closest('.room-layer') as HTMLElement | null;
+    if (!layer) return { inLayer: false, layerZ: NaN, minUiZ: NaN, covered: false, topIsEmblem: false };
+    const layerZ = Number(getComputedStyle(layer).zIndex);
+    const ui = Array.from(document.querySelectorAll<HTMLElement>('.status-bar, .stage, .evidence, .strip, .hero-overlay'));
+    const minUiZ = Math.min(...ui.map((el) => Number(getComputedStyle(el).zIndex) || 0));
+    const e = emblem.getBoundingClientRect();
+    const cx = e.left + e.width / 2, cy = e.top + e.height / 2;
+    const covered = ui.some((el) => { const b = el.getBoundingClientRect(); return b.left <= cx && cx <= b.right && b.top <= cy && cy <= b.bottom; });
+    const top = document.elementFromPoint(cx, cy);
+    return { inLayer: true, layerZ, minUiZ, covered, topIsEmblem: top === emblem };
+  });
+  expect(layering.inLayer, 'emblem inside the room layer').toBe(true);
+  expect(layering.layerZ).toBeLessThan(layering.minUiZ);
+  if (layering.covered) expect(layering.topIsEmblem, 'a panel over the emblem paints above it').toBe(false);
 }
 
 /** No element with a (near-)opaque background or an image intersects Glen's head region (plate x 5–25 %, y 30–60 %). */

@@ -14,6 +14,7 @@ import { applyTheme } from './theme';
 import { AudioDirector, type MusicMap, type SoundscapeMap } from './audio';
 import { audioUrl } from './assets';
 import { DEFAULT_AUDIO, PREF_KEYS, STAGES, defaultUi, screenId, type AudioPrefs, type Overlay, type Stage, type Store, type UiState } from './ui-state';
+export { FULLSCREEN_LINE } from './render';
 import musicMap from './music-map.json';
 import soundscapeMap from './soundscape-map.json';
 
@@ -43,6 +44,8 @@ function readAudioPrefs(): AudioPrefs {
 
 const content = indexContent(bundle);
 const openingSeen = readPref(PREF_KEYS.openingSeen) === '1';
+/** The player has made a sound setting (persisted); otherwise Begin turns the master on (playtest 2, note 1). */
+let audioPersisted = readPref(PREF_KEYS.audio) !== null;
 const reducedMotionQuery = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null;
 
 const store: Store = {
@@ -58,6 +61,7 @@ const store: Store = {
     hasBrowserSave: hasBrowserSave(),
     reducedMotion: reducedMotionQuery?.matches ?? false,
     debug: /(^|[?&])debug(=|&|$)/.test(location.search),
+    hints: readPref(PREF_KEYS.hints) !== '0',
   }),
 };
 
@@ -148,19 +152,97 @@ function goToStage(stage: Stage): void {
   store.ui.screen = 'opening';
   store.ui.stage = stage;
   store.ui.scrollPaused = false;
+  if (stage !== 'title') clearFade();
   if (stage === 'menu') { markOpeningSeen(); refreshContinueSave(); }
 }
 
+// The prose → title transition: a fade to black, then the title fading in; quick when the player pressed Continue; a cut under reduced motion.
+let fadeTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearFade(): void {
+  if (fadeTimer) { clearTimeout(fadeTimer); fadeTimer = null; }
+  store.ui.fade = null;
+  store.ui.fadeQuick = false;
+}
+
+function fadeToTitle(quick: boolean): void {
+  stopProseScroll();
+  if (store.ui.reducedMotion) { goToStage('title'); return; }
+  if (fadeTimer) clearTimeout(fadeTimer);
+  store.ui.fade = 'out';
+  store.ui.fadeQuick = quick;
+  paint();
+  fadeTimer = setTimeout(() => {
+    goToStage('title');
+    store.ui.fade = 'in';
+    store.ui.fadeQuick = quick;
+    paint();
+    fadeTimer = setTimeout(() => { fadeTimer = null; store.ui.fade = null; store.ui.fadeQuick = false; paint(); }, quick ? 400 : 1500);
+  }, quick ? 400 : 1000);
+}
+
 function nextStage(): void {
-  const i = STAGES.indexOf(store.ui.stage);
-  let next = STAGES[Math.min(i + 1, STAGES.length - 1)]!;
-  if (next === 'montage') next = 'title'; // the montage slot is a 0-duration pass-through in M00b
-  goToStage(next);
+  const s = store.ui.stage;
+  if (s === 'dedication') {
+    if (store.ui.reducedMotion) goToStage('notices'); // two static pages
+    else fadeToTitle(true); // the notices are in the same column; Continue cuts to the title with a quick fade
+    return;
+  }
+  if (s === 'notices') { goToStage('title'); return; } // the montage slot is a 0-duration pass-through
+  const i = STAGES.indexOf(s);
+  goToStage(STAGES[Math.min(i + 1, STAGES.length - 1)]!);
 }
 
 function persistAudio(): void {
+  audioPersisted = true;
   writePref(PREF_KEYS.audio, JSON.stringify(store.ui.audio));
   director.setPrefs(store.ui.audio);
+}
+
+/** Begin (or Skip) is the explicit player interaction: the master goes on unless the player has already set it (playtest 2, note 1). */
+function audioOnAtBegin(): void {
+  director.unlock();
+  if (!audioPersisted && !store.ui.audio.enabled) {
+    store.ui.audio = { ...store.ui.audio, enabled: true };
+    persistAudio();
+  }
+}
+
+// Full screen (playtest 2, note 6): a menu key; hidden when the API is unavailable or refuses.
+let fullscreenRefused = false;
+
+function fullscreenState(): UiState['fullscreen'] {
+  if (fullscreenRefused || typeof document === 'undefined' || !document.fullscreenEnabled || typeof document.documentElement.requestFullscreen !== 'function') return 'unavailable';
+  return document.fullscreenElement ? 'active' : 'available';
+}
+
+// Idle help (playtest 2, note 8): 30 s without an input highlights the continuation; presentation only, never logged.
+const IDLE_MS = 30_000;
+let idleTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleIdle(): void {
+  if (idleTimer) clearTimeout(idleTimer);
+  idleTimer = null;
+  if (!store.ui.hints || store.ui.reducedMotion || store.ui.idle) return;
+  idleTimer = setTimeout(() => {
+    idleTimer = null;
+    if (store.ui.overlay || store.ui.idle) return;
+    store.ui.idle = true;
+    paint();
+  }, IDLE_MS);
+}
+
+/** The highlight was cleared by a pointer press whose click may not repaint (empty space): the click handler repaints then. */
+let idleDirty = false;
+
+/** Any input clears the highlight; the next paint (or a deferred one for inputs that cause none) removes it from the screen. */
+function noteInput(repaintIfIdle: boolean): void {
+  const wasIdle = store.ui.idle;
+  store.ui.idle = false;
+  if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
+  if (wasIdle && repaintIfIdle) requestAnimationFrame(() => { if (!store.ui.idle) paint(); });
+  else if (wasIdle) idleDirty = true;
+  else scheduleIdle();
 }
 
 // ---------------------------------------------------------------------------
@@ -171,15 +253,27 @@ export function dispatch(action: string, arg?: string): void {
   const ui = store.ui;
   switch (action) {
     case 'begin': {
-      director.unlock();
+      audioOnAtBegin();
       director.event('ui:begin');
       goToStage('dedication');
       break;
     }
     case 'skip-to-menu': {
-      director.unlock();
+      audioOnAtBegin();
       director.signal('skip-to-menu');
       goToStage('menu');
+      break;
+    }
+    case 'fullscreen-toggle': {
+      director.event('ui:settings-change');
+      if (document.fullscreenElement) void document.exitFullscreen?.().catch(() => undefined);
+      else document.documentElement.requestFullscreen?.().catch(() => { fullscreenRefused = true; paint(); });
+      break;
+    }
+    case 'hints-toggle': {
+      ui.hints = !ui.hints;
+      writePref(PREF_KEYS.hints, ui.hints ? '1' : '0');
+      director.event('ui:settings-change');
       break;
     }
     case 'stage-next': {
@@ -193,6 +287,7 @@ export function dispatch(action: string, arg?: string): void {
     }
     case 'replay-opening': {
       ui.overlay = null;
+      ui.idle = false;
       goToStage('start');
       break;
     }
@@ -391,7 +486,7 @@ function stopProseScroll(): void {
 function driveProseScroll(): void {
   stopProseScroll();
   const ui = store.ui;
-  if (ui.screen !== 'opening' || (ui.stage !== 'dedication' && ui.stage !== 'notices') || ui.reducedMotion || ui.scrollPaused || ui.overlay) return;
+  if (ui.screen !== 'opening' || (ui.stage !== 'dedication' && ui.stage !== 'notices') || ui.reducedMotion || ui.scrollPaused || ui.overlay || ui.fade) return;
   const el = document.getElementById('op-scroll');
   if (!el) return;
   const seconds = Math.max(4, Number(el.dataset.seconds) || 30);
@@ -401,9 +496,9 @@ function driveProseScroll(): void {
     if (scrollLastTs) el.scrollTop += (max / seconds) * ((ts - scrollLastTs) / 1000);
     scrollLastTs = ts;
     if (el.scrollTop >= max - 0.5) {
-      // Text has cleared: a short hold, then the next chapter (never while the player has paused).
+      // The last line has cleared the top: a 1.2 s hold, then the fade to black and the title (never while the player has paused).
       scrollFrame = 0;
-      scrollHold = setTimeout(() => { scrollHold = null; if (store.ui.stage === stage && !store.ui.scrollPaused && !store.ui.overlay) dispatch('stage-next'); }, 1200);
+      scrollHold = setTimeout(() => { scrollHold = null; if (store.ui.stage === stage && !store.ui.scrollPaused && !store.ui.overlay && !store.ui.fade) fadeToTitle(false); }, 1200);
       return;
     }
     scrollFrame = requestAnimationFrame(step);
@@ -421,6 +516,8 @@ function paint(): void {
   const scrollBox = document.getElementById('op-scroll');
   const keepScroll = scrollBox ? scrollBox.scrollTop : null;
   document.documentElement.setAttribute('data-text', store.ui.textSize);
+  store.ui.fullscreen = fullscreenState();
+  idleDirty = false;
   root.innerHTML = render(store);
   layoutEmblem();
   const newScroll = document.getElementById('op-scroll');
@@ -435,6 +532,7 @@ function paint(): void {
   }
   syncAudio();
   driveProseScroll();
+  scheduleIdle();
 }
 
 function wire(): void {
@@ -442,7 +540,7 @@ function wire(): void {
   if (!root) return;
   root.addEventListener('click', (ev) => {
     const target = (ev.target as HTMLElement).closest<HTMLElement>('[data-action]');
-    if (!target) return;
+    if (!target) { if (idleDirty) paint(); return; }
     if (target.hasAttribute('disabled') || target.getAttribute('aria-disabled') === 'true') return;
     lastFocus = target.getAttribute('data-focus');
     const [action, arg] = splitAction(target.getAttribute('data-action')!);
@@ -499,6 +597,12 @@ function wire(): void {
     }
   });
   reducedMotionQuery?.addEventListener?.('change', (e) => { store.ui.reducedMotion = e.matches; paint(); });
+  document.addEventListener('fullscreenchange', () => paint());
+  // Any input resets the idle timer. A pointer press is followed by a click that repaints; other inputs repaint on their own if the highlight was up.
+  document.addEventListener('pointerdown', () => noteInput(false), true);
+  document.addEventListener('keydown', () => noteInput(true), true);
+  document.addEventListener('wheel', () => noteInput(true), { capture: true, passive: true });
+  document.addEventListener('input', () => noteInput(false), true);
 }
 
 function splitAction(s: string): [string, string | undefined] {
@@ -508,7 +612,7 @@ function splitAction(s: string): [string, string | undefined] {
 
 declare global {
   interface Window {
-    __fno?: { store: Store; dispatch: typeof dispatch; fingerprint: string; audio: { enabled: () => boolean; unlocked: () => boolean } };
+    __fno?: { store: Store; dispatch: typeof dispatch; fingerprint: string; audio: { enabled: () => boolean; unlocked: () => boolean }; idle: () => boolean };
   }
 }
 
@@ -517,4 +621,4 @@ wire();
 window.addEventListener('resize', layoutEmblem);
 if (store.ui.stage === 'menu') refreshContinueSave();
 paint();
-window.__fno = { store, dispatch, fingerprint: content.fingerprint, audio: { enabled: () => director.enabled, unlocked: () => director.unlocked } };
+window.__fno = { store, dispatch, fingerprint: content.fingerprint, audio: { enabled: () => director.enabled, unlocked: () => director.unlocked }, idle: () => store.ui.idle };

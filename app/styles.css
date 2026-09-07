@@ -48,6 +48,7 @@
   --selected-ink: #13281d;
   --disabled-ink: #151d19;
   --disabled-ink-dark: #d8d4c4;
+  --idle-opacity: 0.85;
   --mode-ink: #18323e;
   --hero-ink: #f2edda;
   --hero-overlay: rgba(4, 21, 26, 0.7);
@@ -108,6 +109,8 @@ a { color: var(--blue); }
   cursor: pointer;
   white-space: normal;
 }
+/* Idle help: the continuation key takes the selected face at reduced opacity, steady. */
+.k.idle-hint:not(:disabled) { background-image: var(--face-selected); color: var(--selected-ink); opacity: var(--idle-opacity); }
 .k-key { --face-default: var(--face-key-default); --face-hover: var(--face-key-hover); --face-pressed: var(--face-key-pressed); --face-selected: var(--face-key-selected); --face-disabled: var(--face-key-disabled); color: var(--key-ink); min-height: 3.4rem; min-width: 9rem; font-size: 1.1rem; }
 .k-action, .k-title, .k-choose { --face-default: var(--face-action-default); --face-hover: var(--face-action-hover); --face-pressed: var(--face-action-pressed); --face-selected: var(--face-action-selected); --face-disabled: var(--face-action-disabled); color: var(--action-ink); }
 .k-selector { --face-default: var(--face-selector-default); --face-hover: var(--face-selector-hover); --face-pressed: var(--face-selector-pressed); --face-selected: var(--face-selector-selected); --face-disabled: var(--face-selector-disabled); color: var(--action-ink); }
@@ -179,7 +182,7 @@ a { color: var(--blue); }
 .panel::before {
   content: "";
   position: absolute;
-  inset: -2px;
+  inset: 0; /* inside the box: a panel that clips its overflow keeps its corner ticks, and nothing extends past its edge */
   pointer-events: none;
   background:
     linear-gradient(var(--panel-tick), var(--panel-tick)) top left / 16px 3px no-repeat,
@@ -214,12 +217,17 @@ a { color: var(--blue); }
   padding: 1rem;
 }
 .op-keys { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+.op-chapter { opacity: 1; transition: opacity 1s linear; }
+.op-chapter.fade-out { opacity: 0; }
+.op-chapter.fade-out.quick { transition-duration: 0.4s; }
 .op-chapter .op-scroll {
   position: absolute;
   inset: 0 0 6.5rem 0;
   overflow: auto;
-  scrollbar-width: thin;
+  scrollbar-width: none; /* the scroll moves on its own; wheel and keyboard still work when paused */
 }
+.op-chapter .op-scroll::-webkit-scrollbar { display: none; }
+.op-chapter-gap { height: 2.7em; } /* about 1.5 line-heights between the dedication and the notices */
 .op-prose {
   max-width: 62ch;
   margin: 0 auto;
@@ -240,10 +248,11 @@ html[data-text="large"] .op-prose { font-size: clamp(24px, 14px + 0.85vw, 30px);
 }
 .op-montage { background: var(--dark); }
 
-/* Hero title (Study A — Engineering block): live text over the room under a dark overlay. The room is the ground here. */
+/* Hero title (Study A at 0.75 — Engineering block): live text over the room under a dark overlay. The room is the ground here. */
 .op-hero { background: transparent; }
-.op-hero .plate { z-index: 0; }
-.op-hero .emblem { z-index: 1; }
+@keyframes op-fade-in { from { opacity: 0; } to { opacity: 1; } }
+.op-hero.fade-in { animation: op-fade-in 1.5s ease both; }
+.op-hero.fade-in.quick { animation-duration: 0.4s; }
 .hero-overlay { position: fixed; inset: 0; background: var(--hero-overlay); z-index: 2; }
 .hero-title {
   position: fixed;
@@ -294,22 +303,24 @@ html[data-text="large"] .op-prose { font-size: clamp(24px, 14px + 0.85vw, 30px);
 
 /* ---------- console layout ---------- */
 
-.plate {
+/* The room layer: the plate and the emblem, one composite beneath every panel, card region and status bar. */
+.room-layer {
   position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+}
+.plate {
+  position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
-  z-index: 0;
-  pointer-events: none;
-  user-select: none;
 }
 .emblem {
-  position: fixed;
-  z-index: 1;
-  pointer-events: none;
-  user-select: none;
+  position: absolute;
 }
 
 .console-shell {
@@ -338,6 +349,7 @@ html[data-text="large"] .op-prose { font-size: clamp(24px, 14px + 0.85vw, 30px);
   .strip { padding-left: 1rem; }
 }
 
+.status-bar, .stage, .evidence, .strip { position: relative; z-index: 1; } /* every UI region sits above the room layer */
 .status-bar {
   grid-area: status;
   display: flex;
@@ -387,16 +399,17 @@ html[data-text="large"] .op-prose { font-size: clamp(24px, 14px + 0.85vw, 30px);
   right: 1.25rem;
   top: 1rem;
   max-height: calc(100% - 2rem);
-  overflow: auto;
+  overflow: hidden; /* the body scrolls; the questions stay pinned at the bottom; never a horizontal bar */
   padding: 1rem 1.25rem 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
   backdrop-filter: blur(8px);
 }
-.conv-head { display: flex; flex-direction: column; gap: 0.3rem; }
-.conv-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; align-items: start; }
-.conv-body.with-portrait { grid-template-columns: auto minmax(0, 1fr); }
+.conv-head { display: flex; flex-direction: column; gap: 0.3rem; flex: 0 0 auto; }
+.conv-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; align-items: start; overflow: auto; overflow-x: hidden; min-height: 0; flex: 1 1 auto; scrollbar-width: thin; }
+.conv-body.with-portrait { grid-template-columns: minmax(0, auto) minmax(0, 1fr); }
+.conv-questions { flex: 0 0 auto; border-top: 1px solid var(--panel-border); padding-top: 0.6rem; }
 .conv-lines { display: flex; flex-direction: column; gap: 0.8rem; min-width: 0; }
 .active-portrait {
   margin: 0;
@@ -414,7 +427,11 @@ html[data-text="large"] .op-prose { font-size: clamp(24px, 14px + 0.85vw, 30px);
 @media (max-width: 1500px) {
   html[data-text="large"] .conv-body.with-portrait { grid-template-columns: minmax(0, 1fr); }
   html[data-text="large"] .active-portrait { position: static; flex-direction: row; align-items: flex-end; gap: 0.8rem; }
-  html[data-text="large"] .active-portrait img { height: clamp(150px, 20vh, 200px); }
+  html[data-text="large"] .active-portrait img { height: clamp(150px, 18vh, 200px); } /* never under 1.5x the 96 px thumbnail */
+  /* Enlarged text on a short viewport: tighter panel chrome and a lower card strip so the dialogue body keeps room above Glen's questions. */
+  html[data-text="large"] .conversation { padding: 0.7rem 0.9rem 0.9rem; gap: 0.5rem; }
+  html[data-text="large"] .question { padding: 0.45em 0.8em; }
+  html[data-text="large"] .strip { max-height: min(36vh, calc(100vh - 22rem)); }
 }
 .conversation .scene-title {
   font-family: var(--font-control);
@@ -429,7 +446,7 @@ html[data-text="large"] .op-prose { font-size: clamp(24px, 14px + 0.85vw, 30px);
   background: rgba(5, 23, 27, 0.45);
   border-left: 3px solid var(--green-dim);
   padding: 0.8rem 1rem;
-  max-width: 62ch;
+  max-width: min(62ch, 100%);
   white-space: pre-line;
 }
 .line {
@@ -439,7 +456,7 @@ html[data-text="large"] .op-prose { font-size: clamp(24px, 14px + 0.85vw, 30px);
   align-items: start;
   background: rgba(5, 23, 27, 0.45);
   padding: 0.7rem 0.9rem;
-  max-width: 62ch;
+  max-width: min(62ch, 100%);
 }
 .line .portrait {
   width: 72px; height: 96px;
@@ -450,16 +467,16 @@ html[data-text="large"] .op-prose { font-size: clamp(24px, 14px + 0.85vw, 30px);
 .line.no-speaker { grid-template-columns: minmax(0, 1fr); border-left: 3px solid var(--green-dim); }
 .line .who { font-family: var(--font-control); font-weight: 700; font-size: 0.9rem; color: var(--green); letter-spacing: 0.08em; text-transform: uppercase; }
 .line .what { margin-top: 0.15rem; }
-.questions { display: flex; flex-direction: column; gap: 0.5rem; max-width: 62ch; }
+.questions { display: flex; flex-direction: column; gap: 0.5rem; max-width: min(62ch, 100%); }
 .questions .answer { margin-left: 1rem; }
 .report {
   background: rgba(5, 23, 27, 0.5);
   border: 1px solid var(--amber);
   padding: 0.8rem 1rem;
-  max-width: 62ch;
+  max-width: min(62ch, 100%);
 }
 .report .label { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.3rem; }
-.applied { background: rgba(5, 23, 27, 0.45); padding: 0.6rem 1rem; max-width: 62ch; }
+.applied { background: rgba(5, 23, 27, 0.45); padding: 0.6rem 1rem; max-width: min(62ch, 100%); }
 .applied .label { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .applied ul { margin: 0.3rem 0 0; padding-left: 1.2rem; }
 .applied li { font-family: var(--font-mono); font-size: 0.85rem; }
@@ -504,10 +521,11 @@ html[data-text="large"] .op-prose { font-size: clamp(24px, 14px + 0.85vw, 30px);
   border-top: 2px solid var(--panel-border);
   color: var(--panel-ink);
   padding: 0.9rem 1rem 1rem max(27vw, 1rem);
-  max-height: 54vh;
+  max-height: min(50vh, calc(100vh - 20rem)); /* leaves the conversation panel room for the dialogue above Glen's questions */
   overflow: auto;
 }
-html[data-text="large"] .strip { max-height: 50vh; }
+html[data-text="large"] .strip { max-height: min(40vh, calc(100vh - 22rem)); }
+.hint-strip { padding: 0.6rem 0.9rem; margin: 0 0 0.8rem; max-width: 80ch; font-size: 0.95rem; }
 .strip .prompt { font-size: 1.15rem; font-weight: 600; margin: 0 0 0.6rem; }
 .strip .prompt .glen { font-family: var(--font-control); font-weight: 700; font-size: 0.85rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; display: block; }
 .strip .hint { color: var(--cream); font-size: 0.88rem; margin: 0 0 0.6rem; max-width: 80ch; }

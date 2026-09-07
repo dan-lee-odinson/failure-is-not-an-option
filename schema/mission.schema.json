@@ -413,6 +413,10 @@
             "$ref": "defs.schema.json#/$defs/option"
           }
         },
+        "hint": {
+          "$ref": "defs.schema.json#/$defs/text",
+          "description": "Presentation only: a procedural hint shown above the cards after 30 s of idling when hints are on. Never a recommendation between options; never read by the engine. Added in FNO-M00c for content 0.5.2."
+        },
         "historical_option": {
           "$ref": "defs.schema.json#/$defs/id"
         }

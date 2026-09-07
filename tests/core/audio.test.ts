@@ -75,6 +75,14 @@ describe('music map', () => {
     expect(post.trigger).toBe('node:g8-accountability-brief');
     const crisis = music.cues.find((c) => c.id === 'crisis')!;
     expect(crisis.provisional).toBe(true);
+    // Playtest 2, note 9: the drum background at 25 % lower; Mission in Danger stays in the manifest and the OST, uncued.
+    expect(crisis.asset).toBe('audio-mission-in-danger-drum-background');
+    expect(crisis.gain).toBe(0.75);
+    expect(audio.get('audio-mission-in-danger-drum-background')!.duration_s).toBeCloseTo(126.85, 1);
+    expect(existsSync(resolve(ROOT, 'public', 'audio', audio.get('audio-mission-in-danger-drum-background')!.filename))).toBe(true);
+    expect(music.cues.some((c) => c.asset === 'audio-mission-in-danger')).toBe(false);
+    expect((music.reserved ?? []).some((r) => r.asset === 'audio-mission-in-danger')).toBe(true);
+    for (const c of music.cues) if (c.gain !== undefined) { expect(c.gain).toBeGreaterThan(0); expect(c.gain).toBeLessThanOrEqual(1); }
     expect(crisis.stop_on).toEqual(expect.arrayContaining(['choose:g8-return-earlier', 'choose:g8-return-later']));
     const opening = music.cues.find((c) => c.id === 'opening')!;
     expect(opening.end).toBe(42);

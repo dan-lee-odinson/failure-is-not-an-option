@@ -24,6 +24,12 @@ import soundscapeMap from './soundscape-map.json';
 import titleLayout from './title-layout.json';
 
 export const PIN_HINT = 'Pin to keep this report in view. Pinning changes nothing in the mission.';
+export const FULLSCREEN_LINE = 'Best played full screen — press F11 on Windows.';
+
+/** Set per render: the idle highlight is on (30 s without an input, hints on, motion allowed, no overlay). */
+let IDLE = false;
+/** IDLE as computed for the screen, before a choice screen suppresses the key highlight (the hint strip still reads it). */
+let IDLE_SCREEN = false;
 
 export function esc(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
@@ -74,6 +80,7 @@ function key(o: KeyOpts): string {
   if (o.ariaLabel) attrs.push(`aria-label="${esc(o.ariaLabel)}"`);
   if (o.title) attrs.push(`title="${esc(o.title)}"`);
   if (o.focusDefault) attrs.push('data-focus-default');
+  if (o.focusDefault && IDLE) attrs[1] = attrs[1]!.replace(/"$/, ' idle-hint"');
   return `<button ${attrs.join(' ')}>${o.html ? o.label : esc(o.label)}</button>`;
 }
 
@@ -93,6 +100,8 @@ function soundControl(store: Store, id: string): string {
 
 export function render(store: Store): string {
   const { ui } = store;
+  IDLE = ui.idle && ui.hints && !ui.reducedMotion && !ui.overlay;
+  IDLE_SCREEN = IDLE;
   let body: string;
   switch (ui.screen) {
     case 'opening': body = renderOpening(store); break;
@@ -107,10 +116,11 @@ export function render(store: Store): string {
 // Opening: start → dedication → notices → (montage) → hero title → main menu
 // ---------------------------------------------------------------------------
 
-function plateImgs(): string {
+/** The room composite: the plate and the emblem on Glen's vest, one layer beneath every panel, card region and status bar. */
+function roomLayer(): string {
   const room = assetUrl('room-gemini-console');
   const emblem = assetUrl('emblem-flight-operations');
-  return `${room ? `<img id="plate" class="plate" src="${room}" alt="" aria-hidden="true" data-testid="plate" />` : ''}${emblem ? `<img id="emblem" class="emblem" src="${emblem}" alt="" aria-hidden="true" data-testid="emblem" />` : ''}`;
+  return `<div class="room-layer" aria-hidden="true" data-testid="room-layer">${room ? `<img id="plate" class="plate" src="${room}" alt="" data-testid="plate" />` : ''}${emblem ? `<img id="emblem" class="emblem" src="${emblem}" alt="" aria-hidden="true" data-testid="emblem" />` : ''}</div>`;
 }
 
 function renderOpening(store: Store): string {
@@ -133,13 +143,20 @@ function renderOpening(store: Store): string {
   </main>`;
   }
   if (stage === 'dedication' || stage === 'notices') {
-    const texts = stage === 'dedication' ? reg.notices.dedication : [reg.notices.project_disclaimer, reg.notices.ai_disclosure, reg.notices.dramatization];
-    const words = texts.join(' ').split(/\s+/).length;
+    const dedication = reg.notices.dedication;
+    const notices = [reg.notices.project_disclaimer, reg.notices.ai_disclosure, reg.notices.dramatization];
+    // One continuous scroll: the dedication, a chapter gap, then the notices; no Continue between them.
+    // Under reduced motion: two static pages (dedication, notices) with Continue and immediate cuts.
+    const chapters = ui.reducedMotion ? [stage === 'dedication' ? dedication : notices] : [dedication, notices];
+    const words = chapters.flat().join(' ').split(/\s+/).length;
     const seconds = Math.round(6 + words / 3.5); // a reading pace; Continue is always available
+    const column = chapters.map((c, i) => `${i ? '<div class="op-chapter-gap" aria-hidden="true"></div>' : ''}<div class="op-chapter-text">${c.map((t) => `<p>${esc(t)}</p>`).join('')}</div>`).join('');
+    const label = ui.reducedMotion ? (stage === 'dedication' ? 'Dedication' : 'Notices') : 'Dedication and notices';
+    const fade = ui.fade === 'out' ? ` fade-out${ui.fadeQuick ? ' quick' : ''}` : '';
     return `
-  <main class="screen-opening op-chapter" data-testid="screen-opening" data-stage="${stage}">
-    <section id="op-scroll" class="op-scroll${ui.reducedMotion ? ' static' : ''}${ui.scrollPaused ? ' paused' : ''}" data-testid="op-scroll" data-seconds="${seconds}" tabindex="0" aria-label="${stage === 'dedication' ? 'Dedication' : 'Notices'}">
-      <div class="op-prose" data-testid="op-prose">${texts.map((t) => `<p>${esc(t)}</p>`).join('')}</div>
+  <main class="screen-opening op-chapter${fade}" data-testid="screen-opening" data-stage="${stage}"${ui.fade ? ` data-fade="${ui.fade}"` : ''}>
+    <section id="op-scroll" class="op-scroll${ui.reducedMotion ? ' static' : ''}${ui.scrollPaused ? ' paused' : ''}" data-testid="op-scroll" data-seconds="${seconds}" tabindex="0" aria-label="${label}">
+      <div class="op-prose" data-testid="op-prose">${column}</div>
     </section>
     <div class="op-controls" data-testid="op-controls">
       ${ui.reducedMotion ? '' : key({ family: 'selector', action: 'scroll-toggle', focus: 'scroll-toggle', testid: 'scroll-toggle', pressed: ui.scrollPaused, label: ui.scrollPaused ? 'RESUME' : 'PAUSE' })}
@@ -159,9 +176,10 @@ function renderOpening(store: Store): string {
   const menu = stage === 'menu';
   const cs = ui.continueSave;
   const svg = `<svg class="hero-svg" viewBox="0 0 ${study.canvas[0]} ${study.canvas[1]}" role="img" aria-label="Failure is Not an Option" focusable="false">${study.rows.map((r) => `<text x="${r.x}" y="${r.baseline}" font-size="${r.font_size}">${esc(r.text)}</text>`).join('')}</svg>`;
+  const fadeIn = ui.fade === 'in' ? ` fade-in${ui.fadeQuick ? ' quick' : ''}` : '';
   return `
-  <main class="screen-opening op-hero ${menu ? 'stage-menu' : 'stage-title'}" data-testid="screen-opening" data-stage="${stage}">
-    ${plateImgs()}
+  <main class="screen-opening op-hero ${menu ? 'stage-menu' : 'stage-title'}${fadeIn}" data-testid="screen-opening" data-stage="${stage}"${ui.fade ? ` data-fade="${ui.fade}"` : ''}>
+    ${roomLayer()}
     <div class="hero-overlay">
     <h1 class="hero-title" data-testid="hero-title">${svg}</h1>
     ${menu ? '' : `<button type="button" class="hero-continue" data-action="stage-next" data-focus="hero-continue" data-focus-default data-testid="hero-continue">CONTINUE →</button>`}
@@ -175,7 +193,9 @@ function renderOpening(store: Store): string {
       </nav>
       ${cs.ok ? '' : `<p class="menu-reason" id="continue-reason" data-testid="continue-reason">${esc(cs.reason)}</p>`}
       <p class="menu-subtitle" data-testid="menu-subtitle">${esc(m.title)} — ${esc(m.subtitle ?? '')} · ${esc(m.start_notice)}</p>
+      <p class="menu-subtitle menu-fullscreen" data-testid="fullscreen-line">${esc(FULLSCREEN_LINE)}</p>
       <div class="menu-tools">
+        ${ui.fullscreen === 'unavailable' ? '' : key({ family: 'selector', action: 'fullscreen-toggle', focus: 'fullscreen-toggle', testid: 'fullscreen', pressed: ui.fullscreen === 'active', label: ui.fullscreen === 'active' ? 'EXIT FULL SCREEN' : 'FULL SCREEN' })}
         ${key({ family: 'selector', action: 'text-size', focus: 'text-size', testid: 'text-size', pressed: ui.textSize === 'large', label: `TEXT SIZE: ${ui.textSize === 'large' ? 'ENLARGED' : 'DEFAULT'}` })}
         ${key({ family: 'selector', action: 'open:settings', focus: 'open:settings', testid: 'open-settings', label: 'SETTINGS' })}
         ${soundControl(store, 'menu')}
@@ -195,9 +215,10 @@ function renderConsole(store: Store): string {
   const view = describeNode(run);
   if (!view) return renderDebrief(store);
   const evidence = describeEvidence(store.content, run.state);
+  if (view.options) IDLE = false; // a choice screen highlights nothing; a hint, when the content carries one, appears instead
   return `
   <div class="console-shell" data-testid="screen-console" data-node="${esc(view.node.id)}" data-phase="${esc(view.phase.id)}">
-    ${plateImgs()}
+    ${roomLayer()}
     ${renderStatusBar(store, view)}
     <div class="stage">
       ${renderConversation(store, view)}
@@ -275,11 +296,12 @@ function renderConversation(store: Store, view: NodeView): string {
   if (view.applied.length) {
     parts.push(`<div class="applied" data-testid="applied"><div class="label">Logged at this event</div><ul>${view.applied.map((a) => `<li>${esc(a.label)}</li>`).join('')}</ul></div>`);
   }
-  if (view.questions.length) {
-    parts.push(`<div class="questions" data-testid="questions">${view.questions.map((q) => `
+  // Glen's questions sit in the panel's footer, outside the scrolling body, so they are always in view.
+  const questions = view.questions.length
+    ? `<div class="conv-questions"><div class="questions" data-testid="questions">${view.questions.map((q) => `
       <button type="button" class="question paper" data-action="question:${esc(q.id)}" data-focus="question:${esc(q.id)}" data-testid="question-${esc(q.id)}" aria-expanded="${q.asked}">${esc(q.text)}</button>
-      ${q.asked ? `<div class="answer">${renderLine(store, q.answer, `${q.id}#answer`)}</div>` : ''}`).join('')}</div>`);
-  }
+      ${q.asked ? `<div class="answer">${renderLine(store, q.answer, `${q.id}#answer`)}</div>` : ''}`).join('')}</div></div>`
+    : '';
   const active = activeSpeaker(view);
   const activeUrl = active ? assetUrl(active.portrait) : null;
   const portrait = active && activeUrl
@@ -288,6 +310,7 @@ function renderConversation(store: Store, view: NodeView): string {
   return `<section class="conversation panel" aria-label="Conversation" data-testid="conversation">
     <div class="conv-head">${head.join('')}</div>
     <div class="conv-body ${portrait ? 'with-portrait' : ''}">${portrait}<div class="conv-lines">${parts.join('')}</div></div>
+    ${questions}
   </section>`;
 }
 
@@ -368,7 +391,7 @@ function renderStrip(store: Store, view: NodeView): string {
   // A decision just committed in this phase: its cards stay on screen, stamped and greyed, until the player continues.
   const committed = view.node.type === 'briefing' ? describeCommittedDecision(run) : null;
   if (committed) {
-    parts.push(`<div class="cards committed" data-testid="committed-cards" role="group" aria-label="Your decision">${committed.options.map((o) => renderCard(store, o, 'decision', o.chosen ? 'chosen' : 'closed', false)).join('')}</div>`);
+    parts.push(`<div class="cards committed" data-testid="committed-cards" role="group" aria-label="Your decision">${committed.options.map((o) => renderCard(store, o, 'decision', o.chosen ? 'chosen' : 'closed', true)).join('')}</div>`);
   }
   if (view.node.prompt) {
     parts.push(`<h2 class="prompt"><span class="glen">Glen Kurtz — FLIGHT</span>${esc(view.node.prompt)}</h2>`);
@@ -377,13 +400,16 @@ function renderStrip(store: Store, view: NodeView): string {
     parts.push(`<p class="hint">Opportunities remaining: ${view.attention.remaining} of ${view.attention.declared}. Reading reports and asking questions use no rehearsal opportunities.</p>`);
   }
   if (view.readout) {
-    parts.push(`<div class="readout" data-testid="readout" role="group" aria-label="Rehearsal readout">${view.readout.map((r) => `<span class="${r.ready ? 'ready' : 'not-ready'}">${esc(r.label)}: ${esc(r.text)}</span>`).join('')}</div><p class="hint">Unrehearsed does not mean untrained or incapable. Both orders remain available.</p>`);
+    // The rehearsal readout is shown once, under "Supported by" on each card (Details is open by default); only the caution stays here.
+    parts.push(`<p class="hint">Unrehearsed does not mean untrained or incapable. Both orders remain available.</p>`);
   }
   if (view.options) {
-    // Details open by default at the return fork only — the one decision with a rehearsal readout.
-    const detailsDefault = view.readout !== null;
+    const current = store.content.nodes.get(view.node.id)?.node;
+    const hint = current?.type === 'decision' ? current.hint : undefined;
+    if (hint && IDLE_SCREEN) parts.push(`<div class="hint-strip paper" role="status" data-testid="hint-strip">${esc(hint)}</div>`);
+    // Details open by default on every card (playtest 2, note 12); a player's toggle is remembered per card.
     const state = (o: OptionView): CardState => (o.chosen ? 'chosen' : o.available ? 'rest' : 'unavailable');
-    parts.push(`<div class="cards" role="group" aria-label="Options">${view.options.map((o) => renderCard(store, o, view.node.type, state(o), detailsDefault)).join('')}</div>`);
+    parts.push(`<div class="cards" role="group" aria-label="Options">${view.options.map((o) => renderCard(store, o, view.node.type, state(o), true)).join('')}</div>`);
   }
   if (view.continue) {
     parts.push(`<div class="continue-row">${key({ family: 'key', action: `continue:${view.continue.id}`, focus: 'continue', testid: `continue-${view.continue.id}`, focusDefault: true, label: view.continue.label })}${store.ui.message ? `<span class="message" role="alert">${esc(store.ui.message)}</span>` : ''}</div>`);
@@ -435,22 +461,19 @@ function renderBinder(store: Store): string {
     ${rules.length ? rules.map((r) => `<div class="page"><div class="title">${esc(r.title)}</div><div>${esc(r.body ?? '')}</div></div>`).join('') : '<p class="muted">No references acquired yet.</p>'}`;
 }
 
+/**
+ * History panel (playtest 2, note 14): the history explanation, the lamp sentence and the sources H1–H8.
+ * The per-item provenance lines, the fiction register, the people list and the anchors are game mechanics
+ * and are not rendered; the data is untouched and stays on the dialogue sheet as `history-hidden`.
+ */
 function renderHistory(store: Store): string {
   const reg = store.content.bundle.registry;
-  const chars = store.content.bundle.characters;
   const labels = reg.labels;
   return `
     <p data-testid="alt-history-explanation">${esc(labels.alternate_history_explanation)}</p>
     <p class="muted" data-testid="lamp-explanation">The status bar shows ${esc(labels.historical_choice_badge ?? 'HISTORICAL CHOICE')} on a decision where one option matches the record, and ${esc(labels.alternate_history_badge)} once play has left it. Neither lamp is a recommendation.</p>
     <h3>Historical sources</h3>
-    <ul class="plain">${reg.sources.map((s) => `<li><b>${esc(s.id)}</b> — <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>${s.author ? ` (${esc(s.author)})` : ''}. <span class="muted">${esc(s.note)}</span></li>`).join('')}</ul>
-    <h3>Report, procedure, and departure references</h3><ul class="plain">${[...store.content.bundle.evidence, ...store.content.bundle.procedures, ...store.content.mission.debrief.filter((r) => r.provenance)].map((item) => `<li><b>${esc(item.id)}</b> ${esc(provenanceLine(item.provenance))}</li>`).join('')}</ul>
-    <h3>Fiction register</h3>
-    <ul class="plain">${reg.fiction.map((f) => `<li><b>${esc(f.id)} — ${esc(f.title)}.</b> ${esc(f.text)}</li>`).join('')}</ul>
-    <h3>People in this scenario</h3>
-    <ul class="plain">${chars.map((c) => `<li><b>${esc(c.display)}</b> — ${esc(c.portrayal)}</li>`).join('')}</ul>
-    <h3>Mission anchors</h3>
-    <ul class="plain">${store.content.mission.anchors.map((a) => `<li><a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.label)}</a></li>`).join('')}</ul>`;
+    <ul class="plain">${reg.sources.map((s) => `<li><b>${esc(s.id)}</b> — <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>${s.author ? ` (${esc(s.author)})` : ''}. <span class="muted">${esc(s.note)}</span></li>`).join('')}</ul>`;
 }
 
 function renderSaveLoad(store: Store): string {
@@ -476,9 +499,12 @@ function renderSettings(store: Store): string {
     <h3>Text</h3>
     <div class="actions">${key({ family: 'selector', action: 'text-size', testid: 'text-size', pressed: store.ui.textSize === 'large', label: `TEXT SIZE: ${store.ui.textSize === 'large' ? 'ENLARGED' : 'DEFAULT'}` })}${key({ family: 'selector', action: 'open:about', testid: 'settings-about', label: 'ABOUT / CREDITS' })}</div>
     <h3>Sound</h3>
-    <p class="muted">Off until you turn it on. Music and room sound never carry information you need; nothing here changes the mission.</p>
+    <p class="muted">On from Begin unless you turn it off; the setting is remembered. Music and room sound never carry information you need; nothing here changes the mission.</p>
     <div class="actions">${key({ family: 'selector', action: 'sound-toggle', testid: 'sound-toggle', pressed: a.enabled, label: `SOUND: ${a.enabled ? 'ON' : 'OFF'}` })}</div>
     <div class="sliders">${slider('master', 'Master volume')}${slider('music', 'Music')}${slider('effects', 'Effects')}${slider('beds', 'Room')}</div>
+    <h3>Help</h3>
+    <p class="muted">After 30 seconds without an input, the key that continues is highlighted; on a decision, a hint may appear above the cards. Hints never recommend one option over another.</p>
+    <div class="actions">${key({ family: 'selector', action: 'hints-toggle', testid: 'hints-toggle', pressed: store.ui.hints, label: `HINTS: ${store.ui.hints ? 'SHOW' : 'HIDE'}` })}</div>
     ${MODERN_UI_AVAILABLE ? `<h3>Interface</h3><div class="actions">${key({ family: 'selector', action: 'ui-mode', testid: 'ui-mode', label: `INTERFACE: ${store.ui.uiMode.toUpperCase()}` })}</div>` : ''}
     ${store.ui.reducedMotion ? '<p class="muted">Reduced motion is on: the opening shows static chapters and cuts between scenes.</p>' : ''}`;
 }
@@ -573,6 +599,7 @@ function renderPlanning(store: Store): string {
     return `<div class="person" data-testid="plan-person-${esc(p.id)}"><div class="name">${esc(c?.display ?? p.id)}</div><div class="trust">Trust ${p.trust} · ${esc(p.label)}</div></div>`;
   };
   const alt = alternateHistoryActive(run);
+  if (!fo.committed) IDLE = false; // choosing a plan is a decision: no continuation highlight until it is committed
   const tileState = (p: { enabled: boolean; committed: boolean }): CardState => (p.committed ? 'chosen' : fo.committed ? 'closed' : p.enabled ? 'rest' : 'unavailable');
   return `
   <main class="screen-planning" data-testid="screen-planning">

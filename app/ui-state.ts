@@ -59,6 +59,16 @@ export interface UiState {
   uiMode: UiMode;
   /** `?debug` in the URL: shows the raw event record on the debrief. */
   debug: boolean;
+  /** Opening transition in progress: the prose fading to black, or the hero title fading in. */
+  fade: null | 'out' | 'in';
+  /** The quick (0.4 s) version, when the player pressed Continue. */
+  fadeQuick: boolean;
+  /** 30 s without an input: the continuation key takes a muted highlight, a decision shows its hint. Presentation only. */
+  idle: boolean;
+  /** HINTS: SHOW / HIDE (persisted per player). */
+  hints: boolean;
+  /** The Fullscreen API's state for the menu key. */
+  fullscreen: 'available' | 'active' | 'unavailable';
 }
 
 export interface Store {
@@ -91,6 +101,11 @@ export function defaultUi(overrides: Partial<UiState> = {}): UiState {
     openingSeen: false,
     uiMode: 'apollo',
     debug: false,
+    fade: null,
+    fadeQuick: false,
+    idle: false,
+    hints: true,
+    fullscreen: 'unavailable',
     ...overrides,
   };
 }
@@ -101,6 +116,7 @@ export const PREF_KEYS = {
   openingSeen: 'fno.openingSeen',
   pinHint: 'fno.pinHintSeen',
   audio: 'fno.audio',
+  hints: 'fno.hints',
 } as const;
 
 /** Screen id used by the cue maps for a UI state: `screen:menu`, `screen:opening-dedication`, `screen:console`, … */

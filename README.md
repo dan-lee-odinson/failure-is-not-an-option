@@ -2,7 +2,7 @@
 
 *A 2D NASA flight-director simulator and narrative strategy game, framed from the director's first-person viewpoint.*
 
-**This repository holds FNO-M00b**, the presentation pass on the first playable increment: one Gemini VIII chapter, *The Weight of the Call*, played from preparation through a return decision, its aftermath, a post-flight accountability scene, a causal debrief, and a small playable Gemini IX-A preparation plan whose options depend on what you did. M00b adds the opening screens, the Apollo interface kit as a theme, the music and soundscape, and Codex's content 0.5.1.
+**This repository holds FNO-M00c**, the playtest-2 presentation fixes on the first playable increment: one Gemini VIII chapter, *The Weight of the Call*, played from preparation through a return decision, its aftermath, a post-flight accountability scene, a causal debrief, and a small playable Gemini IX-A preparation plan whose options depend on what you did. M00b added the opening screens, the Apollo interface kit as a theme, the music and soundscape, and Codex's content 0.5.1; M00c applies Dan's playtest-2 notes (docs/m00c-inputs/26-Playtest-2-Findings.md).
 
 Content package **0.5.1** (fingerprint printed by `npm run validate`). Simulation version 0.1.0.
 
@@ -48,19 +48,19 @@ Checks every file under `content/` and `assets/manifest.json`: JSON Schema, id u
 npm test
 ```
 
-Vitest against the engine-free core and the renderer: the replay test (written first, never deleted), acceptance cases AC-01…AC-16 where they are domain cases, save/import verification, the validator's fail-on-purpose cases, the 0.5.x history-marker contract, the M00b presentation contract, the music and soundscape maps, the Quindar generator, and the dialogue-sheet proofs.
+Vitest against the engine-free core and the renderer: the replay test (written first, never deleted), acceptance cases AC-01…AC-16 where they are domain cases, save/import verification, the validator's fail-on-purpose cases, the 0.5.x history-marker contract, the M00b and M00c presentation contracts, the music and soundscape maps, the Quindar generator, and the dialogue-sheet proofs.
 
 ```bash
 npm run test:e2e
 ```
 
-Playwright display and access cases (AC-12): the opening flow including Skip and reduced motion, return-to-menu on a second launch, marker precedence on both routes, CONTINUE disabled and enabled, audio off by default and absent from the log, keyboard reach, contrast of every kit face and every text sample, and the screenshot set at 1920×1080 and 1366×768, default and enlarged text, written to `artifacts/screenshots/` with the contrast measurements in `artifacts/contrast.json` (ignored by git; shipped in the handoff zip). Requires `npx playwright install chromium` once.
+Playwright display and access cases (AC-12): the opening flow including Skip and reduced motion, return-to-menu on a second launch, marker precedence on both routes, CONTINUE disabled and enabled, audio silent until Begin and absent from the log, the fade sequence and the idle highlight under fake timers, the full-screen key, the emblem beneath the panels, keyboard reach, contrast of every kit face and every text sample, and the screenshot set at 1920×1080 and 1366×768, default and enlarged text, written to `artifacts/screenshots/` with the contrast measurements in `artifacts/contrast.json` (ignored by git; shipped in the handoff zip). Requires `npx playwright install chromium` once.
 
 Other scripts: `npm run placeholders` (image placeholders for any slot still marked to-generate or placeholder — none at present — and a list of any missing sound); `npm run dialogue-sheet` (regenerates `docs/dialogue-sheet.md` and `.csv`, every player-visible string once in play order); `npm run gen-quindar` (regenerates the two Quindar tones byte for byte); `npm run fingerprint`; `npm run build` type-checks and builds to `dist/`. Add `?debug` to the URL to see the raw event record on the debrief.
 
 ## Opening and menu
 
-First launch: a quiet Start screen (Begin, Skip to menu, the sound control) → the dedication as a slow prose scroll → the notices as a second prose chapter → the hero title (Study A, Chakra Petch Bold, live text over the room) → the main menu (NEW CAMPAIGN · CONTINUE · LOAD · ABOUT). Continue advances one stage; Skip bypasses the rest; Pause/Resume stops the scroll, and the text can be scrolled by hand. Under reduced motion the chapters are static with Continue and every transition is a cut. Once the opening has been viewed or skipped, later launches open on the menu; About / Credits carries Replay opening, the dedication, all notices, the sources, the soundtrack, the soundscape credits, the font licences, and the project licences. The archival montage (`docs/m00b-inputs/07-Opening-Cinematic.md`) has a named empty slot between the notices and the title; nothing plays there yet.
+First launch: a quiet Start screen (Begin, Skip to menu, the sound control) → the dedication and the notices as one continuous prose scroll with a chapter gap between them and no visible scrollbar → when the last line has cleared, a fade to black and the hero title fading in (Study A at 0.75, Chakra Petch Bold, live text over the room) → the main menu (NEW CAMPAIGN · CONTINUE · LOAD · ABOUT, and a FULL SCREEN key with the line "Best played full screen — press F11 on Windows."). Continue at any time fades quickly to the title; Skip bypasses the rest; Pause/Resume stops the scroll, and the text can be scrolled by hand. Under reduced motion the dedication and the notices are two static pages with Continue and every transition is a cut. Once the opening has been viewed or skipped, later launches open on the menu; About / Credits carries Replay opening, the dedication, all notices, the sources, the soundtrack, the soundscape credits, the font licences, and the project licences. The archival montage (`docs/m00b-inputs/07-Opening-Cinematic.md`) has a named empty slot between the notices and the title; nothing plays there yet.
 
 CONTINUE resumes the browser slot and is disabled with a visible reason when there is no valid save. LOAD opens the save/import panel.
 
@@ -68,13 +68,21 @@ CONTINUE resumes the browser slot and is disabled with a visible reason when the
 
 The Apollo kit (`docs/m00b-inputs/19-Claude-Review-Equipment-and-Navigation.md` §6) is implemented as a theme: the root element carries `data-ui-mode="apollo"`, the kit's colours live in `app/styles.css` under that attribute, and the label-free control faces are manifest SVGs whose URLs `app/theme.ts` publishes as CSS custom properties. Controls are native buttons with live text over those faces; content is paper (cards, evidence, binder, debrief). A Modern skin would be a second token block and face set with no logic change; it does not exist yet, and the settings control for the mode stays hidden until `MODERN_UI_AVAILABLE` in `app/theme.ts` is true. No engine, content, eligibility or app decision logic reads the mode.
 
-Pinning lives in the Evidence panel only (a pin glyph on each report, with a once-only hint the first time you hover or focus one). Pin state, text size, overlays, the theme and audio never enter the ledger, the log, a save, or the replay.
+Pinning lives in the Evidence panel only (a pin glyph on each report, with a once-only hint the first time you hover or focus one). Every card's Details disclosure starts open; the toggle is remembered per card. Glen's questions sit at the bottom of the conversation panel, always in view; the dialogue above them scrolls. The History panel shows the history explanation, the lamp sentence and the sources H1–H8; the per-item provenance lines and the fiction register are game mechanics and are not displayed (they stay in the content, on the dialogue sheet as `history-hidden`, and in this README). After 30 seconds without an input the key that continues takes a muted highlight, and a decision shows its hint if the content carries one (`hint` on a decision node, none yet); Settings has HINTS: SHOW / HIDE. Pin state, text size, overlays, the theme, audio, the idle timer and hints never enter the ledger, the log, a save, or the replay.
 
 ## Audio
 
-Off by default. Nothing plays until you turn SOUND on (Start screen, menu, or Settings); the setting and the four volumes (master, music, effects, room) persist per player alongside text size. Music never carries information you need, never loops on a screen where you read and decide, and never becomes a clock.
+On from Begin: pressing Begin (or Skip) is the player interaction browsers require, and the master goes on then unless you have turned SOUND off before (the setting and the four volumes — master, music, effects, room — persist per player alongside text size). Music never carries information you need, never loops on a screen where you read and decide, and never becomes a clock.
 
-**Soundtrack** — Music: Dan Lee-Odinson, produced with Suno Pro, instrumental. The five original MP3s are unchanged under `public/audio/`; cue points (start, end, fades, the menu loop, what stops a cue) live in `app/music-map.json` and can be tuned without a rebuild. Rights: owned by Dan Lee-Odinson under Suno's Pro plan terms; released with the game under a licence to be chosen before publication (`docs/m00b-inputs/audio-README.md`).
+**Soundtrack** — Music: Dan Lee-Odinson, produced with Suno Pro, instrumental. The six original MP3s are unchanged under `public/audio/`; cue points (start, end, fades, the menu loop, a per-cue gain, what stops a cue) live in `app/music-map.json` and can be tuned without a rebuild.
+
+| Cue | Track | Where | Notes |
+|---|---|---|---|
+| opening | Orbit of Hope | dedication, notices, hero title | 0:00 → 0:42, extended to the 2:04 seam if still reading; crossfades into the menu loop |
+| menu-loop | Orbit of Hope (refrain) | main menu | loop 1:00.5 → 1:51.7, 0.2 s crossfade; the only loop |
+| crisis | Mission in Danger Drum Background | crisis report through the return decision | once from 0:00 at cue gain 0.75; fades on the return Choose; provisional |
+| postflight | Per Aspera | post-flight scene and debrief | from 1:30, once, runs out |
+| — | Mission in Danger, Disaster and Loss | not cued | in the OST list; Mission in Danger was the crisis cue until playtest 2 | Rights: owned by Dan Lee-Odinson under Suno's Pro plan terms; released with the game under a licence to be chosen before publication (`docs/m00b-inputs/audio-README.md`).
 
 **Soundscape** — seven Freesound recordings chosen by Dan (`docs/m00b-inputs/22-Soundscape-CC0-Candidates.md`) under `public/audio/soundscape-cc0/`, plus two Quindar tones generated by `scripts/gen-quindar.ts`. Regions, loop points and gains live in `app/soundscape-map.json`; the room bed defaults to `room_bed_gain` 0.3 (Dan's ruling: 60–75 % below full scale), the walla layer sits under it and runs only on the preparation and post-flight screens, and one-shots are bound to interface events only.
 

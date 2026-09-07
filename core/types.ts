@@ -117,6 +117,8 @@ export interface PrepChoiceNode {
 export interface DecisionNode {
   /** Presentation metadata; never an eligibility rule. */
   historical_option?: string;
+  /** Presentation only: a procedural hint shown above the cards after idling (M00c); never a recommendation; never read by the engine. */
+  hint?: string;
   type: 'decision';
   id: string;
   prompt: string;

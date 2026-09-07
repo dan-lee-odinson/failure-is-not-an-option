@@ -126,32 +126,38 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     await shot(page, vp.name, text, '00-opening-start');
     await expect(page.getByTestId('begin')).toBeVisible();
     await expect(page.getByTestId('skip-to-menu')).toBeVisible();
-    await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'false');
+    // Silent before the first Begin; the large-text run has already skipped once, which turned the master on.
+    await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', text === 'default' ? 'false' : 'true');
 
     await click(page, 'begin');
     expect(await stage(page)).toBe('dedication');
-    await click(page, 'scroll-toggle'); // pause so the shot is repeatable
+    await click(page, 'scroll-toggle'); // pause so the shots are repeatable
     await expect(page.getByTestId('scroll-toggle')).toHaveText('RESUME');
     const prose = page.getByTestId('op-prose');
     await expect(prose).toBeVisible();
+    // One continuous column: the dedication, a chapter gap, the notices; no visible scrollbar.
+    await expect(prose.locator('.op-chapter-text')).toHaveCount(2);
+    await expect(prose.locator('.op-chapter-gap')).toHaveCount(1);
+    await expect(prose).toContainText('To the men and women of NASA');
+    await expect(prose).toContainText('independent homage to NASA');
+    expect(await page.getByTestId('op-scroll').evaluate((el) => getComputedStyle(el).scrollbarWidth)).toBe('none');
     const fontSize = await prose.locator('p').first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
     expect(fontSize).toBeGreaterThanOrEqual(20);
     await prose.locator('p').first().evaluate((el) => el.scrollIntoView({ block: 'center' }));
     await shot(page, vp.name, text, '01-opening-dedication');
+    await prose.locator('.op-chapter-text').nth(1).locator('p').first().evaluate((el) => el.scrollIntoView({ block: 'start' }));
+    await shot(page, vp.name, text, '01b-opening-notices');
     // Manual scrolling while paused reaches every word: the last paragraph can be brought fully into the scroll box.
     await prose.locator('p').last().evaluate((el) => el.scrollIntoView({ block: 'center' }));
     const lastVisible = await prose.locator('p').last().evaluate((el) => { const r = el.getBoundingClientRect(); const box = el.closest('#op-scroll')!.getBoundingClientRect(); return r.top >= box.top && r.bottom <= box.bottom; });
     expect(lastVisible).toBe(true);
+    await shot(page, vp.name, text, '01c-opening-scroll-end');
     await page.getByTestId('op-scroll').evaluate((el) => { el.scrollTop = 0; });
 
+    // Continue at any time: a quick fade to the hero title (no notices stage in between).
     await click(page, 'stage-next');
-    expect(await stage(page)).toBe('notices');
-    await click(page, 'scroll-toggle');
-    await prose.locator('p').first().evaluate((el) => el.scrollIntoView({ block: 'start' }));
-    await shot(page, vp.name, text, '02-opening-notices');
-
-    await click(page, 'stage-next');
-    expect(await stage(page)).toBe('title');
+    await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'title');
+    await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/, { timeout: 5000 });
     await expect(page.getByTestId('hero-title')).toBeVisible();
     const continueSize = await page.getByTestId('hero-continue').evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
     expect(continueSize).toBeGreaterThanOrEqual(18);
@@ -163,6 +169,10 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     await expect(page.getByTestId('start-load')).toBeDisabled();
     await expect(page.getByTestId('continue-reason')).toBeVisible();
     for (const id of ['start-new', 'start-load', 'menu-load', 'menu-about']) await assertVisibleWithinViewport(page, id);
+    await expect(page.getByTestId('fullscreen-line')).toHaveText('Best played full screen — press F11 on Windows.');
+    const fsEnabled = await page.evaluate(() => document.fullscreenEnabled);
+    if (fsEnabled) await expect(page.getByTestId('fullscreen')).toHaveText('FULL SCREEN');
+    else await expect(page.getByTestId('fullscreen')).toHaveCount(0);
     await shot(page, vp.name, text, '04-menu-continue-disabled');
 
     await click(page, 'menu-about');
@@ -240,8 +250,16 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     await click(page, 'continue-g8-stabilization-report-continue');
     expect(await node(page)).toBe('g8-rule-decision');
     await expect(page.getByTestId('badge-historical-choice')).toBeVisible();
-    // Details closed by default away from the return fork.
-    expect(await page.getByTestId('card-g8-order-return').locator('details').evaluate((d) => (d as HTMLDetailsElement).open)).toBe(false);
+    // Details open by default on every card (M00c).
+    expect(await page.getByTestId('card-g8-order-return').locator('details').evaluate((d) => (d as HTMLDetailsElement).open)).toBe(true);
+    // History: the explanation, the lamp sentence and the sources; no provenance lines, no fiction register.
+    await click(page, 'open-history');
+    await expect(page.getByTestId('overlay-history')).toBeVisible();
+    await expect(page.getByTestId('overlay-history')).toContainText('Historical sources');
+    await expect(page.getByTestId('overlay-history')).not.toContainText('Fiction register');
+    await expect(page.getByTestId('overlay-history')).not.toContainText('Report, procedure');
+    await shot(page, v, text, '07-history-panel');
+    await click(page, 'close-overlay');
     await click(page, 'option-g8-order-return');
     // Return decision: HISTORICAL CHOICE lamp, Details open, no chips, pinning in the Evidence panel only.
     expect(await node(page)).toBe('g8-return-brief');
@@ -252,7 +270,24 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     const thumbH = (await page.locator('[data-testid="conversation"] .line img.portrait').first().boundingBox())!.height;
     expect(activeH).toBeGreaterThan(thumbH * 1.5);
     if (v === '1920x1080') { expect(activeH).toBeGreaterThanOrEqual(200); expect(activeH).toBeLessThanOrEqual(260); }
-    await expect(page.getByTestId('readout')).toBeVisible();
+    // The rehearsal readout appears once, under "Supported by" on each card; not under Glen's question.
+    await expect(page.getByTestId('readout')).toHaveCount(0);
+    await expect(page.getByTestId('card-g8-return-earlier')).toContainText('Supported by');
+    // The conversation panel: no horizontal overflow, and Glen's questions in view without scrolling the panel.
+    const panel = await page.getByTestId('conversation').evaluate((el) => {
+      const b = el.getBoundingClientRect();
+      const q = el.querySelector('.conv-questions')!.getBoundingClientRect();
+      const body = el.querySelector('.conv-body')!;
+      const cs = getComputedStyle(el), bs = getComputedStyle(body);
+      const inner = b.right - parseFloat(cs.borderRightWidth);
+      const past = Array.from(el.querySelectorAll<HTMLElement>('*')).filter((c) => c.getBoundingClientRect().right > inner + 0.5).length;
+      const noX = cs.overflowX === 'hidden' && bs.overflowX === 'hidden' && past === 0 && body.scrollWidth <= body.clientWidth + 1 && el.scrollWidth <= el.clientWidth + 1;
+      return { noX, qIn: q.top >= b.top && q.bottom <= b.bottom + 1, scrollTop: el.scrollTop };
+    });
+    expect(panel.noX, 'no horizontal overflow in the conversation panel').toBe(true);
+    expect(panel.qIn, "Glen's questions within the panel").toBe(true);
+    expect(panel.scrollTop).toBe(0);
+    for (const q of ['question-g8-q-recovery-risk', 'question-g8-q-reserve-risk']) await expect(page.getByTestId(q)).toBeInViewport();
     for (const id of ['option-g8-return-earlier', 'option-g8-return-later', 'card-g8-return-earlier', 'card-g8-return-later']) await assertVisibleWithinViewport(page, id);
     for (const id of ['g8-return-earlier', 'g8-return-later']) {
       expect(await page.getByTestId(`card-${id}`).locator('details').evaluate((d) => (d as HTMLDetailsElement).open)).toBe(true);
@@ -411,9 +446,8 @@ test('keyboard reaches every stage of the opening, the menu, every card and lamp
   expect(await stage(page)).toBe('dedication');
   await expect(page.getByTestId('stage-next')).toBeFocused();
   await page.keyboard.press('Enter');
-  expect(await stage(page)).toBe('notices');
-  await page.keyboard.press('Enter');
-  expect(await stage(page)).toBe('title');
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'title');
+  await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/, { timeout: 5000 });
   await expect(page.getByTestId('hero-continue')).toBeFocused();
   await page.keyboard.press('Enter');
   expect(await stage(page)).toBe('menu');
@@ -453,6 +487,8 @@ test('keyboard reaches every stage of the opening, the menu, every card and lamp
   await expect(page.getByTestId('continue-g8-prep-finish')).toBeFocused();
   // Details disclosure and the pin glyph are keyboard-reachable.
   await page.getByTestId('details-g8-prep-recovery').focus();
+  await page.keyboard.press('Enter'); // Details starts open (M00c): Enter closes it, Enter again reopens it
+  expect(await page.getByTestId('card-g8-prep-recovery').locator('details').evaluate((d) => (d as HTMLDetailsElement).open)).toBe(false);
   await page.keyboard.press('Enter');
   expect(await page.getByTestId('card-g8-prep-recovery').locator('details').evaluate((d) => (d as HTMLDetailsElement).open)).toBe(true);
   await page.getByTestId('pin-g8-ev-contact-worksheet').focus();
@@ -484,14 +520,18 @@ test('reduced motion: static chapters with Continue, immediate cuts, no animatio
   expect(await stage(page)).toBe('dedication');
   await expect(page.getByTestId('op-scroll')).toHaveClass(/static/);
   await expect(page.getByTestId('scroll-toggle')).toHaveCount(0);
+  await expect(page.getByTestId('op-prose').locator('.op-chapter-text')).toHaveCount(1); // two static pages, not one column
+  await expect(page.getByTestId('op-prose')).not.toContainText('independent homage');
   const top = await page.getByTestId('op-scroll').evaluate((el) => el.scrollTop);
   await page.waitForTimeout(1500);
   expect(await page.getByTestId('op-scroll').evaluate((el) => el.scrollTop)).toBe(top);
   await click(page, 'stage-next');
   expect(await stage(page)).toBe('notices');
   await expect(page.getByTestId('op-scroll')).toHaveClass(/static/);
+  await expect(page.getByTestId('op-prose')).toContainText('independent homage');
   await click(page, 'stage-next');
-  expect(await stage(page)).toBe('title');
+  expect(await stage(page)).toBe('title'); // an immediate cut
+  await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/);
   await click(page, 'hero-continue');
   expect(await stage(page)).toBe('menu');
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
@@ -533,28 +573,138 @@ test('the opening scroll runs on its own, pauses, resumes, and advances when the
   await click(page, 'scroll-toggle');
   await page.waitForTimeout(800);
   expect(await box.evaluate((el) => el.scrollTop)).toBeGreaterThan(p0);
-  // Jump near the end: the chapter clears and the next one follows on its own.
+  // Jump to the end: the text has cleared; after the hold the prose fades to black and the title fades in on its own.
   await box.evaluate((el) => { el.scrollTop = el.scrollHeight; });
-  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'notices', { timeout: 5000 });
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'out', { timeout: 5000 });
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'title', { timeout: 5000 });
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'in');
+  await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/, { timeout: 5000 });
 });
 
-test('audio is off by default, starts only on a player interaction, and never enters the log', async ({ page }) => {
+test('fade sequence timing under fake timers: 1.2 s hold, 1.0 s to black, 1.5 s title fade-in; Continue fades in 0.4 s', async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.clock.install();
+  await fresh(page, false);
+  await page.clock.pauseAt(Date.now() + 1000); // from here the page's clock moves only when the test advances it
+  await click(page, 'begin');
+  const box = page.getByTestId('op-scroll');
+  await box.evaluate((el) => { el.scrollTop = el.scrollHeight; });
+  // The driver notices the end on its first fake frame (within the first ~32 ms); the timings below are measured from there.
+  await page.clock.runFor(100);
+  await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/);
+  await page.clock.runFor(1050); // t ≈ 1.15 s: still holding
+  await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/);
+  await page.clock.runFor(100); // t ≈ 1.25 s: the 1.2 s hold is over, the prose is fading to black
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'out');
+  expect(await stage(page)).toBe('dedication');
+  await page.clock.runFor(900); // t ≈ 2.15 s: still black-bound
+  expect(await stage(page)).toBe('dedication');
+  await page.clock.runFor(100); // t ≈ 2.25 s: 1.0 s later the title is fading in
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'title');
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'in');
+  await page.clock.runFor(1400); // t ≈ 3.65 s: still fading in
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'in');
+  await page.clock.runFor(100); // t ≈ 3.75 s: the 1.5 s fade-in is done
+  await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/);
+  // Continue from the prose: a quick fade (0.4 s out, 0.4 s in).
+  await click(page, 'hero-continue');
+  await click(page, 'menu-about');
+  await click(page, 'replay-opening');
+  await click(page, 'begin');
+  await click(page, 'stage-next');
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'out');
+  await expect(page.getByTestId('screen-opening')).toHaveClass(/quick/);
+  await page.clock.runFor(350);
+  expect(await stage(page)).toBe('dedication');
+  await page.clock.runFor(100);
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'title');
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'in');
+  await page.clock.runFor(450);
+  await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/);
+});
+
+test('the FULL SCREEN key is absent when the Fullscreen API is unavailable', async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.addInitScript(() => { Object.defineProperty(document, 'fullscreenEnabled', { get: () => false }); });
+  await fresh(page, true);
+  await expect(page.getByTestId('fullscreen-line')).toBeVisible();
+  await expect(page.getByTestId('fullscreen')).toHaveCount(0);
+});
+
+test('idle help: after 30 s the continuation key is highlighted; any input clears it; hints can be hidden and the setting persists; nothing under reduced motion', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.clock.install();
+  await fresh(page, true);
+  await page.clock.pauseAt(Date.now() + 1000);
+  await toMenu(page);
+  await click(page, 'start-new');
+  expect(await node(page)).toBe('g8-brief');
+  const key = page.getByTestId('continue-g8-brief-continue');
+  await page.clock.runFor(29_000);
+  await expect(key).not.toHaveClass(/idle-hint/);
+  await page.clock.runFor(1_100);
+  await expect(key).toHaveClass(/idle-hint/);
+  expect(await page.evaluate(() => window.__fno!.idle())).toBe(true);
+  await shot(page, '1920x1080', 'default', '22-idle-highlight');
+  // Any input clears it (a key press repaints on the next frame, so the highlight never steals an Enter from the key).
+  await page.keyboard.press('Shift');
+  await page.clock.runFor(50);
+  await expect(key).not.toHaveClass(/idle-hint/);
+  expect(await page.evaluate(() => window.__fno!.idle())).toBe(false);
+  // A decision screen with no hint text highlights nothing.
+  await click(page, 'continue-g8-brief-continue');
+  expect(await node(page)).toBe('g8-prep-select');
+  await page.clock.runFor(31_000);
+  expect(await page.evaluate(() => window.__fno!.idle())).toBe(true);
+  await expect(page.locator('.idle-hint')).toHaveCount(0);
+  await expect(page.getByTestId('hint-strip')).toHaveCount(0);
+  // Never in the log.
+  expect(await page.evaluate(() => JSON.stringify(window.__fno!.store.run!.log))).not.toMatch(/idle|hint/i);
+  // HINTS: HIDE persists and disables the highlight.
+  await click(page, 'open-settings');
+  await expect(page.getByTestId('hints-toggle')).toHaveText('HINTS: SHOW');
+  await click(page, 'hints-toggle');
+  await expect(page.getByTestId('hints-toggle')).toHaveText('HINTS: HIDE');
+  expect(await page.evaluate(() => localStorage.getItem('fno.hints'))).toBe('0');
+  await click(page, 'close-overlay');
+  await click(page, 'option-g8-prep-recovery');
+  await page.clock.runFor(31_000);
+  await expect(page.locator('.idle-hint')).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'menu');
+  await click(page, 'open-settings');
+  await expect(page.getByTestId('hints-toggle')).toHaveText('HINTS: HIDE');
+});
+
+test('idle help is absent under reduced motion', async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.clock.install();
+  await fresh(page, true);
+  await page.clock.pauseAt(Date.now() + 1000);
+  await toMenu(page);
+  await click(page, 'start-new');
+  await page.clock.runFor(31_000);
+  await expect(page.locator('.idle-hint')).toHaveCount(0);
+  expect(await page.evaluate(() => window.__fno!.idle())).toBe(false);
+});
+
+test('audio is silent until Begin, on after Begin, a persisted off stays off, and never enters the log', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await fresh(page, false);
   const audio = () => page.evaluate(() => ({ enabled: window.__fno!.audio.enabled(), unlocked: window.__fno!.audio.unlocked() }));
   expect(await audio()).toEqual({ enabled: false, unlocked: false });
   expect(await page.locator('audio, video').count()).toBe(0);
   await click(page, 'begin');
-  expect(await audio()).toEqual({ enabled: false, unlocked: true }); // a context exists after Begin, the master is still off
+  expect(await audio()).toEqual({ enabled: true, unlocked: true }); // Begin is the player interaction: the master is on
+  await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'true');
   await click(page, 'skip-to-menu');
   await click(page, 'start-new');
   await click(page, 'continue-g8-brief-continue');
   await click(page, 'option-g8-prep-recovery');
   const before = await page.evaluate(() => JSON.stringify(window.__fno!.store.run!.log));
   await click(page, 'open-settings');
-  await click(page, 'sound-toggle');
   await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'true');
-  expect((await audio()).enabled).toBe(true);
   await page.getByTestId('volume-master').fill('40');
   await click(page, 'close-overlay');
   await click(page, 'continue-g8-prep-finish');
@@ -572,6 +722,16 @@ test('audio is off by default, starts only on a player interaction, and never en
   await page.reload();
   await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'menu');
   await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'true');
+  // The player turns it off: the setting persists and Begin no longer turns it on.
+  await click(page, 'sound-toggle');
+  await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'false');
+  await page.reload();
+  await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'false');
+  await click(page, 'menu-about');
+  await click(page, 'replay-opening');
+  await click(page, 'begin');
+  expect(await audio()).toEqual({ enabled: false, unlocked: true });
+  await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'false');
 });
 
 test('no voice, no timers, no forced flashing, no art outside the manifest', async ({ page }) => {

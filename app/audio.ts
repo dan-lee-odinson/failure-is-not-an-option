@@ -28,6 +28,8 @@ export interface MusicCue {
   loop: { from: number; to: number; crossfade: number } | null;
   extend_to_seam_if_still_reading?: number;
   stop_on: string[];
+  /** Per-cue level (0–1) on top of the music bus; absent = 1. */
+  gain?: number;
   provisional?: boolean;
   note?: string;
 }
@@ -226,9 +228,10 @@ export class AudioDirector {
     const buf = await this.buffer(cue.asset);
     if (!buf || token.stopped || !this.ctx || this.playing.get(cue.id) !== token) return;
     const t0 = this.ctx.currentTime + 0.03;
+    const level = cue.gain ?? 1;
     token.gain.connect(this.music);
-    token.gain.gain.setValueAtTime(cue.fade_in > 0 ? 0 : 1, t0);
-    if (cue.fade_in > 0) token.gain.gain.linearRampToValueAtTime(1, t0 + cue.fade_in);
+    token.gain.gain.setValueAtTime(cue.fade_in > 0 ? 0 : level, t0);
+    if (cue.fade_in > 0) token.gain.gain.linearRampToValueAtTime(level, t0 + cue.fade_in);
     token.startedAt = t0;
     if (cue.loop) {
       // First pass: from `start` to the loop's end plus the crossfade; then segments from loop.from.
@@ -270,7 +273,7 @@ export class AudioDirector {
     if (!token.plannedEnd || !this.ctx) return;
     const fade = token.cue.fade_out;
     const end = token.plannedEnd;
-    token.gain.gain.setValueAtTime(1, Math.max(this.ctx.currentTime, end - fade));
+    token.gain.gain.setValueAtTime(token.cue.gain ?? 1, Math.max(this.ctx.currentTime, end - fade));
     token.gain.gain.linearRampToValueAtTime(0, end);
     for (const s of token.sources) { try { s.stop(end + 0.01); } catch { /* not started */ } }
     token.stopped = true;

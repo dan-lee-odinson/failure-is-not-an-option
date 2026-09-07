@@ -48,7 +48,8 @@ describe('opening screens', () => {
     }
     const dedication = render(store(null, { stage: 'dedication' }));
     for (const p of content().bundle.registry.notices.dedication) expect(dedication).toContain(esc(p));
-    expect(dedication).not.toContain(esc(content().bundle.registry.notices.project_disclaimer));
+    // Since M00c the dedication and the notices share one scroll; only the reduced-motion page keeps them apart.
+    expect(render(store(null, { stage: 'dedication', reducedMotion: true }))).not.toContain(esc(content().bundle.registry.notices.project_disclaimer));
     const notices = render(store(null, { stage: 'notices' }));
     for (const p of [content().bundle.registry.notices.project_disclaimer, content().bundle.registry.notices.ai_disclosure, content().bundle.registry.notices.dramatization]) expect(notices).toContain(esc(p));
     expect(render(store(null, { stage: 'montage' }))).toContain('data-stage="montage"');
@@ -98,9 +99,9 @@ describe('cards, pins and stamps', () => {
     expect(details).toContain('<b>Supported by</b>');
     expect(card.indexOf('<b>Intent</b>')).toBeLessThan(card.indexOf('<details'));
     expect(card.indexOf('<b>Risk</b>')).toBeLessThan(card.indexOf('<details'));
-    // Closed by default elsewhere (the termination decision).
+    // Open by default everywhere since M00c (playtest 2, note 12), the termination decision included.
     const rule = render(store(upTo('g8-rule-decision')));
-    expect(rule).toMatch(/<details class="card-details" data-details="g8-order-return">/);
+    expect(rule).toMatch(/<details class="card-details" data-details="g8-order-return" open>/);
     // A player's explicit toggle wins.
     expect(render(store(run, { details: { 'g8-return-earlier': false } }))).toMatch(/<details class="card-details" data-details="g8-return-earlier">/);
   });
@@ -184,7 +185,8 @@ describe('play text carries no fiction call-outs or provenance', () => {
       check();
       for (const inp of inputs) { play(run, [inp]); check(); }
       const history = render(store(run, { screen: 'debrief', overlay: 'history' }));
-      expect(history).toContain('Fiction register');
+      expect(history).not.toContain('Fiction register'); // M00c: game mechanics are not shown in History
+      expect(history).toContain('Historical sources');
       expect(history).not.toMatch(/Sources: \.|Fiction register: \./);
       const debrief = render(store(run, { screen: 'debrief' }));
       expect(debrief).not.toContain('data-testid="event-record-toggle"');

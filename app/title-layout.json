@@ -1,6 +1,6 @@
 {
   "version": "v003",
-  "purpose": "Hero title revision; no game logic or navigation changes",
+  "purpose": "Hero title revision (v003), sized at 0.75 for M00c; no game logic or navigation changes",
   "studies": [
     {
       "id": "a",
@@ -14,27 +14,38 @@
         {
           "text": "FAILURE",
           "x": 475,
-          "baseline": 335,
-          "width": 1320,
-          "font_size": 320.792
+          "baseline": 376.3,
+          "width": 990.0,
+          "font_size": 240.594,
+          "source_font_size": 320.792,
+          "source_baseline": 335,
+          "source_width": 1320
         },
         {
           "text": "IS NOT AN",
           "x": 475,
-          "baseline": 576,
-          "width": 1320,
-          "font_size": 269.4
+          "baseline": 557.1,
+          "width": 990.0,
+          "font_size": 202.05,
+          "source_font_size": 269.4,
+          "source_baseline": 576,
+          "source_width": 1320
         },
         {
           "text": "OPTION",
           "x": 475,
-          "baseline": 890,
-          "width": 1320,
-          "font_size": 360.81
+          "baseline": 792.6,
+          "width": 990.0,
+          "font_size": 270.608,
+          "source_font_size": 360.81,
+          "source_baseline": 890,
+          "source_width": 1320
         }
       ],
       "hero": "hero-a.png",
-      "transparent": "title-lockup-a.png"
+      "transparent": "title-lockup-a.png",
+      "scale": 0.75,
+      "note": "FNO-M00c (playtest 2, note 5): the v003 study-a sizes multiplied by 0.75; the left edge stays at x 475; baselines scaled about the block's vertical centre y 500.2 (cap top of FAILURE to the OPTION baseline, cap height 0.7 em). source_* fields keep the v003 values."
     },
     {
       "id": "b",

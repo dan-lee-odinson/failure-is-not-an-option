@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest';
 import { describeDebrief, describeEvidence, describeFollowOnForRun, describeNode, type Run } from '../../core';
 import { render } from '../../app/render';
 import { STAGES, defaultUi, type Store, type UiState } from '../../app/ui-state';
-import { MESSAGE_SOURCES, buildSheet, dedupeKey, extractRuns, norm, provenanceText, toCsv, toMarkdown, type Sheet } from '../../scripts/lib/dialogue-sheet';
+import { MESSAGE_SOURCES, buildSheet, dedupeKey, extractRuns, historyHiddenStrings, norm, provenanceText, toCsv, toMarkdown, type Sheet } from '../../scripts/lib/dialogue-sheet';
 import { PREP_SETS, ROOT, content, newRun, play, script, type Lesson, type Route, type Stance } from './helpers';
 
 const routes: Route[] = ['earlier', 'later'];
@@ -124,10 +124,15 @@ describe('dialogue sheet', () => {
       note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, scrollPaused: true })), reachableRendered);
       note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, reducedMotion: true })), reachableRendered);
       note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, continueSave: { ok: true } })), reachableRendered);
+      note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, fullscreen: 'available' })), reachableRendered);
+      note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, fullscreen: 'active' })), reachableRendered);
     }
+    // History no longer renders these; they are content and stay on the sheet as history-hidden.
+    const hidden = new Set(historyHiddenStrings(content()).map((c) => dedupeKey(c.text)));
+    for (const k of hidden) reachableView.add(k);
     for (const overlay of ['history', 'about', 'saveload', 'settings'] as const) {
       note(renderedStrings(null, ui({ screen: 'opening', stage: 'menu', overlay })), reachableRendered);
-      note(renderedStrings(null, ui({ screen: 'opening', stage: 'menu', overlay, reducedMotion: true, audio: { enabled: true, master: 0.8, music: 1, effects: 1, beds: 1 } })), reachableRendered);
+      note(renderedStrings(null, ui({ screen: 'opening', stage: 'menu', overlay, reducedMotion: true, audio: { enabled: true, master: 0.8, music: 1, effects: 1, beds: 1 }, hints: false })), reachableRendered);
     }
 
     // All 56 routes, questions asked, every stop.
@@ -141,6 +146,7 @@ describe('dialogue sheet', () => {
           note(renderedStrings(run, ui()), reachableRendered);
           note(renderedStrings(run, ui({ open: Object.keys(run.state.mission.evidence), pinned: Object.keys(run.state.mission.evidence).slice(0, 1) })), reachableRendered);
           note(renderedStrings(run, ui({ pinHintOpen: true })), reachableRendered);
+          note(renderedStrings(run, ui({ idle: true })), reachableRendered);
           note(renderedStrings(run, ui({ overlay: 'binder' })), reachableRendered);
         }
         steps++;
@@ -171,6 +177,7 @@ describe('dialogue sheet', () => {
     const messageSrc = MESSAGE_SOURCES.map((f) => readFileSync(resolve(ROOT, f), 'utf8')).join('\n').replace(/\\'/g, "'");
     const unreachable = s.rows.filter((r) => {
       const k = dedupeKey(r.text);
+      if (r.kind === 'history-hidden') return !hidden.has(k) && !reachableView.has(k);
       if (r.kind === 'ui.message') return !messageSrc.includes(r.text.split('…')[0]!.trim().slice(0, 24));
       if (r.source === 'app') return !reachableRendered.has(k);
       return !reachableView.has(k) && !reachableRendered.has(k);
@@ -194,6 +201,12 @@ describe('dialogue sheet', () => {
     expect(firstIndex.get('g9-plan-decision')!).toBeGreaterThan(firstIndex.get('debrief')!);
     expect(firstIndex.has('overlay-settings')).toBe(true);
     expect(s.rows.filter((r) => r.kind === 'notice')).toHaveLength(5); // two dedication paragraphs and three notices, as content
+    // Every history-hidden row is a content string History used to show; every such string is on the sheet.
+    const hiddenKeys = new Set(historyHiddenStrings(content()).map((c) => dedupeKey(c.text)));
+    const onSheetKeys = new Set(s.rows.map((r) => dedupeKey(r.text)));
+    for (const r of s.rows.filter((r) => r.kind === 'history-hidden')) expect(hiddenKeys.has(dedupeKey(r.text)), `history-hidden row ${r.id}`).toBe(true);
+    for (const k of hiddenKeys) expect(onSheetKeys.has(k), `hidden string on the sheet: ${k.slice(0, 60)}`).toBe(true);
+    expect(s.rows.some((r) => r.kind === 'evidence.provenance')).toBe(false);
 
     const keys = s.rows.map((r) => dedupeKey(r.text));
     expect(new Set(keys).size).toBe(keys.length); // no duplicates
