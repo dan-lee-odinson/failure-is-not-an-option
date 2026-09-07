@@ -54,7 +54,7 @@ Vitest against the engine-free core: the replay test (written first, never delet
 npm run test:e2e
 ```
 
-Playwright display and access cases (AC-12) and the screenshot set at 1920×1080 and 1366×768, default and enlarged text, written to `test-results/screenshots/`. Requires `npx playwright install chromium` once.
+Playwright display and access cases (AC-12) and the screenshot set at 1920×1080 and 1366×768, default and enlarged text, written to `artifacts/screenshots/` (ignored by git; shipped in the handoff zip). Requires `npx playwright install chromium` once.
 
 Other scripts: `npm run placeholders` regenerates the labeled placeholder PNGs from the manifest; `npm run fingerprint` prints the content fingerprint; `npm run build` type-checks and builds to `dist/`.
 

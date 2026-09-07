@@ -224,7 +224,9 @@ function paint(): void {
   const root = document.getElementById('app');
   if (!root) return;
   const active = document.activeElement as HTMLElement | null;
-  const focusKey = active?.getAttribute('data-focus') ?? lastFocus;
+  // An explicit lastFocus (set by a click or by Escape) wins over the element that happened to be active.
+  const focusKey = lastFocus ?? active?.getAttribute('data-focus') ?? null;
+  lastFocus = null;
   document.documentElement.setAttribute('data-text', store.ui.textSize);
   root.innerHTML = render(store);
   if (store.ui.overlay) {

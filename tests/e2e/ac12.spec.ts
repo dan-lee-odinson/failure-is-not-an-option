@@ -8,7 +8,8 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
-const SHOTS = resolve(HERE, '..', '..', 'test-results', 'screenshots');
+// Outside Playwright's outputDir, which is cleaned on every run.
+const SHOTS = resolve(HERE, '..', '..', 'artifacts', 'screenshots');
 const VIEWPORTS = [{ name: '1920x1080', width: 1920, height: 1080 }, { name: '1366x768', width: 1366, height: 768 }];
 const TEXT = ['default', 'large'] as const;
 
@@ -276,11 +277,14 @@ test('save/export/import round trip through the UI; a bad import is rejected and
   expect(await node(page)).toBe('g8-docking-report');
   await click(page, 'open-saveload');
   await page.getByTestId('import-file').setInputFiles({ name: 'good.json', mimeType: 'application/json', buffer: Buffer.from(text) });
+  // A verified import closes the overlay; wait for that before reading the node.
+  await expect(page.getByTestId('overlay-saveload')).toHaveCount(0);
   await expect(page.getByTestId('screen-console')).toBeVisible();
   expect(await node(page)).toBe('g8-prep-select');
   await expect(page.getByTestId('option-g8-prep-contact')).toBeEnabled();
   // Browser slot load.
   await click(page, 'open-saveload');
   await click(page, 'load-browser');
+  await expect(page.getByTestId('overlay-saveload')).toHaveCount(0);
   expect(await node(page)).toBe('g8-prep-select');
 });
