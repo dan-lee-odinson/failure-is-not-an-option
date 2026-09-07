@@ -1,0 +1,48 @@
+{
+  "$comment": "FNO music map — starting values from 20-Music-Scene-Entries.md §2/§5 as ruled by Dan. Seconds. trigger = a screen id (screen:menu, screen:opening-dedication, screen:console, …) or a node id (node:<id>) entered; stop_on = input ids (start-new, start-load, skip-to-menu, choose:<option id>) or screen ids that fade the cue out. No loops on any screen where the player reads and decides. All numbers are tunable without a rebuild; cues marked provisional are expected to move after playtest 2. Nothing here enters the ledger, the log, or the replay.",
+  "version": 1,
+  "defaults": { "music_gain": 0.8 },
+  "cues": [
+    {
+      "id": "opening",
+      "asset": "audio-orbit-of-hope",
+      "trigger": "screen:opening-dedication",
+      "start": 0.0, "end": 42.0, "fade_in": 0.0, "fade_out": 2.5,
+      "loop": null,
+      "extend_to_seam_if_still_reading": 124.0,
+      "stop_on": ["screen:menu", "skip-to-menu", "screen:opening-start"],
+      "note": "Under the dedication, the notices and the hero title; crossfades into menu-loop. 0:42 is a section change; if the player is still reading at 0:42 the cue extends to the next seam at 2:04."
+    },
+    {
+      "id": "menu-loop",
+      "asset": "audio-orbit-of-hope-refrain",
+      "trigger": "screen:menu",
+      "start": 0.0, "end": null, "fade_in": 0.0, "fade_out": 2.0,
+      "loop": { "from": 60.5, "to": 111.7, "crossfade": 0.2 },
+      "stop_on": ["start-new", "start-load", "screen:opening-start", "screen:console", "screen:debrief", "screen:planning"],
+      "note": "Dan: the refrain loop 1:00 → 1:52 stands. Fades over 2 s on New Campaign or Continue."
+    },
+    {
+      "id": "crisis",
+      "asset": "audio-mission-in-danger",
+      "trigger": "node:g8-crisis-report",
+      "start": 0.0, "end": null, "fade_in": 0.0, "fade_out": 2.0,
+      "loop": null,
+      "stop_on": ["choose:g8-return-earlier", "choose:g8-return-later", "screen:menu", "screen:opening-start"],
+      "provisional": true,
+      "note": "Runs once through the stabilization report, the rule, the return briefing and the decision; silence after 2:37 is intended. Tune the start offset first, then the fade on Choose."
+    },
+    {
+      "id": "postflight",
+      "asset": "audio-per-aspera",
+      "trigger": "node:g8-accountability-brief",
+      "start": 90.0, "end": null, "fade_in": 1.0, "fade_out": 2.0,
+      "loop": null,
+      "stop_on": ["screen:menu", "screen:opening-start"],
+      "note": "Dan's ruling: start at 1:30. Runs out naturally at 1:46; no retrigger for the IX-A briefing. Alternative if too short in play: start 64.0."
+    }
+  ],
+  "reserved": [
+    { "asset": "audio-disaster-and-loss", "note": "Not cued in M00; held for loss outcomes in later missions." }
+  ]
+}

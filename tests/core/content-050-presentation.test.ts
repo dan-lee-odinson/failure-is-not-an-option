@@ -2,10 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { describeDebrief, type Run } from '../../core';
 import { render } from '../../app/render';
 import type { Store } from '../../app/main';
+import { defaultUi } from '../../app/ui-state';
 import { content, newRun, play, playScript, script, PREP_SETS } from './helpers';
 
 function store(run: Run, screen: 'console' | 'debrief' | 'planning' = 'console'): Store {
-  return { content: content(), run, ui: { screen, overlay: null, pinned: [], textSize: 'default', highlightPlan: null, message: null, saveMessage: null, hasBrowserSave: false, open: Object.keys(run.state.mission.evidence) } };
+  return { content: content(), run, ui: defaultUi({ screen, open: Object.keys(run.state.mission.evidence) }) };
 }
 
 describe('0.5.1 presentation boundaries', () => {

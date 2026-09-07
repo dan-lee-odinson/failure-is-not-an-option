@@ -131,6 +131,19 @@ describe('validator fails on purpose', () => {
     expect(r.errors.some((e) => /is missing from assets/.test(e))).toBe(true);
   });
 
+  it('audio duration mismatch and non-audio bytes', () => {
+    const raw = loadRaw();
+    const manifest = JSON.parse(readFileSync(resolve(ROOT, 'assets', 'manifest.json'), 'utf8')) as { assets: { id: string; duration_s?: number; filename: string }[] };
+    manifest.assets.find((a) => a.id === 'sfx-quindar-open')!.duration_s = 1;
+    const r = run(raw, manifest, false);
+    expect(r.errors.some((e) => /sfx-quindar-open: .*is 0\.250 s long, manifest declares 1 s/.test(e))).toBe(true);
+    const m2 = JSON.parse(readFileSync(resolve(ROOT, 'assets', 'manifest.json'), 'utf8')) as { assets: { id: string; filename: string }[] };
+    m2.assets.find((a) => a.id === 'sfx-quindar-close')!.filename = 'generated/does-not-exist.wav';
+    const r2 = run(raw, m2, false);
+    expect(r2.errors).toEqual([]);
+    expect(r2.warnings.some((w) => /sfx-quindar-close: public\/audio\/generated\/does-not-exist\.wav is missing/.test(w))).toBe(true);
+  });
+
   it('schema violation (unknown node property)', () => {
     const raw = loadRaw();
     (raw.mission.phases[0]!.nodes[0] as unknown as Record<string, unknown>)['timer'] = 30;

@@ -11,7 +11,9 @@
  *      is run over the same state so anything the app authors itself
  *      (buttons, headings, hints, badges, tooltips, compositions such as
  *      "Trust 0 → 1 · Confidence strengthened") is captured exactly as
- *      displayed. Overlays are rendered too.
+ *      displayed. The opening (every stage, both text sizes, the menu with
+ *      CONTINUE enabled and disabled, reduced motion) and every overlay are
+ *      rendered too.
  *   3. Strings are deduplicated on their text (digit runs collapsed, so a
  *      counter such as "EVIDENCE · 12" is one row) and attributed to the
  *      first node where a player can meet them. A string seen only on some
@@ -25,7 +27,7 @@ import {
 } from '../../core';
 import { loadBundle } from './load-content';
 import { provenanceLine, render } from '../../app/render';
-import type { Store, UiState } from '../../app/main';
+import { STAGES, defaultUi, type Stage, type Store, type UiState } from '../../app/ui-state';
 
 export type Source = 'content' | 'core' | 'app';
 
@@ -153,6 +155,9 @@ function uiKind(r: DomRun): string {
   if (r.tag === 'button') return 'ui.button';
   if (r.tag === 'b' || r.tag === 'strong') return 'ui.label';
   if (/^h[1-3]$/.test(r.tag) || r.tag === 'summary' || r.tag === 'figcaption') return c.includes(' prompt ') ? 'ui.prompt' : 'ui.heading';
+  if (r.tag === 'text' || c.includes(' hero-title ')) return 'ui.heading';
+  if (/ (stamp|lamp|lamp-op) /.test(c)) return 'ui.badge';
+  if (/ (menu-reason|menu-subtitle|pin-hint) /.test(c)) return 'ui.hint';
   if (c.includes(' prompt ')) return 'ui.prompt';
   if (/ (label|scene-title|header-label|who|glen|subtitle|status|committed-text) /.test(c)) return 'ui.label';
   if (/ (badge|lamp) /.test(c)) return 'ui.badge';
@@ -505,7 +510,7 @@ export class SheetBuilder {
   }
 
   private ui(overrides: Partial<UiState> = {}): UiState {
-    return { screen: 'console', overlay: null, pinned: [], textSize: 'default', highlightPlan: null, message: null, saveMessage: null, hasBrowserSave: true, open: [], ...overrides };
+    return defaultUi({ screen: 'console', hasBrowserSave: true, ...overrides });
   }
 
   private store(run: Run | null, ui: UiState): Store {
@@ -534,11 +539,30 @@ export class SheetBuilder {
     for (const c of structured) if (!seenStructured.has(norm(c.text))) add(c);
   }
 
-  captureStart(): void {
-    const b = this.bucket('start', 'Start screen', 'start', 'Start screen', 0);
-    for (const textSize of ['default', 'large'] as const) {
-      this.record(b, {}, [], render(this.store(null, this.ui({ screen: 'notices', textSize }))));
-    }
+  /** The opening: every stage at both text sizes; the menu with CONTINUE enabled and disabled; reduced motion; the scroll paused. */
+  captureOpening(): void {
+    const reg = this.content.bundle.registry;
+    const m = this.content.mission;
+    const notice = (id: string, text: string): Captured => ({ kind: 'notice', speaker: '', id, text, source: 'content' });
+    const structured: Captured[] = [
+      ...reg.notices.dedication.map((t) => notice('registry.notices.dedication', t)),
+      notice('registry.notices.project_disclaimer', reg.notices.project_disclaimer),
+      notice('registry.notices.ai_disclosure', reg.notices.ai_disclosure),
+      notice('registry.notices.dramatization', reg.notices.dramatization),
+      { kind: 'label', speaker: '', id: m.id, text: m.title, source: 'content' as const },
+      { kind: 'label', speaker: '', id: m.id, text: m.subtitle ?? '', source: 'content' as const },
+      { kind: 'label', speaker: '', id: 'mission.start_notice', text: m.start_notice, source: 'content' as const },
+    ].filter((c) => c.text.trim().length > 0);
+    const titles: Record<Stage, string> = { start: 'Start', dedication: 'Dedication', notices: 'Notices', montage: 'Montage slot (empty)', title: 'Hero title', menu: 'Main menu' };
+    STAGES.forEach((stage, i) => {
+      const b = this.bucket('opening-' + stage, titles[stage], 'opening', 'Opening', i);
+      for (const textSize of ['default', 'large'] as const) {
+        const variants: Partial<UiState>[] = [{ screen: 'opening', stage, textSize }];
+        if (stage === 'dedication' || stage === 'notices') variants.push({ screen: 'opening', stage, textSize, scrollPaused: true }, { screen: 'opening', stage, textSize, reducedMotion: true });
+        if (stage === 'menu') variants.push({ screen: 'opening', stage, textSize, continueSave: { ok: true } });
+        for (const v of variants) this.record(b, {}, structured, render(this.store(null, this.ui(v))));
+      }
+    });
   }
 
   captureMissionNode(run: Run, dims: Dims): void {
@@ -552,15 +576,16 @@ export class SheetBuilder {
     const allEvidence = Object.keys(run.state.mission.evidence);
     this.record(b, dims, structured, render(this.store(run, this.ui())));
     this.record(b, dims, structured, render(this.store(run, this.ui({ open: allEvidence, pinned: allEvidence.slice(0, 1) }))));
+    if (allEvidence.length) this.record(b, dims, structured, render(this.store(run, this.ui({ pinHintOpen: true }))));
     this.captureOverlay(run, dims, 'binder');
   }
 
-  captureOverlay(run: Run | null, dims: Dims, overlay: 'binder' | 'history' | 'saveload' | 'about'): void {
-    const rank = { binder: 9001, history: 9002, saveload: 9003, about: 9004 }[overlay];
-    const title = overlay === 'saveload' ? 'Save / Load' : overlay[0]!.toUpperCase() + overlay.slice(1);
+  captureOverlay(run: Run | null, dims: Dims, overlay: 'binder' | 'history' | 'saveload' | 'about' | 'settings', extra: Partial<UiState> = {}): void {
+    const rank = { binder: 9001, history: 9002, saveload: 9003, about: 9004, settings: 9005 }[overlay];
+    const title = overlay === 'saveload' ? 'Save / Load' : overlay === 'about' ? 'About / Credits' : overlay[0]!.toUpperCase() + overlay.slice(1);
     const b = this.bucket('overlay-' + overlay, `Overlay: ${title}`, UI_PHASE.id, UI_PHASE.title, rank);
-    const screen: UiState['screen'] = run ? (run.state.mission.completed ? 'planning' : 'console') : 'notices';
-    const html = render(this.store(run, this.ui({ overlay, screen })));
+    const screen: UiState['screen'] = run ? (run.state.mission.completed ? 'planning' : 'console') : 'opening';
+    const html = render(this.store(run, this.ui({ overlay, screen, stage: 'menu', ...extra })));
     const at = html.indexOf('<div class="overlay-backdrop"');
     this.record(b, dims, [], at >= 0 ? html.slice(at) : '');
   }
@@ -619,11 +644,13 @@ export class SheetBuilder {
   }
 
   build(root: string): Sheet {
-    this.captureStart();
+    this.captureOpening();
     const runs = this.walk();
     this.captureOverlay(null, {}, 'history');
     this.captureOverlay(null, {}, 'about');
     this.captureOverlay(null, {}, 'saveload');
+    this.captureOverlay(null, {}, 'settings');
+    this.captureOverlay(null, {}, 'settings', { reducedMotion: true, audio: { enabled: true, master: 0.8, music: 1, effects: 1, beds: 1 } });
     this.captureMessages(root);
 
     const ordered = [...this.buckets.values()].sort((a, b) => a.rank - b.rank);

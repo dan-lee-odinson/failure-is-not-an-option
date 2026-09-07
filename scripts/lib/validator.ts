@@ -258,7 +258,21 @@ export function validateContent(opts: ValidateOptions): ValidationReport {
 
   // 5. Manifest files -------------------------------------------------------
   if (!opts.skipFiles) {
-    for (const a of (opts.manifest as { assets: { id: string; filename: string; format?: string; width: number; height: number; alpha: boolean }[] }).assets ?? []) {
+    for (const a of (opts.manifest as { assets: { id: string; filename: string; kind?: string; format?: string; width: number; height: number; alpha: boolean; duration_s?: number }[] }).assets ?? []) {
+      if (a.kind === 'audio') {
+        // Audio lives under public/audio/. A missing sound plays silence and is listed by npm run placeholders: a warning, never a failed build.
+        const apath = resolve(opts.root, 'public', 'audio', a.filename);
+        if (!existsSync(apath)) { warnings.push(`asset ${a.id}: public/audio/${a.filename} is missing (plays silence; npm run placeholders lists it)`); continue; }
+        const buf = readFileSync(apath);
+        if (a.format === 'wav') {
+          const info = readWavInfo(buf);
+          if (!info) { errors.push(`asset ${a.id}: ${a.filename} is not a RIFF/WAVE file`); continue; }
+          if (Math.abs(info.duration - (a.duration_s ?? 0)) > 0.05) errors.push(`asset ${a.id}: ${a.filename} is ${info.duration.toFixed(3)} s long, manifest declares ${a.duration_s} s`);
+        } else if (!isMp3(buf)) {
+          errors.push(`asset ${a.id}: ${a.filename} is not an MP3 (no ID3 tag or frame sync)`);
+        }
+        continue;
+      }
       const path = resolve(opts.assetsDir, a.filename);
       if (!existsSync(path)) { errors.push(`asset ${a.id}: ${a.filename} is missing from assets/ (run npm run placeholders)`); continue; }
       if (a.format === 'svg') {
@@ -372,6 +386,34 @@ function sweep(index: ContentIndex, report: ValidationReport): void {
 
 function describe(i: Input): string {
   return i.kind === 'option' ? i.option : i.kind === 'continue' ? i.id : i.kind === 'question' ? i.question : i.plan;
+}
+
+/** Sample rate, channels, bits and duration from a RIFF/WAVE header (PCM, float, or extensible). */
+export function readWavInfo(buf: Buffer): { sampleRate: number; channels: number; bits: number; duration: number } | null {
+  if (buf.length < 12 || buf.toString('ascii', 0, 4) !== 'RIFF' || buf.toString('ascii', 8, 12) !== 'WAVE') return null;
+  let pos = 12;
+  let fmt: { sampleRate: number; channels: number; bits: number; blockAlign: number } | null = null;
+  let dataSize: number | null = null;
+  while (pos + 8 <= buf.length) {
+    const id = buf.toString('ascii', pos, pos + 4);
+    const size = buf.readUInt32LE(pos + 4);
+    if (id === 'fmt ' && pos + 24 <= buf.length) {
+      fmt = { channels: buf.readUInt16LE(pos + 10), sampleRate: buf.readUInt32LE(pos + 12), blockAlign: buf.readUInt16LE(pos + 20), bits: buf.readUInt16LE(pos + 22) };
+    } else if (id === 'data') {
+      dataSize = Math.min(size, buf.length - pos - 8);
+      break;
+    }
+    pos += 8 + size + (size % 2);
+  }
+  if (!fmt || dataSize === null || fmt.blockAlign === 0 || fmt.sampleRate === 0) return null;
+  return { sampleRate: fmt.sampleRate, channels: fmt.channels, bits: fmt.bits, duration: dataSize / fmt.blockAlign / fmt.sampleRate };
+}
+
+/** An MP3 starts with an ID3v2 tag or an MPEG frame sync (0xFFE). */
+export function isMp3(buf: Buffer): boolean {
+  if (buf.length < 4) return false;
+  if (buf.toString('ascii', 0, 3) === 'ID3') return true;
+  return buf[0] === 0xff && (buf[1]! & 0xe0) === 0xe0;
 }
 
 export function readIhdr(buf: Buffer): { width: number; height: number; colorType: number } | null {

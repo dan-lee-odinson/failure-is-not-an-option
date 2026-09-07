@@ -7,7 +7,7 @@ import { evaluate } from './conditions';
 import type { ContentIndex } from './content';
 import { optionAvailability, type Run } from './engine';
 import { describeFollowOn, trustLabel, type FollowOnView } from './followon';
-import type { Character, Condition, Evidence, Line, LogEntry, Node, Option, Phase, RunState } from './types';
+import type { Character, Condition, DecisionNode, Evidence, Line, LogEntry, Node, Option, Phase, RunState } from './types';
 
 export interface SpeakerView {
   id: string;
@@ -155,6 +155,25 @@ function factLabel(content: ContentIndex, fact: string): string {
     for (const e of resolution.effects) if ('set_fact' in e && e.set_fact === fact && e.label) return e.label;
   }
   return fact.replace(/^g\d+[a-z]?-/, '').replace(/-/g, ' ');
+}
+
+
+/**
+ * The decision the player has just committed in this phase (the node before
+ * the current briefing), with its options as the player saw them, so the
+ * receipt screen can keep the cards on screen stamped and greyed. Null when
+ * the current node is not a briefing that directly follows a chosen decision
+ * in the same phase. Read-only; nothing here mutates the run.
+ */
+export function describeCommittedDecision(run: Run): { node: DecisionNode; options: OptionView[] } | null {
+  const cur = run.currentNode();
+  if (!cur || cur.node.type !== 'briefing') return null;
+  const ref = run.content.nodes.get(cur.node.id);
+  if (!ref || ref.nodeIndex === 0) return null;
+  const prev = cur.phase.nodes[ref.nodeIndex - 1];
+  if (!prev || prev.type !== 'decision') return null;
+  if (!run.state.mission.chosen.some((c) => c.node === prev.id)) return null;
+  return { node: prev, options: prev.options.map((o) => optionView(run.content, run.state, prev, o)) };
 }
 
 export function describeNode(run: Run): NodeView | null {

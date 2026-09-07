@@ -1,0 +1,44 @@
+{
+  "$comment": "FNO soundscape map — 21 §3, 22 (Dan's selection), audio/README, Dan's room-bed ruling. Files live in public/audio/soundscape-cc0/ under their original Freesound filenames; a missing file plays silence and is listed by npm run placeholders. Gains are linear multipliers on the beds/effects buses; regions are seconds into the file; all tunable without a rebuild. Regions were chosen by onset analysis of the files (docs/BUILD-HANDOFF-M00b.md), not by ear, and are provisional until Dan listens. One-shots are bound to UI events only, never to domain events; nothing here enters the ledger, the log, or the replay.",
+  "version": 1,
+  "gains": {
+    "room_bed_gain": 0.3,
+    "walla_gain": 0.2,
+    "effects_gain": 0.6
+  },
+  "beds": [
+    {
+      "id": "room-bed",
+      "asset": "sfx-room-tone",
+      "gain_ref": "room_bed_gain",
+      "screens": "all-console",
+      "loop": { "from": 7.5, "to": 42.25, "crossfade": 0.3 },
+      "note": "Dan's ruling: 60–75 % below full scale by default. Loop region chosen for steady level (−25.3 dBFS ± 0.2 dB per second across the region) with a 0.3 s crossfade at the seam."
+    },
+    {
+      "id": "walla",
+      "asset": "sfx-walla",
+      "gain_ref": "walla_gain",
+      "screens": ["preparation", "postflight"],
+      "phases": ["g8-prep", "g8-postflight"],
+      "loop": { "from": 37.25, "to": 63.5, "crossfade": 0.3 },
+      "note": "Sits under the room bed, never above it. Enabled only on the listed phases (preparation and post-flight)."
+    }
+  ],
+  "one_shots": [
+    { "id": "button", "asset": "sfx-button", "region": { "start": 3.50, "end": 4.20 }, "gain": 1.0, "events": ["ui:choose", "ui:commit", "ui:continue", "ui:begin"], "note": "The cleanest isolated press in the file (onset 3.57 s, 2.6 s of silence before and 2.0 s after)." },
+    { "id": "toggle", "asset": "sfx-switches", "region": { "start": 8.62, "end": 8.95 }, "gain": 1.0, "events": ["ui:menu-select"], "note": "Toggle click region: the loudest clean switch click (onset 8.66 s, −23.6 dBFS peak, 10 ms decay) in the light-switch part of the file." },
+    { "id": "rotary", "asset": "sfx-switches", "region": { "start": 22.15, "end": 22.45 }, "gain": 1.6, "events": ["ui:settings-change", "ui:volume-change"], "note": "Detent region from the dimmer-slide part of the file (onset 22.19 s, −40.5 dBFS peak, 40 ms decay); boosted because it is quiet." },
+    { "id": "paper", "asset": "sfx-paper", "region": { "start": 19.10, "end": 19.80 }, "gain": 1.0, "events": ["ui:pin", "ui:unpin", "ui:binder-open", "ui:binder-close"], "note": "A single page flip (onset 19.2 s, −21.1 dBFS peak, 0.44 s of quiet before it)." },
+    { "id": "headset", "asset": "sfx-headset", "region": null, "gain": 0.5, "events": ["ui:history-open", "ui:history-close", "ui:loop-panel-toggle"], "note": "Whole file (0.37 s static burst)." },
+    { "id": "alert", "asset": "sfx-alert", "region": { "start": 0.10, "end": 0.40 }, "gain": 0.7, "events": ["ui:crisis-card-render"], "credit_required": "Beep 8 count (loopable) by JonNicholas, freesound.org, CC BY 3.0", "note": "ONE beep only — the first of the eight (the file's beat is 0.288 s); never loop." },
+    { "id": "quindar-open", "asset": "sfx-quindar-open", "region": null, "gain": 0.5, "events": ["ui:capcom-line-start"] },
+    { "id": "quindar-close", "asset": "sfx-quindar-close", "region": null, "gain": 0.5, "events": ["ui:capcom-line-end"] }
+  ],
+  "crisis_cards": ["g8-ev-crisis"],
+  "generated": {
+    "script": "scripts/gen-quindar.ts",
+    "quindar": { "open_hz": 2525, "close_hz": 2475, "duration_ms": 250, "ramp_ms": 10, "sample_rate": 44100, "bits": 16, "peak_dbfs": -12 }
+  },
+  "never_commit": ["audio/soundscape/ (Epidemic Sound — not redistributable)"]
+}

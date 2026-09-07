@@ -76,6 +76,14 @@ const PLANTS: Planted[] = [
     expect: /must NOT have additional properties/,
   },
   {
+    name: 'audio duration mismatch (generated Quindar tone declared as 1 s)',
+    plant: (root) => {
+      cpSync(resolve(repoRoot, 'public', 'audio', 'generated'), resolve(root, 'public', 'audio', 'generated'), { recursive: true });
+      edit(root, 'assets/manifest.json', (d: { assets: { id: string; duration_s?: number }[] }) => { d.assets.find((a) => a.id === 'sfx-quindar-open')!.duration_s = 1; });
+    },
+    expect: /is 0\.250 s long, manifest declares 1 s/,
+  },
+  {
     name: 'missing PNG (manifest points at a file that is not on disk)',
     plant: (root) => edit(root, 'assets/manifest.json', (d: { assets: { filename: string }[] }) => { d.assets[1]!.filename = 'fno_gemini_portrait_missing_placeholder_v001.png'; }),
     expect: /is missing from assets/,

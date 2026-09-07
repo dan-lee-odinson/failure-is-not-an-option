@@ -1,0 +1,74 @@
+{
+  "version": "v003",
+  "purpose": "Hero title revision; no game logic or navigation changes",
+  "studies": [
+    {
+      "id": "a",
+      "font": "Chakra Petch",
+      "weight": 700,
+      "canvas": [
+        1920,
+        1080
+      ],
+      "rows": [
+        {
+          "text": "FAILURE",
+          "x": 475,
+          "baseline": 335,
+          "width": 1320,
+          "font_size": 320.792
+        },
+        {
+          "text": "IS NOT AN",
+          "x": 475,
+          "baseline": 576,
+          "width": 1320,
+          "font_size": 269.4
+        },
+        {
+          "text": "OPTION",
+          "x": 475,
+          "baseline": 890,
+          "width": 1320,
+          "font_size": 360.81
+        }
+      ],
+      "hero": "hero-a.png",
+      "transparent": "title-lockup-a.png"
+    },
+    {
+      "id": "b",
+      "font": "Chakra Petch",
+      "weight": 700,
+      "canvas": [
+        1920,
+        1080
+      ],
+      "rows": [
+        {
+          "text": "FAILURE",
+          "x": 110,
+          "baseline": 329,
+          "width": 1690,
+          "font_size": 412.376
+        },
+        {
+          "text": "IS NOT AN",
+          "x": 630,
+          "baseline": 573,
+          "width": 1165,
+          "font_size": 236.98
+        },
+        {
+          "text": "OPTION",
+          "x": 630,
+          "baseline": 887,
+          "width": 1165,
+          "font_size": 317.791
+        }
+      ],
+      "hero": "hero-b.png",
+      "transparent": "title-lockup-b.png"
+    }
+  ]
+}

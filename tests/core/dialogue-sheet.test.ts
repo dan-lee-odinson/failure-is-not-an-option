@@ -3,16 +3,17 @@
  *  1. The committed docs/dialogue-sheet.{md,csv} equal a fresh generation.
  *  2. An independent walk of all 56 routes (the acceptance-test script, not
  *     the generator's explorer) collects every string the view-models expose
- *     and every text run the renderer emits; every one is on the sheet, and
- *     every sheet row is reachable (content rows via the view-models, app
- *     rows via the renderer, message rows via app/main.ts).
+ *     and every text run the renderer emits — the opening stages, every
+ *     console stop, the debrief, the planning screen and every overlay; every
+ *     one is on the sheet, and every sheet row is reachable (content rows via
+ *     the view-models, app rows via the renderer, message rows via app/main.ts).
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { describeDebrief, describeEvidence, describeFollowOnForRun, describeNode, type Run } from '../../core';
 import { render } from '../../app/render';
-import type { Store, UiState } from '../../app/main';
+import { STAGES, defaultUi, type Store, type UiState } from '../../app/ui-state';
 import { MESSAGE_SOURCES, buildSheet, dedupeKey, extractRuns, norm, provenanceText, toCsv, toMarkdown, type Sheet } from '../../scripts/lib/dialogue-sheet';
 import { PREP_SETS, ROOT, content, newRun, play, script, type Lesson, type Route, type Stance } from './helpers';
 
@@ -27,7 +28,7 @@ function sheet(): Sheet {
 }
 
 function ui(overrides: Partial<UiState> = {}): UiState {
-  return { screen: 'console', overlay: null, pinned: [], textSize: 'default', highlightPlan: null, message: null, saveMessage: null, hasBrowserSave: true, open: [], ...overrides };
+  return defaultUi({ screen: 'console', hasBrowserSave: true, ...overrides });
 }
 
 function store(run: Run | null, u: UiState): Store {
@@ -113,11 +114,21 @@ describe('dialogue sheet', () => {
     const reachableView = new Set<string>();
     const reachableRendered = new Set<string>();
     const note = (list: string[], into: Set<string>) => { for (const t of list) into.add(dedupeKey(t)); };
+    const reg = content().bundle.registry;
+    const m = content().mission;
+    note([...reg.notices.dedication, reg.notices.project_disclaimer, reg.notices.ai_disclosure, reg.notices.dramatization, m.title, m.subtitle ?? '', m.start_notice].filter(Boolean), reachableView);
 
-    // Start screen.
-    note(renderedStrings(null, ui({ screen: 'notices' })), reachableRendered);
-    note(renderedStrings(null, ui({ screen: 'notices', textSize: 'large' })), reachableRendered);
-    for (const overlay of ['history', 'about', 'saveload'] as const) note(renderedStrings(null, ui({ screen: 'notices', overlay })), reachableRendered);
+    // The opening: every stage, both text sizes, paused and reduced-motion chapters, the menu with CONTINUE both ways.
+    for (const stage of STAGES) for (const textSize of ['default', 'large'] as const) {
+      note(renderedStrings(null, ui({ screen: 'opening', stage, textSize })), reachableRendered);
+      note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, scrollPaused: true })), reachableRendered);
+      note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, reducedMotion: true })), reachableRendered);
+      note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, continueSave: { ok: true } })), reachableRendered);
+    }
+    for (const overlay of ['history', 'about', 'saveload', 'settings'] as const) {
+      note(renderedStrings(null, ui({ screen: 'opening', stage: 'menu', overlay })), reachableRendered);
+      note(renderedStrings(null, ui({ screen: 'opening', stage: 'menu', overlay, reducedMotion: true, audio: { enabled: true, master: 0.8, music: 1, effects: 1, beds: 1 } })), reachableRendered);
+    }
 
     // All 56 routes, questions asked, every stop.
     let steps = 0;
@@ -129,6 +140,7 @@ describe('dialogue sheet', () => {
         if (run.currentNode()) {
           note(renderedStrings(run, ui()), reachableRendered);
           note(renderedStrings(run, ui({ open: Object.keys(run.state.mission.evidence), pinned: Object.keys(run.state.mission.evidence).slice(0, 1) })), reachableRendered);
+          note(renderedStrings(run, ui({ pinHintOpen: true })), reachableRendered);
           note(renderedStrings(run, ui({ overlay: 'binder' })), reachableRendered);
         }
         steps++;
@@ -175,23 +187,26 @@ describe('dialogue sheet', () => {
     const seen = missionNodes.filter((n) => firstIndex.has(n));
     expect(seen).toEqual(missionNodes); // every node present, in content order
     for (let i = 1; i < seen.length; i++) expect(firstIndex.get(seen[i]!)!).toBeGreaterThan(firstIndex.get(seen[i - 1]!)!);
-    expect(firstIndex.get('start')).toBe(0);
+    expect(firstIndex.get('opening-start')).toBe(0);
+    for (const stage of STAGES) if (stage !== 'montage') expect(firstIndex.has('opening-' + stage), `opening stage ${stage} on the sheet`).toBe(true);
+    expect(firstIndex.get('opening-menu')!).toBeLessThan(firstIndex.get(missionNodes[0]!)!);
     expect(firstIndex.get('debrief')!).toBeGreaterThan(firstIndex.get(missionNodes[missionNodes.length - 1]!)!);
     expect(firstIndex.get('g9-plan-decision')!).toBeGreaterThan(firstIndex.get('debrief')!);
+    expect(firstIndex.has('overlay-settings')).toBe(true);
+    expect(s.rows.filter((r) => r.kind === 'notice')).toHaveLength(5); // two dedication paragraphs and three notices, as content
 
     const keys = s.rows.map((r) => dedupeKey(r.text));
     expect(new Set(keys).size).toBe(keys.length); // no duplicates
     const by = (text: string) => s.rows.find((r) => norm(r.text) === norm(text));
     expect(by('Bring them down at the earlier opportunity.')!.branch).toBe('');
-    expect(by("They're down. We still have to get the ship to them.")!.branch).toBe('earlier');
-    expect(by('Flight, RCS propellant is critically low. They still need those thrusters for entry.')!.branch).toBe('later');
-    expect(by('The desks first settled who would send the pickup instruction, then called again to confirm receipt. That delayed the team\'s approach. By the time help reaches the capsule, both crew members are badly exhausted and need assistance getting aboard.')!.branch).toBe('earlier q0');
-    expect(by('I wanted the later return. You gave my team the preparation to make the earlier one work. We still need to practice that sea-recovery problem.')!.branch).toBe('earlier q2');
-    expect(by('Cunningham and Stafford welcome your support. Armstrong and Scott lose confidence in you. The disagreement now divides the astronaut corps more deeply, with its flight director backing the crew\'s critics.')!.branch).toBe('crew-blame');
+    expect(by('Contact drill: instruction and readback')!.branch).toBe('contact rehearsal');
+    expect(by('Earlier return — two calls need correction')!.branch).toBe('earlier q0');
+    expect(s.rows.find((r) => r.id === 'g8-order-receipt' && r.kind === 'briefing' && /earlier opportunity/.test(r.text))!.branch).toBe('earlier');
     expect(by("This mission must include the systems-warning drill after Gemini VIII's reserve warning.")!.branch).toBe('later');
-    expect(by('CAPCOM has left the next report\'s receipt blank. Nothing new has come through.')!.branch).toBe('contact rehearsal');
-    expect(by('Crew recovered — earlier return, punishing sea wait')!.branch).toBe('earlier q0');
-    expect(by('You added report timing and confirmation to the procedures binder.')!.branch).toBe('lesson: provenance');
+    expect(by('ORDERED')!.branch).toBe('');
+    expect(by('CHOSEN')!.branch).toBe('any rehearsal'); // the stamp first appears on a rehearsed prep card
+    expect(by('HISTORICAL CHOICE')!.branch).toBe('');
+    expect(by('ALTERNATE HISTORY')!.branch).toBe('earlier');
     expect(s.rows.filter((r) => /^varies/.test(r.branch)).map((r) => r.text), 'rows whose branch could not be named').toEqual([]);
   });
 });

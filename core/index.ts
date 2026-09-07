@@ -6,7 +6,7 @@ export { SIM_VERSION, contentFingerprint, indexContent, type ContentIndex } from
 export { EngineError, Run, emptyLedger, optionAvailability, replay, describeInput, type ApplyResult } from './engine';
 export { describeFollowOn, validateFollowOnLedger, trustLabel, holdsOnLedger, type FollowOnView } from './followon';
 export {
-  alternateHistoryActive, describeNode, describeEvidence, describeDebrief, describeFollowOnForRun, conditionHolds,
+  alternateHistoryActive, describeCommittedDecision, describeNode, describeEvidence, describeDebrief, describeFollowOnForRun, conditionHolds,
   type NodeView, type OptionView, type LineView, type EvidenceView, type DebriefView, type SpeakerView, type EvidenceLink,
 } from './views';
 export { createSave, verifySave, checkStructure, checkReferences, SAVE_FORMAT, SAVE_VERSION, type SaveFile, type VerifyResult } from './save';

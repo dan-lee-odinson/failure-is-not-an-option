@@ -14,33 +14,66 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "type": "object",
-        "required": ["id", "filename", "width", "height", "alpha", "color_space", "framing", "reference_version", "origin", "attribution", "status"],
-        "properties": {
-          "id": { "$ref": "defs.schema.json#/$defs/id" },
-          "filename": { "type": "string", "anyOf": [
-            { "pattern": "^fno_[a-z0-9]+_[a-z0-9]+_[a-z0-9-]+_[a-z0-9]+_v[0-9]{3}\\.png$" },
-            { "pattern": "^[a-z0-9]+(-[a-z0-9]+)*-v[0-9]{3}\\.svg$" }
-          ] },
-          "format": { "enum": ["png", "svg"] },
-          "kind": { "enum": ["room", "portrait", "emblem", "layer"] },
-          "width": { "type": "integer", "minimum": 1 },
-          "height": { "type": "integer", "minimum": 1 },
-          "alpha": { "type": "boolean" },
-          "color_space": { "const": "sRGB" },
-          "framing": { "type": "string" },
-          "reference_version": { "type": "string" },
-          "origin": { "type": "string" },
-          "attribution": { "type": "string" },
-          "status": { "enum": ["to-generate", "placeholder", "final"] }
-        },
-        "additionalProperties": false,
-        "allOf": [
-          { "if": { "type": "object", "properties": { "filename": { "type": "string", "pattern": "\\.svg$" } } }, "then": { "type": "object", "required": ["format"], "properties": { "format": { "const": "svg" }, "alpha": { "const": true } } } },
-          { "if": { "type": "object", "required": ["format"], "properties": { "format": { "const": "svg" } } }, "then": { "type": "object", "properties": { "filename": { "type": "string", "pattern": "\\.svg$" } } } }
+        "oneOf": [
+          { "$ref": "#/$defs/imageAsset" },
+          { "$ref": "#/$defs/audioAsset" }
         ]
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$defs": {
+    "imageAsset": {
+      "type": "object",
+      "required": ["id", "filename", "width", "height", "alpha", "color_space", "framing", "reference_version", "origin", "attribution", "status"],
+      "properties": {
+        "id": { "$ref": "defs.schema.json#/$defs/id" },
+        "filename": { "type": "string", "anyOf": [
+          { "pattern": "^fno_[a-z0-9]+_[a-z0-9]+_[a-z0-9-]+_[a-z0-9]+_v[0-9]{3}\\.png$" },
+          { "pattern": "^[a-z0-9]+(-[a-z0-9]+)*-v[0-9]{3}\\.svg$" }
+        ] },
+        "format": { "enum": ["png", "svg"] },
+        "kind": { "enum": ["room", "portrait", "emblem", "layer", "image"] },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "alpha": { "type": "boolean" },
+        "color_space": { "const": "sRGB" },
+        "framing": { "type": "string" },
+        "reference_version": { "type": "string" },
+        "origin": { "type": "string" },
+        "attribution": { "type": "string" },
+        "status": { "enum": ["to-generate", "placeholder", "final"] }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "type": "object", "properties": { "filename": { "type": "string", "pattern": "\\.svg$" } } }, "then": { "type": "object", "required": ["format"], "properties": { "format": { "const": "svg" }, "alpha": { "const": true } } } },
+        { "if": { "type": "object", "required": ["format"], "properties": { "format": { "const": "svg" } } }, "then": { "type": "object", "properties": { "filename": { "type": "string", "pattern": "\\.svg$" } } } }
+      ]
+    },
+    "audioAsset": {
+      "type": "object",
+      "description": "A sound the app may play. Files live under public/audio/ (the filename may carry the soundscape-cc0/ or generated/ subfolder); a missing file plays silence and is listed by npm run placeholders. Credit and rights lines are shown in About/Credits.",
+      "required": ["id", "filename", "kind", "format", "title", "credit", "rights", "license", "duration_s", "origin", "attribution", "status"],
+      "properties": {
+        "id": { "$ref": "defs.schema.json#/$defs/id" },
+        "filename": { "type": "string", "pattern": "^(soundscape-cc0/|generated/)?[A-Za-z0-9 ()_.-]+\\.(mp3|wav)$" },
+        "kind": { "const": "audio" },
+        "format": { "enum": ["mp3", "wav"] },
+        "title": { "type": "string", "minLength": 1 },
+        "credit": { "type": "string", "minLength": 1 },
+        "rights": { "type": "string", "minLength": 1 },
+        "license": { "type": "string", "minLength": 1 },
+        "source_url": { "type": "string" },
+        "duration_s": { "type": "number", "exclusiveMinimum": 0 },
+        "origin": { "type": "string" },
+        "attribution": { "type": "string" },
+        "status": { "enum": ["to-generate", "placeholder", "final"] }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "type": "object", "properties": { "filename": { "type": "string", "pattern": "\\.mp3$" } } }, "then": { "type": "object", "properties": { "format": { "const": "mp3" } } } },
+        { "if": { "type": "object", "properties": { "filename": { "type": "string", "pattern": "\\.wav$" } } }, "then": { "type": "object", "properties": { "format": { "const": "wav" } } } }
+      ]
+    }
+  }
 }
