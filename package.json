@@ -15,7 +15,8 @@
     "validate": "tsx scripts/validate.ts",
     "placeholders": "tsx scripts/placeholders.ts",
     "fingerprint": "tsx scripts/fingerprint.ts",
-    "validate:fail": "tsx scripts/fail-on-purpose.ts"
+    "validate:fail": "tsx scripts/fail-on-purpose.ts",
+    "dialogue-sheet": "vite-node scripts/dialogue-sheet.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
