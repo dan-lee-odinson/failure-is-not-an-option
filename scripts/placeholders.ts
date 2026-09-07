@@ -13,10 +13,14 @@ import { Canvas, drawText, textWidth } from './lib/png';
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const manifestPath = resolve(root, 'assets', 'manifest.json');
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
-  assets: { id: string; filename: string; width: number; height: number; alpha: boolean }[];
+  assets: { id: string; filename: string; format?: string; width: number; height: number; alpha: boolean; status: string }[];
 };
 
-for (const a of manifest.assets) {
+// Only slots still waiting for art get a placeholder; `final` assets are never overwritten.
+const pending = manifest.assets.filter((a) => (a.status === 'to-generate' || a.status === 'placeholder') && (a.format ?? 'png') === 'png');
+if (pending.length === 0) console.log('placeholders: no slots with status to-generate or placeholder; nothing to do');
+
+for (const a of pending) {
   const c = new Canvas(a.width, a.height, a.alpha);
   const isRoom = a.id.startsWith('room-');
   if (a.alpha) {

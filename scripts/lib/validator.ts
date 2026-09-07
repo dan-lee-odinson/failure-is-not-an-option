@@ -258,9 +258,16 @@ export function validateContent(opts: ValidateOptions): ValidationReport {
 
   // 5. Manifest files -------------------------------------------------------
   if (!opts.skipFiles) {
-    for (const a of (opts.manifest as { assets: { id: string; filename: string; width: number; height: number; alpha: boolean }[] }).assets ?? []) {
+    for (const a of (opts.manifest as { assets: { id: string; filename: string; format?: string; width: number; height: number; alpha: boolean }[] }).assets ?? []) {
       const path = resolve(opts.assetsDir, a.filename);
       if (!existsSync(path)) { errors.push(`asset ${a.id}: ${a.filename} is missing from assets/ (run npm run placeholders)`); continue; }
+      if (a.format === 'svg') {
+        const dims = readSvgSize(readFileSync(path, 'utf8'));
+        if (!dims) { errors.push(`asset ${a.id}: ${a.filename} is not an SVG with width/height on its root element`); continue; }
+        if (dims.width !== a.width || dims.height !== a.height) errors.push(`asset ${a.id}: ${a.filename} is ${dims.width}×${dims.height}, manifest declares ${a.width}×${a.height}`);
+        if (!a.alpha) errors.push(`asset ${a.id}: an SVG layer must declare alpha=true`);
+        continue;
+      }
       const ihdr = readIhdr(readFileSync(path));
       if (!ihdr) { errors.push(`asset ${a.id}: ${a.filename} is not a PNG`); continue; }
       if (ihdr.width !== a.width || ihdr.height !== a.height) errors.push(`asset ${a.id}: ${a.filename} is ${ihdr.width}×${ihdr.height}, manifest declares ${a.width}×${a.height}`);
@@ -373,4 +380,21 @@ export function readIhdr(buf: Buffer): { width: number; height: number; colorTyp
   for (let i = 0; i < 8; i++) if (buf[i] !== sig[i]) return null;
   if (buf.toString('ascii', 12, 16) !== 'IHDR') return null;
   return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20), colorType: buf[25]! };
+}
+
+/** Width/height from an SVG root element (attributes, else the viewBox). */
+export function readSvgSize(text: string): { width: number; height: number } | null {
+  const head = text.slice(0, 2000);
+  const root = /<svg\b[^>]*>/i.exec(head)?.[0];
+  if (!root) return null;
+  const attr = (name: string): number | null => {
+    const m = new RegExp(`\\b${name}="([0-9.]+)(px)?"`).exec(root);
+    return m ? Number(m[1]) : null;
+  };
+  const w = attr('width');
+  const h = attr('height');
+  if (w !== null && h !== null) return { width: w, height: h };
+  const vb = /\bviewBox="([0-9.\-]+)[ ,]+([0-9.\-]+)[ ,]+([0-9.]+)[ ,]+([0-9.]+)"/.exec(root);
+  if (vb) return { width: Number(vb[3]), height: Number(vb[4]) };
+  return null;
 }

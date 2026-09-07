@@ -7,6 +7,7 @@ import { Run, indexContent, type ContentIndex, type Input } from '../core';
 import { bundle } from './content-bundle';
 import { render } from './render';
 import { exportFilename, exportText, hasBrowserSave, importFromText, loadFromBrowser, saveToBrowser } from './storage';
+import { layoutEmblem } from './plate';
 
 export type Screen = 'notices' | 'console' | 'debrief' | 'planning';
 export type Overlay = null | 'binder' | 'history' | 'saveload' | 'about';
@@ -229,6 +230,7 @@ function paint(): void {
   lastFocus = null;
   document.documentElement.setAttribute('data-text', store.ui.textSize);
   root.innerHTML = render(store);
+  layoutEmblem();
   if (store.ui.overlay) {
     const first = root.querySelector<HTMLElement>('.overlay [data-focus]');
     first?.focus();
@@ -287,5 +289,6 @@ declare global {
 }
 
 wire();
+window.addEventListener('resize', layoutEmblem);
 paint();
 window.__fno = { store, dispatch, fingerprint: content.fingerprint };

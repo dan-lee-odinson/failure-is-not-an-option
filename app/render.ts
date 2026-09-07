@@ -7,7 +7,7 @@ import { describeDebrief, describeEvidence, describeFollowOnForRun, describeNode
 import manifest from '../assets/manifest.json';
 import type { Store } from './main';
 
-const assetUrls = import.meta.glob('../assets/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
+const assetUrls = import.meta.glob('../assets/*.{png,svg}', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
 
 function assetUrl(id: string | null): string | null {
   if (!id) return null;
@@ -76,10 +76,13 @@ function renderConsole(store: Store): string {
   if (!view) return renderDebrief(store);
   const evidence = describeEvidence(store.content, run.state);
   const room = assetUrl('room-gemini-console');
+  const emblem = assetUrl('emblem-flight-operations');
   return `
   <div class="console-shell" data-testid="screen-console" data-node="${esc(view.node.id)}" data-phase="${esc(view.phase.id)}">
+    ${room ? `<img id="plate" class="plate" src="${room}" alt="" aria-hidden="true" data-testid="plate" />` : ''}
+    ${emblem ? `<img id="emblem" class="emblem" src="${emblem}" alt="" aria-hidden="true" data-testid="emblem" />` : ''}
     ${renderStatusBar(store, view)}
-    <div class="stage" style="${room ? `background-image:url('${room}')` : ''}">
+    <div class="stage">
       ${renderConversation(store, view)}
     </div>
     ${renderEvidencePanel(store, evidence)}
@@ -125,17 +128,29 @@ function renderLine(store: Store, l: LineView): string {
   const who = l.speaker ? `<div class="who">${esc(l.speaker.display)}</div>` : '';
   const img = l.speaker
     ? portrait
-      ? `<img class="portrait" src="${portrait}" alt="Portrait placeholder: ${esc(l.speaker.display)}" />`
+      ? `<img class="portrait" src="${portrait}" alt="Portrait: ${esc(l.speaker.display)}" />`
       : `<div class="portrait empty" aria-hidden="true">text only</div>`
-    : `<div class="portrait empty" aria-hidden="true">room</div>`;
+    : '';
   const cites = l.cites.filter((c) => c.acquired).length ? `<div class="cites">${l.cites.map((c) => evLink(store, c)).join('')}</div>` : '';
-  return `<div class="line"${l.speaker ? '' : ' data-narration'}>${img}<div>${who}<div class="what">${esc(l.text)}</div>${cites}</div></div>`;
+  return `<div class="line ${l.speaker ? '' : 'no-speaker'}"${l.speaker ? '' : ' data-narration'}>${img}<div>${who}<div class="what">${esc(l.text)}</div>${cites}</div></div>`;
+}
+
+/** The active speaker: the last rendered line (or asked answer) whose speaker has a portrait. */
+function activeSpeaker(view: NodeView): LineView['speaker'] {
+  const ordered: LineView[] = [...view.lines];
+  for (const q of view.questions) if (q.asked) ordered.push(q.answer);
+  for (let i = ordered.length - 1; i >= 0; i--) {
+    const sp = ordered[i]!.speaker;
+    if (sp && sp.portrait) return sp;
+  }
+  return null;
 }
 
 function renderConversation(store: Store, view: NodeView): string {
   const parts: string[] = [];
-  parts.push(`<div class="scene-title">${esc(view.node.title ?? view.phase.title)}</div>`);
-  if (view.node.header_label) parts.push(`<div class="header-label" data-testid="header-label">${esc(view.node.header_label)}</div>`);
+  const head: string[] = [];
+  head.push(`<div class="scene-title">${esc(view.node.title ?? view.phase.title)}</div>`);
+  if (view.node.header_label) head.push(`<div class="header-label" data-testid="header-label">${esc(view.node.header_label)}</div>`);
   if (view.node.text) parts.push(`<div class="narration" data-testid="narration">${esc(view.node.text)}</div>`);
   for (const l of view.lines) parts.push(renderLine(store, l));
   if (view.event_text) parts.push(`<div class="report" data-testid="event-text"><div class="label">${esc(view.node.header_label ?? 'Simulated report — authored fiction')}</div>${esc(view.event_text)}</div>`);
@@ -147,7 +162,15 @@ function renderConversation(store: Store, view: NodeView): string {
       <button data-action="question:${esc(q.id)}" data-focus="question:${esc(q.id)}" data-testid="question-${esc(q.id)}" aria-expanded="${q.asked}">${esc(q.text)}</button>
       ${q.asked ? `<div class="answer">${renderLine(store, q.answer)}</div>` : ''}`).join('')}</div>`);
   }
-  return `<section class="conversation" aria-label="Conversation" data-testid="conversation">${parts.join('')}</section>`;
+  const active = activeSpeaker(view);
+  const activeUrl = active ? assetUrl(active.portrait) : null;
+  const portrait = active && activeUrl
+    ? `<figure class="active-portrait" data-testid="active-portrait" data-speaker="${esc(active.id)}"><img src="${activeUrl}" alt="Portrait: ${esc(active.display)}" /><figcaption class="who">${esc(active.display)}</figcaption></figure>`
+    : '';
+  return `<section class="conversation" aria-label="Conversation" data-testid="conversation">
+    <div class="conv-head">${head.join('')}</div>
+    <div class="conv-body ${portrait ? 'with-portrait' : ''}">${portrait}<div class="conv-lines">${parts.join('')}</div></div>
+  </section>`;
 }
 
 function renderEvidencePanel(store: Store, evidence: EvidenceView[]): string {

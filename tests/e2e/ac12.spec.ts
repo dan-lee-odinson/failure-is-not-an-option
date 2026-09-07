@@ -6,6 +6,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assertRoomVisible, assertManifestImagesOnly } from './room';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
 // Outside Playwright's outputDir, which is cleaned on every run.
@@ -58,6 +59,7 @@ function shotPath(vp: string, text: string, route: string, name: string): string
 }
 
 async function shot(page: Page, vp: string, text: string, route: string, name: string): Promise<void> {
+  if (await page.getByTestId('screen-console').count()) await assertRoomVisible(page);
   await page.screenshot({ path: shotPath(vp, text, route, name), fullPage: false });
 }
 
@@ -110,6 +112,11 @@ async function playRoute(page: Page, r: Route, vp: string, text: string): Promis
   await click(page, 'option-g8-order-return');
   // Return decision
   expect(await node(page)).toBe('g8-return-brief');
+  await expect(page.getByTestId('active-portrait')).toBeVisible();
+  const activeH = (await page.getByTestId('active-portrait').locator('img').boundingBox())!.height;
+  const thumbH = (await page.locator('[data-testid="conversation"] .line img.portrait').first().boundingBox())!.height;
+  expect(activeH).toBeGreaterThan(thumbH * 1.5);
+  if (vp === '1920x1080') { expect(activeH).toBeGreaterThanOrEqual(200); expect(activeH).toBeLessThanOrEqual(260); }
   await expect(page.getByTestId('badge-alt-history')).toBeVisible();
   await expect(page.getByTestId('readout')).toBeVisible();
   await expect(page.getByTestId('simulated-label').first()).toBeVisible();
@@ -244,10 +251,8 @@ test('no voice, no timers, no forced flashing, no art outside the manifest', asy
   expect(await node(page)).toBe(before);
   const animations = await page.evaluate(() => document.getAnimations().length);
   expect(animations).toBe(0);
-  const srcs = await page.locator('img').evaluateAll((imgs) => imgs.map((i) => (i as HTMLImageElement).getAttribute('src') ?? ''));
-  for (const s of srcs) expect(s).toMatch(/fno_gemini_.*_placeholder_v001/);
-  const bg = await page.locator('.stage').evaluate((el) => getComputedStyle(el).backgroundImage);
-  expect(bg).toMatch(/fno_gemini_room_console_placeholder_v001/);
+  await assertManifestImagesOnly(page);
+  await expect(page.getByTestId('emblem')).toHaveAttribute('aria-hidden', 'true');
 });
 
 test('save/export/import round trip through the UI; a bad import is rejected and the session survives', async ({ page }) => {

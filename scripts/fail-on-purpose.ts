@@ -49,9 +49,11 @@ const PLANTS: Planted[] = [
   {
     name: 'wrong-size PNG (room plate written at 1280x720)',
     plant: (root) => {
+      const manifest = JSON.parse(readFileSync(resolve(root, 'assets', 'manifest.json'), 'utf8')) as { assets: { id: string; filename: string }[] };
+      const room = manifest.assets.find((a) => a.id === 'room-gemini-console')!;
       const c = new Canvas(1280, 720, false);
       c.fill(40, 40, 40);
-      writeFileSync(resolve(root, 'assets', 'fno_gemini_room_console_placeholder_v001.png'), c.encode());
+      writeFileSync(resolve(root, 'assets', room.filename), c.encode());
     },
     expect: /is 1280×720, manifest declares 1920×1080/,
   },

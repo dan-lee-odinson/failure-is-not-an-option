@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200" role="img" aria-labelledby="title desc">
+  <title id="title">Flight Operations — oval star and ascent emblem</title>
+  <desc id="desc">A gold-bordered blue oval containing an elongated gold four-pointed star overlapping the apex of a white curved inverted-V trajectory, with a gold globe grid behind the swoosh. No lettering or official agency marks.</desc>
+  <ellipse cx="450" cy="600" rx="370" ry="540" fill="#103B70" stroke="#D5B15C" stroke-width="14"/>
+
+  <g fill="none" stroke="#D5B15C" stroke-width="4.5">
+    <circle cx="450" cy="675" r="285"/>
+    <ellipse cx="450" cy="675" rx="190" ry="285"/>
+    <ellipse cx="450" cy="675" rx="95" ry="285"/>
+    <path d="M450 540V960"/>
+    <ellipse cx="450" cy="535" rx="247" ry="45"/>
+    <ellipse cx="450" cy="675" rx="285" ry="52"/>
+    <ellipse cx="450" cy="815" rx="247" ry="45"/>
+  </g>
+  <path d="M450 455C383 660 304 855 205 970C355 873 422 735 450 640C478 735 545 873 695 970C596 855 517 660 450 455Z" fill="#FFFFFF" stroke="#103B70" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M450 105L484 288L594 322L484 356L450 565L416 356L306 322L416 288Z" fill="#D5B15C" stroke="#103B70" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M450 105L450 322L416 288Z M450 322L594 322L484 356Z M450 322L450 565L416 356Z M450 322L306 322L416 288Z" fill="#F0D58A"/>
+  <ellipse cx="450" cy="600" rx="346" ry="516" fill="none" stroke="#D5B15C" stroke-width="2.5"/>
+</svg>
+
+
+
+

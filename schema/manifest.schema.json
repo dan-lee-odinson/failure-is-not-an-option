@@ -18,7 +18,12 @@
         "required": ["id", "filename", "width", "height", "alpha", "color_space", "framing", "reference_version", "origin", "attribution", "status"],
         "properties": {
           "id": { "$ref": "defs.schema.json#/$defs/id" },
-          "filename": { "type": "string", "pattern": "^fno_[a-z0-9]+_[a-z0-9]+_[a-z0-9-]+_[a-z0-9]+_v[0-9]{3}\\.png$" },
+          "filename": { "type": "string", "anyOf": [
+            { "pattern": "^fno_[a-z0-9]+_[a-z0-9]+_[a-z0-9-]+_[a-z0-9]+_v[0-9]{3}\\.png$" },
+            { "pattern": "^[a-z0-9]+(-[a-z0-9]+)*-v[0-9]{3}\\.svg$" }
+          ] },
+          "format": { "enum": ["png", "svg"] },
+          "kind": { "enum": ["room", "portrait", "emblem", "layer"] },
           "width": { "type": "integer", "minimum": 1 },
           "height": { "type": "integer", "minimum": 1 },
           "alpha": { "type": "boolean" },
@@ -29,7 +34,11 @@
           "attribution": { "type": "string" },
           "status": { "enum": ["to-generate", "placeholder", "final"] }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          { "if": { "type": "object", "properties": { "filename": { "type": "string", "pattern": "\\.svg$" } } }, "then": { "type": "object", "required": ["format"], "properties": { "format": { "const": "svg" }, "alpha": { "const": true } } } },
+          { "if": { "type": "object", "required": ["format"], "properties": { "format": { "const": "svg" } } }, "then": { "type": "object", "properties": { "filename": { "type": "string", "pattern": "\\.svg$" } } } }
+        ]
       }
     }
   },
