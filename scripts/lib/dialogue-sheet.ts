@@ -84,6 +84,17 @@ const VOID = new Set(['img', 'input', 'br', 'hr', 'meta', 'link']);
 /** Inline text-level elements do not split a run (a <code> inside a sentence stays in the sentence). */
 const INLINE = new Set(['b', 'i', 'em', 'strong', 'code', 'small', 'u', 'sub', 'sup', 'abbr', 'kbd', 'a']);
 
+/**
+ * The one place the stylesheet turns an inline element into a block: the
+ * field labels on option cards (`.field b`, `.support b`) render on their own
+ * line, so they are their own run and never glue onto the sentence beneath.
+ */
+function isInline(name: string, parent: { tag: string; cls: string } | undefined): boolean {
+  if (!INLINE.has(name)) return false;
+  if ((name === 'b' || name === 'strong') && parent && /\b(field|support)\b/.test(parent.cls)) return false;
+  return true;
+}
+
 /** Text runs and player-facing attribute values of an HTML string, in document order, with the enclosing element. */
 export function extractRuns(html: string): DomRun[] {
   const out: DomRun[] = [];
@@ -106,8 +117,9 @@ export function extractRuns(html: string): DomRun[] {
     if (tok.startsWith('<!--')) continue;
     if (tok.startsWith('</')) {
       const name = /^<\/([a-zA-Z0-9]+)/.exec(tok)?.[1]?.toLowerCase() ?? '';
-      const top = stack[stack.length - 1];
-      const inline = INLINE.has(name) || (name === 'span' && top?.tag === 'span' && !top.cls);
+      let parentIdx = -1;
+      for (let i = stack.length - 1; i >= 0; i--) if (stack[i]!.tag === name) { parentIdx = i - 1; break; }
+      const inline = isInline(name, parentIdx >= 0 ? stack[parentIdx] : undefined);
       if (!inline) flush();
       for (let i = stack.length - 1; i >= 0; i--) if (stack[i]!.tag === name) { stack.length = i; break; }
       continue;
@@ -115,7 +127,7 @@ export function extractRuns(html: string): DomRun[] {
     if (tok.startsWith('<')) {
       const name = /^<([a-zA-Z0-9]+)/.exec(tok)?.[1]?.toLowerCase() ?? '';
       const cls = /\sclass="([^"]*)"/.exec(tok)?.[1] ?? '';
-      const inline = INLINE.has(name) || (name === 'span' && !cls);
+      const inline = isInline(name, stack[stack.length - 1]);
       if (!inline) flush();
       for (const attr of ['title', 'alt', 'aria-label'] as const) {
         const v = new RegExp(`\\s${attr}="([^"]*)"`).exec(tok)?.[1];
@@ -139,6 +151,7 @@ function uiKind(r: DomRun): string {
   if (r.attr === 'aria-label') return 'ui.aria';
   const c = ' ' + r.cls + ' ';
   if (r.tag === 'button') return 'ui.button';
+  if (r.tag === 'b' || r.tag === 'strong') return 'ui.label';
   if (/^h[1-3]$/.test(r.tag) || r.tag === 'summary' || r.tag === 'figcaption') return c.includes(' prompt ') ? 'ui.prompt' : 'ui.heading';
   if (c.includes(' prompt ')) return 'ui.prompt';
   if (/ (label|scene-title|header-label|who|glen|subtitle|status|committed-text) /.test(c)) return 'ui.label';
