@@ -1,0 +1,24 @@
+{
+  "baseline": "FNO-M00-Codex-Content-v0.5.0",
+  "result": "PASS",
+  "exact_changed_json_paths": [
+    "/content/characters.json/content_version",
+    "/content/evidence.json/content_version",
+    "/content/followon-gemini-9a.json/content_version",
+    "/content/mission-gemini-8.json/content_version",
+    "/content/mission-gemini-8.json/debrief/13/provenance/note",
+    "/content/mission-gemini-8.json/debrief/13/provenance/sources",
+    "/content/mission-gemini-8.json/debrief/14/provenance/note",
+    "/content/mission-gemini-8.json/debrief/14/provenance/sources",
+    "/content/mission-gemini-8.json/debrief/14/text",
+    "/content/mission-gemini-8.json/phases/4/alternate_history",
+    "/content/mission-gemini-8.json/phases/4/nodes/0/historical_option",
+    "/content/mission-gemini-8.json/phases/5/alternate_history",
+    "/content/procedures.json/content_version",
+    "/content/registry.json/content_version",
+    "/content/registry.json/labels/alternate_history_explanation",
+    "/assets/manifest.json/content_version"
+  ],
+  "unchanged": "Every JSON field outside the enumerated paths; all IDs, branches, gameplay conditions, effects, trust, quantities, outcomes, event order, follow-on rules, notices and asset entries. All runtime image bytes identical.",
+  "baseline_adapter_verified_against_delivered_packet": true
+}

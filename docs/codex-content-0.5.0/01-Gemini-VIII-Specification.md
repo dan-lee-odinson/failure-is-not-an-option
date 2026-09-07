@@ -1,0 +1,5 @@
+# Gemini VIII 0.5.0 specification
+
+The executable specification is the six JSON files in `content/`, read with the optional presentation schema extensions in `integration/schema/`. This replaces the earlier prose-first package as requested in 17. Mechanics are unchanged from the implemented 0.4.0 baseline: choose up to two supplemental rehearsals, observe docking/contact loss/crew stabilization, terminate the mission, choose earlier/later return, experience one of six preparation-dependent recoveries, carry controller consequences into IX-A, adopt one procedure, and choose the post-flight accountability stance.
+
+All existing identifiers, effect values, conditions, quantities, relationships, and branch structure are preserved. Four new conditional debrief paragraphs and optional display metadata add historical explanation without domain effects. See `00_HANDOFF.md` for the schema contract, vocabulary and integration limits; `02-Sources-and-Acceptance.md` for historical grounding; and the generated sheet for every reachable player-facing string.

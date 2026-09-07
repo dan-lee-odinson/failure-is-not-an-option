@@ -1,0 +1,1165 @@
+--- a/core/types.ts
++++ b/core/types.ts
+@@ -115,6 +115,8 @@
+ }
+ 
+ export interface DecisionNode {
++  /** Presentation metadata; never an eligibility rule. */
++  historical_option?: string;
+   type: 'decision';
+   id: string;
+   prompt: string;
+@@ -175,6 +177,8 @@
+ }
+ 
+ export interface DebriefRule {
++  section?: 'departures';
++  provenance?: { sources: string[]; fiction: string[]; note: string };
+   id: string;
+   when: Condition;
+   text: string;
+@@ -285,6 +289,8 @@
+   labels: {
+     start_notice: string;
+     alternate_history_badge: string;
++    historical_choice_badge?: string;
++    departures_heading?: string;
+     alternate_history_explanation: string;
+     simulated_report: string;
+     postflight_header: string;
+--- a/core/views.ts
++++ b/core/views.ts
+@@ -256,7 +256,7 @@
+     context: EvidenceView | null;
+   };
+   procedures: { id: string; title: string; text: string; status: string }[];
+-  paragraphs: { id: string; text: string }[];
++  paragraphs: { id: string; text: string; section?: 'departures'; provenance?: { sources: string[]; fiction: string[]; note: string } }[];
+   events: LogEntry[];
+ }
+ 
+@@ -297,7 +297,7 @@
+     const first = log.find((e) => e.type === 'effect' && e.effect === 'adjust' && e.path === `people.${id}.trust`);
+     const before = first && first.type === 'effect' && first.effect === 'adjust' ? first.before : p.trust;
+     const c = content.characters.get(id);
+-    return { id, display: c?.display ?? id, before, after: p.trust, label: trustLabel(content.followon, p.trust), notes: [...p.notes] };
++    return { id, display: c?.display ?? id, before, after: p.trust, label: trustLabel(content.followon, p.trust), notes: p.notes.map((id) => state.ledger.facts[id]?.label ?? 'No description recorded') };
+   };
+ 
+   const constraintFact = layout.constraint_facts.find((f) => Object.prototype.hasOwnProperty.call(state.ledger.facts, f)) ?? null;
+@@ -309,7 +309,7 @@
+   const fo = describeFollowOn(content, state.ledger, done, state.followon.committed);
+   const contextEv = describeEvidence(content, state).find((e) => e.id === 'g8-ev-postflight-context') ?? null;
+ 
+-  const paragraphs = content.mission.debrief.filter((r) => evaluate(r.when, state)).map((r) => ({ id: r.id, text: r.text }));
++  const paragraphs = content.mission.debrief.filter((r) => evaluate(r.when, state)).map((r) => ({ id: r.id, text: r.text, section: r.section, provenance: r.provenance }));
+ 
+   return {
+     outcome: { id: done.outcome, title: done.title, kind: done.kind },
+--- a/app/render.ts
++++ b/app/render.ts
+@@ -3,7 +3,7 @@
+  * <button>, <a>, <input>, or <summary>, reachable by keyboard in DOM order.
+  * Actions are declared with data-action="name" or "name:arg".
+  */
+-import { describeDebrief, describeEvidence, describeFollowOnForRun, describeNode, type EvidenceLink, type EvidenceView, type LineView, type NodeView, type OptionView } from '../core';
++import { describeDebrief, describeEvidence, describeFollowOnForRun, describeNode, type EvidenceView, type LineView, type NodeView, type OptionView } from '../core';
+ import manifest from '../assets/manifest.json';
+ import type { Store } from './main';
+ 
+@@ -93,6 +93,8 @@
+ function renderStatusBar(store: Store, view: NodeView): string {
+   const m = store.content.mission;
+   const labels = store.content.bundle.registry.labels;
++  const current = store.content.nodes.get(view.node.id)?.node;
++  const historical = !view.phase.alternate_history && current?.type === 'decision' && !!current.historical_option;
+   const contactLabel: Record<string, string> = { 'houston': 'HOUSTON', 'tracking-ship': 'TRACKING SHIP', 'none': 'NONE', 'not-in-flight': 'NOT IN FLIGHT' };
+   const attention = view.attention
+     ? `<span class="attention" data-testid="attention" aria-label="Preparation opportunities: ${view.attention.remaining} of ${view.attention.declared} remaining">${'●'.repeat(view.attention.remaining)}${'○'.repeat(Math.max(0, view.attention.declared - view.attention.remaining))}</span>`
+@@ -109,18 +111,13 @@
+     ${attention}
+     ${view.phase.alternate_history ? `<button class="badge alt" data-action="open:history" data-focus="badge-alt" data-testid="badge-alt-history" aria-label="${esc(labels.alternate_history_badge)} — open the history panel">${esc(labels.alternate_history_badge)}</button>` : ''}
+     <span class="spacer"></span>
++    ${historical ? `<button class="badge history-mode" data-action="open:history" data-focus="badge-historical" data-testid="badge-historical-choice">${esc(labels.historical_choice_badge ?? 'HISTORICAL CHOICE')}</button>` : ''}
+     <button data-action="open:binder" data-focus="open:binder" data-testid="open-binder">Binder</button>
+     <button data-action="open:history" data-focus="open:history" data-testid="open-history">History</button>
+     <button data-action="open:saveload" data-focus="open:saveload" data-testid="open-saveload">Save / Load</button>
+     <button data-action="open:about" data-focus="open:about">About</button>
+     <button data-action="text-size" data-focus="text-size" data-testid="text-size" aria-pressed="${store.ui.textSize === 'large'}">Text size: ${store.ui.textSize === 'large' ? 'enlarged' : 'default'}</button>
+   </header>`;
+-}
+-
+-function evLink(store: Store, l: EvidenceLink): string {
+-  if (!l.acquired) return '';
+-  const pinned = store.ui.pinned.includes(l.id);
+-  return `<button class="ev-link ${pinned ? 'pinned' : ''}" data-action="pin:${esc(l.id)}" data-focus="pin:${esc(l.id)}" aria-pressed="${pinned}" data-testid="link-${esc(l.id)}" title="${pinned ? 'Unpin' : 'Pin'} evidence">${esc(l.title)}</button>`;
+ }
+ 
+ function renderLine(store: Store, l: LineView): string {
+@@ -131,8 +128,7 @@
+       ? `<img class="portrait" src="${portrait}" alt="Portrait: ${esc(l.speaker.display)}" />`
+       : `<div class="portrait empty" aria-hidden="true">text only</div>`
+     : '';
+-  const cites = l.cites.filter((c) => c.acquired).length ? `<div class="cites">${l.cites.map((c) => evLink(store, c)).join('')}</div>` : '';
+-  return `<div class="line ${l.speaker ? '' : 'no-speaker'}"${l.speaker ? '' : ' data-narration'}>${img}<div>${who}<div class="what">${esc(l.text)}</div>${cites}</div></div>`;
++  return `<div class="line ${l.speaker ? '' : 'no-speaker'}"${l.speaker ? '' : ' data-narration'}>${img}<div>${who}<div class="what">${esc(l.text)}</div></div></div>`;
+ }
+ 
+ /** The active speaker: the last rendered line (or asked answer) whose speaker has a portrait. */
+@@ -153,7 +149,7 @@
+   if (view.node.header_label) head.push(`<div class="header-label" data-testid="header-label">${esc(view.node.header_label)}</div>`);
+   if (view.node.text) parts.push(`<div class="narration" data-testid="narration">${esc(view.node.text)}</div>`);
+   for (const l of view.lines) parts.push(renderLine(store, l));
+-  if (view.event_text) parts.push(`<div class="report" data-testid="event-text"><div class="label">${esc(view.node.header_label ?? 'Simulated report — authored fiction')}</div>${esc(view.event_text)}</div>`);
++  if (view.event_text) parts.push(`<div class="report" data-testid="event-text"><div class="label">${esc(view.node.header_label ?? 'Report')}</div>${esc(view.event_text)}</div>`);
+   if (view.applied.length) {
+     parts.push(`<div class="applied" data-testid="applied"><div class="label">Logged at this event</div><ul>${view.applied.map((a) => `<li>${esc(a.label)}</li>`).join('')}</ul></div>`);
+   }
+@@ -185,23 +181,20 @@
+     <article class="ev-item ${pinned ? 'pinned' : ''}" data-testid="evidence-${esc(e.id)}" data-badge="${esc(e.badge)}">
+       <div class="ev-head">
+         <button class="ev-title" data-action="toggle-open:${esc(e.id)}" data-focus="open-ev:${esc(e.id)}" aria-expanded="${open}" style="background:none;border:none;padding:0;text-align:left">${esc(e.title)}</button>
+-        <button class="pin" data-action="pin:${esc(e.id)}" data-focus="pinbtn:${esc(e.id)}" aria-pressed="${pinned}" data-testid="pin-${esc(e.id)}">${pinned ? 'Unpin' : 'Pin'}</button>
++        <button class="pin" data-action="pin:${esc(e.id)}" data-focus="pinbtn:${esc(e.id)}" aria-pressed="${pinned}" data-testid="pin-${esc(e.id)}">${pinned ? 'Unpin report' : 'Pin report'}</button>
+       </div>
+       <div class="ev-meta">
+         <span class="badge ${badgeClass}">${esc(e.badge)}</span>
+-        ${e.simulated ? `<span class="badge sim" data-testid="simulated-label">${esc(labels.simulated_report)}</span>` : ''}
+         ${e.kind !== 'reference' ? `<span>Received: ${esc(e.stage)}</span>` : ''}
+         ${e.observation ? `<span>Observation time: ${e.observation}</span>` : ''}
+       </div>
+       ${open ? (e.body !== null ? `<div class="ev-body" data-testid="evidence-body">${esc(e.body)}</div>` : `<div class="ev-body muted">Not visible at this point.</div>`) : ''}
+-      ${open ? `<div class="ev-prov">${esc(e.provenance.note)}${e.provenance.sources.length ? ` Sources: ${e.provenance.sources.join(', ')}.` : ''}${e.provenance.fiction.length ? ` Fiction register: ${e.provenance.fiction.join(', ')}.` : ''}</div>` : ''}
+     </article>`;
+   });
+-  return `<aside class="evidence" aria-label="Evidence" data-testid="evidence-panel"><h2>Evidence · ${evidence.length}</h2>${items.length ? items.join('') : '<p class="empty">No evidence acquired yet.</p>'}</aside>`;
++  return `<aside class="evidence" aria-label="Evidence" data-testid="evidence-panel"><h2>Evidence · ${evidence.length}</h2><p class="hint">Pin to keep this report in view. Pinning changes nothing in the mission.</p>${items.length ? items.join('') : '<p class="empty">No evidence acquired yet.</p>'}</aside>`;
+ }
+ 
+ function renderOption(store: Store, o: OptionView, kind: 'prep' | 'decision'): string {
+-  const links = o.evidence.filter((e) => e.acquired);
+   const support = o.supported_by.length
+     ? `<div class="support"><b>Supported by</b> ${o.supported_by.map((s) => `<span class="${s.ready ? 'ready' : 'not-ready'}">${esc(s.label)}: ${s.ready ? 'READY' : 'NOT REHEARSED'}</span>`).join(' · ')}</div>`
+     : '';
+@@ -212,7 +205,6 @@
+     ${o.subtitle ? `<div class="subtitle">${esc(o.subtitle)}</div>` : ''}
+     <div class="field intent"><b>Intent</b>${esc(o.intent)}</div>
+     ${o.statement ? `<div class="field statement"><b>Glen says</b>“${esc(o.statement)}”</div>` : ''}
+-    ${links.length ? `<div class="field"><b>Evidence</b><div class="cites">${links.map((l) => evLink(store, l)).join('')}</div></div>` : ''}
+     ${o.attraction ? `<div class="field"><b>Attraction</b>${esc(o.attraction)}</div>` : ''}
+     <div class="field"><b>Cost</b>${esc(o.cost)}</div>
+     <div class="field"><b>Uncertainty</b>${esc(o.uncertainty)}</div>
+@@ -231,7 +223,7 @@
+     parts.push(`<h2 class="prompt"><span class="glen">Glen Kurtz — FLIGHT</span>${esc(view.node.prompt)}</h2>`);
+   }
+   if (view.node.type === 'prep_choice' && view.attention) {
+-    parts.push(`<p class="hint">Opportunities remaining: ${view.attention.remaining} of ${view.attention.declared}. Reading, pinning, and questions cost nothing.</p>`);
++    parts.push(`<p class="hint">Opportunities remaining: ${view.attention.remaining} of ${view.attention.declared}. Reading reports and asking questions use no rehearsal opportunities.</p>`);
+   }
+   if (view.readout) {
+     parts.push(`<div class="readout" data-testid="readout" role="group" aria-label="Preparation readout">${view.readout.map((r) => `<span class="${r.ready ? 'ready' : 'not-ready'}">${esc(r.label)}: ${esc(r.text)}</span>`).join('')}</div><p class="hint">Unrehearsed does not mean untrained or incapable. Both orders remain available.</p>`);
+@@ -278,7 +270,7 @@
+   const pages = procs.map((id) => {
+     const p = store.content.procedures.get(id);
+     if (!p) return '';
+-    return `<div class="page" data-testid="binder-${esc(id)}"><div class="status">${p.status === 'commissioned-task' ? 'Commissioned task — not a completed procedure' : 'Adopted procedure'}</div><div class="title">${esc(p.title)}</div><div>${esc(p.text)}</div><div class="muted" style="color:#5b4a12;font-size:0.8rem;margin-top:0.3rem">${esc(p.provenance.note)}</div></div>`;
++    return `<div class="page" data-testid="binder-${esc(id)}"><div class="status">${p.status === 'commissioned-task' ? 'Commissioned task — not a completed procedure' : 'Adopted procedure'}</div><div class="title">${esc(p.title)}</div><div>${esc(p.text)}</div></div>`;
+   });
+   const rules = run ? describeEvidence(store.content, run.state).filter((e) => e.kind === 'reference' && e.body !== null) : [];
+   return `
+@@ -295,6 +287,7 @@
+     <p data-testid="alt-history-explanation">${esc(reg.labels.alternate_history_explanation)}</p>
+     <h3>Historical sources</h3>
+     <ul class="plain">${reg.sources.map((s) => `<li><b>${esc(s.id)}</b> — <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>${s.author ? ` (${esc(s.author)})` : ''}. <span class="muted">${esc(s.note)}</span></li>`).join('')}</ul>
++    <h3>Report, procedure, and departure references</h3><ul class="plain">${[...store.content.bundle.evidence, ...store.content.bundle.procedures, ...store.content.mission.debrief.filter((r) => r.provenance)].map((item) => `<li><b>${esc(item.id)}</b> ${esc(item.provenance?.note ?? '')} Sources: ${esc(item.provenance?.sources.join(', ') ?? '')}. Fiction register: ${esc(item.provenance?.fiction.join(', ') ?? '')}.</li>`).join('')}</ul>
+     <h3>Fiction register</h3>
+     <ul class="plain">${reg.fiction.map((f) => `<li><b>${esc(f.id)} — ${esc(f.title)}.</b> ${esc(f.text)}</li>`).join('')}</ul>
+     <h3>People in this scenario</h3>
+@@ -350,21 +343,22 @@
+     <span class="badge alt">${esc(labels.alternate_history_badge)}</span>
+     <h1>Debrief — ${esc(store.content.mission.title)}</h1>
+     <p class="outcome-title" data-testid="outcome-title">${esc(d.outcome.title)}</p>
+-    <div class="panel fiction"><h2>Crew condition on pickup — authored fiction (F7)</h2><p data-testid="consequence-text">${esc(d.consequence?.text ?? '')}</p></div>
+-    <div class="panel"><h2>The room remembers — fictional controllers (F8)</h2>
++    <div class="panel fiction"><h2>Crew condition on pickup</h2><p data-testid="consequence-text">${esc(d.consequence?.text ?? '')}</p></div>
++    <div class="panel"><h2>The room remembers</h2>
+       ${d.relationship ? d.relationship.lines.map((l) => renderLine(store, l)).join('') : ''}
+       <div class="people" style="margin-top:0.6rem">${d.controllers.map(person).join('')}</div>
+     </div>
+-    ${d.constraint ? `<div class="panel"><h2>Next-mission constraint (F9)</h2><p data-testid="constraint-text">${esc(d.constraint.text)}</p></div>` : ''}
++    ${d.constraint ? `<div class="panel"><h2>Required practice for the next mission</h2><p data-testid="constraint-text">${esc(d.constraint.text)}</p></div>` : ''}
+     <div class="panel fiction" data-testid="postflight-panel"><h2>${esc(labels.postflight_header)}</h2>
+-      ${d.postflight.context ? `<div class="report"><div class="label">Historical context — attributed summary of H5 (never altered by your stance)</div>${esc(d.postflight.context.body ?? '')}</div>` : ''}
++      ${d.postflight.context ? `<div class="report"><div class="label">Post-flight findings and disagreement</div>${esc(d.postflight.context.body ?? '')}</div>` : ''}
+       ${d.postflight.statement ? `<p><b>Glen's statement:</b> “${esc(d.postflight.statement)}”</p>` : ''}
+       ${d.postflight.response ? `<p data-testid="response-text">${esc(d.postflight.response.text)}</p>` : ''}
+       <div class="people">${d.postflight.astronauts.map(person).join('')}</div>
+       ${d.postflight.status.map((s) => `<p data-testid="status-${esc(s.id)}"><b>${esc(s.title)}.</b> ${esc(s.text)}</p>`).join('')}
+     </div>
+     <div class="panel"><h2>Procedures binder</h2>${d.procedures.length ? d.procedures.map((p) => `<p data-testid="debrief-proc-${esc(p.id)}"><b>${esc(p.title)}</b> (${p.status === 'commissioned-task' ? 'commissioned task' : 'adopted procedure'}): ${esc(p.text)}</p>`).join('') : '<p class="muted">Empty.</p>'}</div>
+-    <div class="panel paragraphs" data-testid="debrief-paragraphs"><h2>What happened, and why</h2>${d.paragraphs.map((p) => `<p data-rule="${esc(p.id)}">${esc(p.text)}</p>`).join('')}</div>
++    <div class="panel paragraphs" data-testid="debrief-paragraphs"><h2>What happened, and why</h2>${d.paragraphs.filter((p) => p.section !== 'departures').map((p) => `<p data-rule="${esc(p.id)}">${esc(p.text)}</p>`).join('')}</div>
++    <section class="panel" data-testid="departures-from-record"><h2>${esc(labels.departures_heading ?? 'Departures from the record')}</h2>${d.paragraphs.filter((p) => p.section === 'departures').map((p) => `<p data-rule="${esc(p.id)}">${esc(p.text)}</p>`).join('')}</section>
+     <details class="panel"><summary data-focus="event-record" data-testid="event-record-toggle">Event record (${d.events.length} entries)</summary><div class="event-record" data-testid="event-record">${events}</div></details>
+     <div class="actions">
+       <button class="primary" data-action="to-planning" data-focus="to-planning" data-focus-default data-testid="to-planning">Continue to Gemini IX-A</button>
+@@ -397,11 +391,11 @@
+     <h1>${esc(fo.display_title)}</h1>
+     <p class="muted">Initialized from the committed Gemini VIII record: ${esc(fo.completion.title)}.</p>
+     ${fo.constraint_text ? `<div class="constraint" data-testid="constraint">${esc(fo.constraint_text)}</div>` : ''}
+-    <div class="panel"><h2>Controllers — persisted confidence (F8)</h2><div class="people">${fo.controllers.map(person).join('')}</div><p class="hint">Critical information is always available regardless of confidence.</p></div>
+-    <div class="panel fiction"><h2>Astronaut relationships — text only, fictional (F10)</h2><div class="people">${fo.astronauts.map(person).join('')}</div>
++    <div class="panel"><h2>Controller confidence</h2><div class="people">${fo.controllers.map(person).join('')}</div><p class="hint">Critical information is always available regardless of confidence.</p></div>
++    <div class="panel fiction"><h2>Astronaut relationships</h2><div class="people">${fo.astronauts.map(person).join('')}</div>
+       ${fo.status_blocks.map((s) => `<p data-testid="status-${esc(s.id)}"><b>${esc(s.title)}.</b> ${esc(s.text)}${s.procedure ? ` <i>Task: ${esc(store.content.procedures.get(s.procedure)?.title ?? s.procedure)} — ${esc(store.content.procedures.get(s.procedure)?.text ?? '')}</i>` : ''}</p>`).join('')}
+     </div>
+-    <div class="panel"><h2>Procedures binder reference</h2>${fo.procedures.length ? fo.procedures.map((id) => `<p><b>${esc(store.content.procedures.get(id)?.title ?? id)}</b>: ${esc(store.content.procedures.get(id)?.text ?? '')}</p>`).join('') : '<p class="muted">Empty.</p>'}<p class="hint">Procedure membership does not determine which plan is legal.</p></div>
++    <div class="panel"><h2>Procedures binder reference</h2>${fo.procedures.length ? fo.procedures.map((id) => `<p><b>${esc(store.content.procedures.get(id)?.title ?? id)}</b>: ${esc(store.content.procedures.get(id)?.text ?? '')}</p>`).join('') : '<p class="muted">Empty.</p>'}<p class="hint">The required rehearsal determines which plans are available.</p></div>
+     <h2 class="prompt">Choose the preparation plan. Each plan contains exactly two supplemental exercises.</h2>
+     <div class="tiles" role="group" aria-label="Preparation plans">
+       ${fo.plans.map((p) => `
+--- a/schema/mission.schema.json
++++ b/schema/mission.schema.json
+@@ -3,31 +3,144 @@
+   "$id": "https://fno.local/schema/mission.schema.json",
+   "title": "Mission",
+   "type": "object",
+-  "required": ["content_version", "id", "title", "chapter", "dramatization", "anchors", "start_notice", "seed_people", "finish", "phases", "outcomes", "debrief", "debrief_layout"],
++  "required": [
++    "content_version",
++    "id",
++    "title",
++    "chapter",
++    "dramatization",
++    "anchors",
++    "start_notice",
++    "seed_people",
++    "finish",
++    "phases",
++    "outcomes",
++    "debrief",
++    "debrief_layout"
++  ],
+   "properties": {
+-    "content_version": { "$ref": "defs.schema.json#/$defs/semver" },
+-    "id": { "$ref": "defs.schema.json#/$defs/id" },
+-    "title": { "$ref": "defs.schema.json#/$defs/text" },
+-    "subtitle": { "$ref": "defs.schema.json#/$defs/text" },
+-    "chapter": { "$ref": "defs.schema.json#/$defs/id" },
+-    "dramatization": { "const": true },
+-    "anchors": { "type": "array", "items": { "type": "object", "required": ["label", "url"], "properties": { "label": { "$ref": "defs.schema.json#/$defs/text" }, "url": { "$ref": "defs.schema.json#/$defs/url" } }, "additionalProperties": false } },
+-    "start_notice": { "$ref": "defs.schema.json#/$defs/text" },
+-    "seed_people": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/id" }, "uniqueItems": true },
+-    "finish": { "type": "object", "required": ["id", "requires"], "properties": { "id": { "$ref": "defs.schema.json#/$defs/id" }, "requires": { "$ref": "defs.schema.json#/$defs/condition" } }, "additionalProperties": false },
+-    "phases": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/phase" } },
+-    "outcomes": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/outcome" } },
+-    "debrief": { "type": "array", "items": { "$ref": "#/$defs/debrief_rule" } },
++    "content_version": {
++      "$ref": "defs.schema.json#/$defs/semver"
++    },
++    "id": {
++      "$ref": "defs.schema.json#/$defs/id"
++    },
++    "title": {
++      "$ref": "defs.schema.json#/$defs/text"
++    },
++    "subtitle": {
++      "$ref": "defs.schema.json#/$defs/text"
++    },
++    "chapter": {
++      "$ref": "defs.schema.json#/$defs/id"
++    },
++    "dramatization": {
++      "const": true
++    },
++    "anchors": {
++      "type": "array",
++      "items": {
++        "type": "object",
++        "required": [
++          "label",
++          "url"
++        ],
++        "properties": {
++          "label": {
++            "$ref": "defs.schema.json#/$defs/text"
++          },
++          "url": {
++            "$ref": "defs.schema.json#/$defs/url"
++          }
++        },
++        "additionalProperties": false
++      }
++    },
++    "start_notice": {
++      "$ref": "defs.schema.json#/$defs/text"
++    },
++    "seed_people": {
++      "type": "array",
++      "items": {
++        "$ref": "defs.schema.json#/$defs/id"
++      },
++      "uniqueItems": true
++    },
++    "finish": {
++      "type": "object",
++      "required": [
++        "id",
++        "requires"
++      ],
++      "properties": {
++        "id": {
++          "$ref": "defs.schema.json#/$defs/id"
++        },
++        "requires": {
++          "$ref": "defs.schema.json#/$defs/condition"
++        }
++      },
++      "additionalProperties": false
++    },
++    "phases": {
++      "type": "array",
++      "minItems": 1,
++      "items": {
++        "$ref": "#/$defs/phase"
++      }
++    },
++    "outcomes": {
++      "type": "array",
++      "minItems": 1,
++      "items": {
++        "$ref": "#/$defs/outcome"
++      }
++    },
++    "debrief": {
++      "type": "array",
++      "items": {
++        "$ref": "#/$defs/debrief_rule"
++      }
++    },
+     "debrief_layout": {
+       "type": "object",
+-      "required": ["consequence_node", "relationship_node", "accountability_node", "controllers", "astronauts", "constraint_facts"],
+-      "properties": {
+-        "consequence_node": { "$ref": "defs.schema.json#/$defs/id" },
+-        "relationship_node": { "$ref": "defs.schema.json#/$defs/id" },
+-        "accountability_node": { "$ref": "defs.schema.json#/$defs/id" },
+-        "controllers": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/id" } },
+-        "astronauts": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/id" } },
+-        "constraint_facts": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/id" }, "minItems": 1 }
++      "required": [
++        "consequence_node",
++        "relationship_node",
++        "accountability_node",
++        "controllers",
++        "astronauts",
++        "constraint_facts"
++      ],
++      "properties": {
++        "consequence_node": {
++          "$ref": "defs.schema.json#/$defs/id"
++        },
++        "relationship_node": {
++          "$ref": "defs.schema.json#/$defs/id"
++        },
++        "accountability_node": {
++          "$ref": "defs.schema.json#/$defs/id"
++        },
++        "controllers": {
++          "type": "array",
++          "items": {
++            "$ref": "defs.schema.json#/$defs/id"
++          }
++        },
++        "astronauts": {
++          "type": "array",
++          "items": {
++            "$ref": "defs.schema.json#/$defs/id"
++          }
++        },
++        "constraint_facts": {
++          "type": "array",
++          "items": {
++            "$ref": "defs.schema.json#/$defs/id"
++          },
++          "minItems": 1
++        }
+       },
+       "additionalProperties": false
+     }
+@@ -36,122 +149,412 @@
+   "$defs": {
+     "phase": {
+       "type": "object",
+-      "required": ["id", "title", "display_time", "contact", "attention", "nodes"],
+-      "properties": {
+-        "id": { "$ref": "defs.schema.json#/$defs/id" },
+-        "title": { "$ref": "defs.schema.json#/$defs/text" },
+-        "display_time": { "$ref": "defs.schema.json#/$defs/text" },
+-        "contact": { "enum": ["houston", "tracking-ship", "none", "not-in-flight"] },
+-        "attention": { "oneOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] },
+-        "alternate_history": { "type": "boolean" },
+-        "nodes": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/node" } }
++      "required": [
++        "id",
++        "title",
++        "display_time",
++        "contact",
++        "attention",
++        "nodes"
++      ],
++      "properties": {
++        "id": {
++          "$ref": "defs.schema.json#/$defs/id"
++        },
++        "title": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "display_time": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "contact": {
++          "enum": [
++            "houston",
++            "tracking-ship",
++            "none",
++            "not-in-flight"
++          ]
++        },
++        "attention": {
++          "oneOf": [
++            {
++              "type": "integer",
++              "minimum": 0
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "alternate_history": {
++          "type": "boolean"
++        },
++        "nodes": {
++          "type": "array",
++          "minItems": 1,
++          "items": {
++            "$ref": "#/$defs/node"
++          }
++        }
+       },
+       "additionalProperties": false
+     },
+     "node": {
+       "oneOf": [
+-        { "$ref": "#/$defs/briefing" },
+-        { "$ref": "#/$defs/prep_choice" },
+-        { "$ref": "#/$defs/decision" },
+-        { "$ref": "#/$defs/event" }
++        {
++          "$ref": "#/$defs/briefing"
++        },
++        {
++          "$ref": "#/$defs/prep_choice"
++        },
++        {
++          "$ref": "#/$defs/decision"
++        },
++        {
++          "$ref": "#/$defs/event"
++        }
+       ]
+     },
+     "briefing": {
+       "type": "object",
+-      "required": ["type", "id", "continue"],
+-      "properties": {
+-        "type": { "const": "briefing" },
+-        "id": { "$ref": "defs.schema.json#/$defs/id" },
+-        "title": { "$ref": "defs.schema.json#/$defs/text" },
+-        "header_label": { "$ref": "defs.schema.json#/$defs/text" },
+-        "text": { "$ref": "defs.schema.json#/$defs/text" },
+-        "variants": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/conditional_text" } },
+-        "documents": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/document" } },
+-        "lines": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/line" } },
+-        "questions": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/question" } },
+-        "continue": { "$ref": "defs.schema.json#/$defs/continue" }
++      "required": [
++        "type",
++        "id",
++        "continue"
++      ],
++      "properties": {
++        "type": {
++          "const": "briefing"
++        },
++        "id": {
++          "$ref": "defs.schema.json#/$defs/id"
++        },
++        "title": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "header_label": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "text": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "variants": {
++          "type": "array",
++          "items": {
++            "$ref": "defs.schema.json#/$defs/conditional_text"
++          }
++        },
++        "documents": {
++          "type": "array",
++          "items": {
++            "$ref": "defs.schema.json#/$defs/document"
++          }
++        },
++        "lines": {
++          "type": "array",
++          "items": {
++            "$ref": "defs.schema.json#/$defs/line"
++          }
++        },
++        "questions": {
++          "type": "array",
++          "items": {
++            "$ref": "defs.schema.json#/$defs/question"
++          }
++        },
++        "continue": {
++          "$ref": "defs.schema.json#/$defs/continue"
++        }
+       },
+       "additionalProperties": false
+     },
+     "prep_choice": {
+       "type": "object",
+-      "required": ["type", "id", "prompt", "cost", "options", "reasons", "finish"],
+-      "properties": {
+-        "type": { "const": "prep_choice" },
+-        "id": { "$ref": "defs.schema.json#/$defs/id" },
+-        "prompt": { "$ref": "defs.schema.json#/$defs/text" },
+-        "text": { "$ref": "defs.schema.json#/$defs/text" },
+-        "cost": { "type": "integer", "minimum": 1 },
+-        "options": { "type": "array", "minItems": 1, "items": { "$ref": "defs.schema.json#/$defs/option" } },
+-        "reasons": { "type": "object", "required": ["completed", "exhausted"], "properties": { "completed": { "$ref": "defs.schema.json#/$defs/text" }, "exhausted": { "$ref": "defs.schema.json#/$defs/text" } }, "additionalProperties": false },
+-        "finish": { "$ref": "defs.schema.json#/$defs/continue" }
++      "required": [
++        "type",
++        "id",
++        "prompt",
++        "cost",
++        "options",
++        "reasons",
++        "finish"
++      ],
++      "properties": {
++        "type": {
++          "const": "prep_choice"
++        },
++        "id": {
++          "$ref": "defs.schema.json#/$defs/id"
++        },
++        "prompt": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "text": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "cost": {
++          "type": "integer",
++          "minimum": 1
++        },
++        "options": {
++          "type": "array",
++          "minItems": 1,
++          "items": {
++            "$ref": "defs.schema.json#/$defs/option"
++          }
++        },
++        "reasons": {
++          "type": "object",
++          "required": [
++            "completed",
++            "exhausted"
++          ],
++          "properties": {
++            "completed": {
++              "$ref": "defs.schema.json#/$defs/text"
++            },
++            "exhausted": {
++              "$ref": "defs.schema.json#/$defs/text"
++            }
++          },
++          "additionalProperties": false
++        },
++        "finish": {
++          "$ref": "defs.schema.json#/$defs/continue"
++        }
+       },
+       "additionalProperties": false
+     },
+     "decision": {
+       "type": "object",
+-      "required": ["type", "id", "prompt", "options"],
+-      "properties": {
+-        "type": { "const": "decision" },
+-        "id": { "$ref": "defs.schema.json#/$defs/id" },
+-        "title": { "$ref": "defs.schema.json#/$defs/text" },
+-        "header_label": { "$ref": "defs.schema.json#/$defs/text" },
+-        "prompt": { "$ref": "defs.schema.json#/$defs/text" },
+-        "text": { "$ref": "defs.schema.json#/$defs/text" },
+-        "documents": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/document" } },
+-        "lines": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/line" } },
+-        "questions": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/question" } },
+-        "readout": { "type": "array", "items": { "type": "object", "required": ["label", "fact", "ready", "not_ready"], "properties": { "label": { "$ref": "defs.schema.json#/$defs/text" }, "fact": { "$ref": "defs.schema.json#/$defs/id" }, "ready": { "$ref": "defs.schema.json#/$defs/text" }, "not_ready": { "$ref": "defs.schema.json#/$defs/text" } }, "additionalProperties": false } },
+-        "options": { "type": "array", "minItems": 1, "items": { "$ref": "defs.schema.json#/$defs/option" } }
++      "required": [
++        "type",
++        "id",
++        "prompt",
++        "options"
++      ],
++      "properties": {
++        "type": {
++          "const": "decision"
++        },
++        "id": {
++          "$ref": "defs.schema.json#/$defs/id"
++        },
++        "title": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "header_label": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "prompt": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "text": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "documents": {
++          "type": "array",
++          "items": {
++            "$ref": "defs.schema.json#/$defs/document"
++          }
++        },
++        "lines": {
++          "type": "array",
++          "items": {
++            "$ref": "defs.schema.json#/$defs/line"
++          }
++        },
++        "questions": {
++          "type": "array",
++          "items": {
++            "$ref": "defs.schema.json#/$defs/question"
++          }
++        },
++        "readout": {
++          "type": "array",
++          "items": {
++            "type": "object",
++            "required": [
++              "label",
++              "fact",
++              "ready",
++              "not_ready"
++            ],
++            "properties": {
++              "label": {
++                "$ref": "defs.schema.json#/$defs/text"
++              },
++              "fact": {
++                "$ref": "defs.schema.json#/$defs/id"
++              },
++              "ready": {
++                "$ref": "defs.schema.json#/$defs/text"
++              },
++              "not_ready": {
++                "$ref": "defs.schema.json#/$defs/text"
++              }
++            },
++            "additionalProperties": false
++          }
++        },
++        "options": {
++          "type": "array",
++          "minItems": 1,
++          "items": {
++            "$ref": "defs.schema.json#/$defs/option"
++          }
++        },
++        "historical_option": {
++          "$ref": "defs.schema.json#/$defs/id"
++        }
+       },
+       "additionalProperties": false
+     },
+     "event": {
+       "type": "object",
+-      "required": ["type", "id", "resolutions", "continue"],
+-      "properties": {
+-        "type": { "const": "event" },
+-        "id": { "$ref": "defs.schema.json#/$defs/id" },
+-        "title": { "$ref": "defs.schema.json#/$defs/text" },
+-        "label": { "$ref": "defs.schema.json#/$defs/text" },
+-        "resolutions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/resolution" } },
+-        "continue": { "$ref": "defs.schema.json#/$defs/continue" }
++      "required": [
++        "type",
++        "id",
++        "resolutions",
++        "continue"
++      ],
++      "properties": {
++        "type": {
++          "const": "event"
++        },
++        "id": {
++          "$ref": "defs.schema.json#/$defs/id"
++        },
++        "title": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "label": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "resolutions": {
++          "type": "array",
++          "minItems": 1,
++          "items": {
++            "$ref": "#/$defs/resolution"
++          }
++        },
++        "continue": {
++          "$ref": "defs.schema.json#/$defs/continue"
++        }
+       },
+       "additionalProperties": false
+     },
+     "resolution": {
+       "type": "object",
+-      "required": ["id", "when", "effects"],
+-      "properties": {
+-        "id": { "$ref": "defs.schema.json#/$defs/id" },
+-        "when": { "$ref": "defs.schema.json#/$defs/condition" },
+-        "effects": { "$ref": "defs.schema.json#/$defs/effects" },
+-        "sub_effects": { "type": "array", "items": { "type": "object", "required": ["when", "effects"], "properties": { "when": { "$ref": "defs.schema.json#/$defs/condition" }, "effects": { "$ref": "defs.schema.json#/$defs/effects" } }, "additionalProperties": false } },
+-        "finally": { "$ref": "defs.schema.json#/$defs/effects" },
+-        "lines": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/line" } },
+-        "text": { "$ref": "defs.schema.json#/$defs/text" },
+-        "status": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/text" } }
++      "required": [
++        "id",
++        "when",
++        "effects"
++      ],
++      "properties": {
++        "id": {
++          "$ref": "defs.schema.json#/$defs/id"
++        },
++        "when": {
++          "$ref": "defs.schema.json#/$defs/condition"
++        },
++        "effects": {
++          "$ref": "defs.schema.json#/$defs/effects"
++        },
++        "sub_effects": {
++          "type": "array",
++          "items": {
++            "type": "object",
++            "required": [
++              "when",
++              "effects"
++            ],
++            "properties": {
++              "when": {
++                "$ref": "defs.schema.json#/$defs/condition"
++              },
++              "effects": {
++                "$ref": "defs.schema.json#/$defs/effects"
++              }
++            },
++            "additionalProperties": false
++          }
++        },
++        "finally": {
++          "$ref": "defs.schema.json#/$defs/effects"
++        },
++        "lines": {
++          "type": "array",
++          "items": {
++            "$ref": "defs.schema.json#/$defs/line"
++          }
++        },
++        "text": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "status": {
++          "type": "array",
++          "items": {
++            "$ref": "defs.schema.json#/$defs/text"
++          }
++        }
+       },
+       "additionalProperties": false
+     },
+     "outcome": {
+       "type": "object",
+-      "required": ["id", "title", "kind", "requires"],
+-      "properties": {
+-        "id": { "$ref": "defs.schema.json#/$defs/id" },
+-        "title": { "$ref": "defs.schema.json#/$defs/text" },
+-        "kind": { "enum": ["success", "partial", "abort-safe", "loss"] },
+-        "requires": { "$ref": "defs.schema.json#/$defs/condition" }
++      "required": [
++        "id",
++        "title",
++        "kind",
++        "requires"
++      ],
++      "properties": {
++        "id": {
++          "$ref": "defs.schema.json#/$defs/id"
++        },
++        "title": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "kind": {
++          "enum": [
++            "success",
++            "partial",
++            "abort-safe",
++            "loss"
++          ]
++        },
++        "requires": {
++          "$ref": "defs.schema.json#/$defs/condition"
++        }
+       },
+       "additionalProperties": false
+     },
+     "debrief_rule": {
+       "type": "object",
+-      "required": ["id", "when", "text"],
+-      "properties": {
+-        "id": { "$ref": "defs.schema.json#/$defs/id" },
+-        "when": { "$ref": "defs.schema.json#/$defs/condition" },
+-        "text": { "$ref": "defs.schema.json#/$defs/text" }
++      "required": [
++        "id",
++        "when",
++        "text"
++      ],
++      "properties": {
++        "id": {
++          "$ref": "defs.schema.json#/$defs/id"
++        },
++        "when": {
++          "$ref": "defs.schema.json#/$defs/condition"
++        },
++        "text": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "section": {
++          "enum": [
++            "departures"
++          ]
++        },
++        "provenance": {
++          "$ref": "defs.schema.json#/$defs/provenance"
++        }
+       },
+       "additionalProperties": false
+     }
+--- a/schema/registry.schema.json
++++ b/schema/registry.schema.json
+@@ -3,29 +3,75 @@
+   "$id": "https://fno.local/schema/registry.schema.json",
+   "title": "Sources, fiction register, labels and notices",
+   "type": "object",
+-  "required": ["content_version", "labels", "notices", "sources", "fiction"],
++  "required": [
++    "content_version",
++    "labels",
++    "notices",
++    "sources",
++    "fiction"
++  ],
+   "properties": {
+-    "content_version": { "$ref": "defs.schema.json#/$defs/semver" },
++    "content_version": {
++      "$ref": "defs.schema.json#/$defs/semver"
++    },
+     "labels": {
+       "type": "object",
+-      "required": ["start_notice", "alternate_history_badge", "alternate_history_explanation", "simulated_report", "postflight_header"],
++      "required": [
++        "start_notice",
++        "alternate_history_badge",
++        "alternate_history_explanation",
++        "simulated_report",
++        "postflight_header"
++      ],
+       "properties": {
+-        "start_notice": { "$ref": "defs.schema.json#/$defs/text" },
+-        "alternate_history_badge": { "$ref": "defs.schema.json#/$defs/text" },
+-        "alternate_history_explanation": { "$ref": "defs.schema.json#/$defs/text" },
+-        "simulated_report": { "$ref": "defs.schema.json#/$defs/text" },
+-        "postflight_header": { "$ref": "defs.schema.json#/$defs/text" }
++        "start_notice": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "alternate_history_badge": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "alternate_history_explanation": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "simulated_report": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "postflight_header": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "historical_choice_badge": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "departures_heading": {
++          "$ref": "defs.schema.json#/$defs/text"
++        }
+       },
+       "additionalProperties": false
+     },
+     "notices": {
+       "type": "object",
+-      "required": ["dedication", "project_disclaimer", "ai_disclosure", "dramatization"],
++      "required": [
++        "dedication",
++        "project_disclaimer",
++        "ai_disclosure",
++        "dramatization"
++      ],
+       "properties": {
+-        "dedication": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/text" } },
+-        "project_disclaimer": { "$ref": "defs.schema.json#/$defs/text" },
+-        "ai_disclosure": { "$ref": "defs.schema.json#/$defs/text" },
+-        "dramatization": { "$ref": "defs.schema.json#/$defs/text" }
++        "dedication": {
++          "type": "array",
++          "items": {
++            "$ref": "defs.schema.json#/$defs/text"
++          }
++        },
++        "project_disclaimer": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "ai_disclosure": {
++          "$ref": "defs.schema.json#/$defs/text"
++        },
++        "dramatization": {
++          "$ref": "defs.schema.json#/$defs/text"
++        }
+       },
+       "additionalProperties": false
+     },
+@@ -33,13 +79,29 @@
+       "type": "array",
+       "items": {
+         "type": "object",
+-        "required": ["id", "title", "url", "note"],
++        "required": [
++          "id",
++          "title",
++          "url",
++          "note"
++        ],
+         "properties": {
+-          "id": { "type": "string", "pattern": "^H[0-9]+$" },
+-          "title": { "$ref": "defs.schema.json#/$defs/text" },
+-          "author": { "$ref": "defs.schema.json#/$defs/text" },
+-          "url": { "$ref": "defs.schema.json#/$defs/url" },
+-          "note": { "$ref": "defs.schema.json#/$defs/text" }
++          "id": {
++            "type": "string",
++            "pattern": "^H[0-9]+$"
++          },
++          "title": {
++            "$ref": "defs.schema.json#/$defs/text"
++          },
++          "author": {
++            "$ref": "defs.schema.json#/$defs/text"
++          },
++          "url": {
++            "$ref": "defs.schema.json#/$defs/url"
++          },
++          "note": {
++            "$ref": "defs.schema.json#/$defs/text"
++          }
+         },
+         "additionalProperties": false
+       }
+@@ -48,11 +110,22 @@
+       "type": "array",
+       "items": {
+         "type": "object",
+-        "required": ["id", "title", "text"],
++        "required": [
++          "id",
++          "title",
++          "text"
++        ],
+         "properties": {
+-          "id": { "type": "string", "pattern": "^F[0-9]+$" },
+-          "title": { "$ref": "defs.schema.json#/$defs/text" },
+-          "text": { "$ref": "defs.schema.json#/$defs/text" }
++          "id": {
++            "type": "string",
++            "pattern": "^F[0-9]+$"
++          },
++          "title": {
++            "$ref": "defs.schema.json#/$defs/text"
++          },
++          "text": {
++            "$ref": "defs.schema.json#/$defs/text"
++          }
+         },
+         "additionalProperties": false
+       }
+--- a/tests/core/ac-05-09.test.ts
++++ b/tests/core/ac-05-09.test.ts
+@@ -18,7 +18,7 @@
+       expect(Object.keys(run.state.ledger.facts).every((f) => f.startsWith('g8-prepared-'))).toBe(true);
+       for (const p of Object.values(run.state.ledger.people)) expect(p.trust).toBe(0);
+       // The prepared-contact appendix appears only with that preparation.
+-      const appendix = describeNode(run)!.lines.some((l) => l.text.startsWith('The handoff board'));
++      const appendix = describeNode(run)!.lines.some((l) => l.text.startsWith('CAPCOM has left'));
+       expect(appendix).toBe(prep.includes('contact'));
+     }
+   });
+@@ -171,7 +171,7 @@
+     for (const v of ['0.1.0', '0.2.0', '0.3.0']) {
+       const s = goodSave();
+       s.identity.content_version = v;
+-      reject(s, /unsupported-content-version/, new RegExp(`content version ${v.replace(/\./g, '\\.')}.*supports 0\\.4\\.0`));
++      reject(s, /unsupported-content-version/, new RegExp(`content version ${v.replace(/\./g, '\\.')}.*supports 0\\.5\\.0`));
+     }
+     const s = goodSave();
+     s.identity.content_fingerprint = 'deadbeef';
+--- a/tests/core/ac-10-14.test.ts
++++ b/tests/core/ac-10-14.test.ts
+@@ -64,7 +64,7 @@
+         expect(view.constraint_text).toBe('The crew paid for the earlier return with a long sea wait. Recovery rehearsal is required. Choose the other exercise.');
+       } else {
+         expect(disabled.id).toBe('g9-plan-recovery-contact');
+-        expect(view.constraint_text).toBe('The extra orbit carried a critical-reserve warning. Systems-warning rehearsal is required. Choose the other exercise.');
++        expect(view.constraint_text).toBe('The extra orbit left the crew facing entry with critically low RCS propellant. A systems-warning drill is required. Choose the other exercise.');
+       }
+       // Trust displays with the authored labels; critical information stays visible regardless.
+       for (const c of view.controllers) expect(c.label).toBe({ '1': 'Confidence strengthened', '0': 'Working confidence', '-1': 'Confidence strained', '-2': 'Confidence damaged' }[String(c.trust)]);
+--- a/tests/core/content-050-presentation.test.ts
++++ b/tests/core/content-050-presentation.test.ts
+@@ -0,0 +1,43 @@
++import { describe, expect, it } from 'vitest';
++import { describeDebrief, type Run } from '../../core';
++import { render } from '../../app/render';
++import type { Store } from '../../app/main';
++import { content, newRun, play, playScript, script, PREP_SETS } from './helpers';
++
++function store(run: Run, screen: 'console' | 'debrief' = 'console'): Store {
++  return { content: content(), run, ui: { screen, overlay: null, pinned: [], textSize: 'default', highlightPlan: null, message: null, saveMessage: null, hasBrowserSave: false, open: Object.keys(run.state.mission.evidence) } };
++}
++
++describe('0.5.0 presentation boundaries', () => {
++  it('shows the historical marker at termination, then keeps alternate history through accountability on either return', () => {
++    for (const route of ['earlier', 'later'] as const) {
++      const inputs = script({ route });
++      for (const [node, historical, alternate] of [
++        ['g8-rule-decision', true, false],
++        ['g8-return-brief', false, true],
++        ['g8-accountability-decision', false, true],
++      ] as const) {
++        const cut = inputs.findIndex((i) => 'node' in i && i.node === node);
++        const run = play(newRun(), inputs.slice(0, cut));
++        const output = render(store(run));
++        expect(output.includes('data-testid="badge-historical-choice"')).toBe(historical);
++        expect(output.includes('data-testid="badge-alt-history"')).toBe(alternate);
++        const visible = output.replace(/<[^>]*>/g, ' ');
++        expect(visible).not.toMatch(/fictional|simulated report|AmericaSpace|Fiction register/i);
++      }
++    }
++  });
++
++  it('every route gets exactly its own return and accountability departure, with valid references and readable notes', () => {
++    const ids = new Set(content().bundle.registry.sources.map((s) => s.id));
++    for (const prep of PREP_SETS) for (const route of ['earlier', 'later'] as const) for (const stance of ['blame', 'ground'] as const) {
++      const run = playScript({ prep, route, stance });
++      const departures = describeDebrief(run)!.paragraphs.filter((p) => p.section === 'departures');
++      expect(departures.map((p) => p.id)).toEqual([`g8-db-departure-${route}`, `g8-db-departure-${stance}`]);
++      for (const p of departures) for (const id of p.provenance!.sources) expect(ids.has(id)).toBe(true);
++      const output = render(store(run, 'debrief'));
++      expect(output).toContain('data-testid="departures-from-record"');
++      for (const match of output.matchAll(/<div class="notes">(.*?)<\/div>/g)) expect(match[1]).not.toMatch(/g[89]-/);
++    }
++  });
++});
+--- a/tests/core/dialogue-sheet.test.ts
++++ b/tests/core/dialogue-sheet.test.ts
+@@ -102,7 +102,7 @@
+     const csv = readFileSync(resolve(ROOT, 'docs', 'dialogue-sheet.csv'), 'utf8').replace(/\r\n/g, '\n');
+     expect(md).toBe(toMarkdown(s));
+     expect(csv).toBe(toCsv(s));
+-    expect(s.version).toBe('0.4.0');
++    expect(s.version).toBe('0.5.0');
+     expect(s.fingerprint).toBe(content().fingerprint);
+     expect(s.runs).toBe(56);
+   });
+@@ -183,15 +183,15 @@
+     expect(new Set(keys).size).toBe(keys.length); // no duplicates
+     const by = (text: string) => s.rows.find((r) => norm(r.text) === norm(text));
+     expect(by('Bring them down at the earlier opportunity.')!.branch).toBe('');
+-    expect(by("They're down. My part is not over.")!.branch).toBe('earlier');
+-    expect(by('Reserve warning. This is the margin we spent to reach their recovery force.')!.branch).toBe('later');
+-    expect(by('The pickup approach is delayed by the two ground handoff corrections. The crew are badly exhausted by the time the retrieval team reaches them; both need help transferring aboard.')!.branch).toBe('earlier q0');
++    expect(by("They're down. We still have to get the ship to them.")!.branch).toBe('earlier');
++    expect(by('Flight, RCS propellant is critically low. They still need those thrusters for entry.')!.branch).toBe('later');
++    expect(by('The desks first settled who would send the pickup instruction, then called again to confirm receipt. That delayed the team\'s approach. By the time help reaches the capsule, both crew members are badly exhausted and need assistance getting aboard.')!.branch).toBe('earlier q0');
+     expect(by('I wanted the later return. You gave my team the preparation to make the earlier one work. We still need to practice that sea-recovery problem.')!.branch).toBe('earlier q2');
+-    expect(by('Your endorsement gives the critics a stronger position in this fictional timeline. Armstrong and Scott\'s confidence in you falls. A disagreement within the astronaut corps has become a division sharpened by its flight director.')!.branch).toBe('crew-blame');
++    expect(by('Cunningham and Stafford welcome your support. Armstrong and Scott lose confidence in you. The disagreement now divides the astronaut corps more deeply, with its flight director backing the crew\'s critics.')!.branch).toBe('crew-blame');
+     expect(by("This mission must include the systems-warning drill after Gemini VIII's reserve warning.")!.branch).toBe('later');
+-    expect(by('The handoff board has a blank acknowledgement field for the next report.')!.branch).toBe('contact rehearsal');
++    expect(by('CAPCOM has left the next report\'s receipt blank. Nothing new has come through.')!.branch).toBe('contact rehearsal');
+     expect(by('Crew recovered — earlier return, punishing sea wait')!.branch).toBe('earlier q0');
+-    expect(by('You carried report provenance into the procedures binder.')!.branch).toBe('lesson: provenance');
++    expect(by('You added report timing and confirmation to the procedures binder.')!.branch).toBe('lesson: provenance');
+     expect(s.rows.filter((r) => /^varies/.test(r.branch)).map((r) => r.text), 'rows whose branch could not be named').toEqual([]);
+   });
+ });
+--- a/tests/core/replay.test.ts
++++ b/tests/core/replay.test.ts
+@@ -54,7 +54,7 @@
+     expect(header.type).toBe('run');
+     if (header.type === 'run') {
+       expect(header.seed).toBe(42);
+-      expect(header.content_version).toBe('0.4.0');
++      expect(header.content_version).toBe('0.5.0');
+       expect(header.content_fingerprint).toBe(content().fingerprint);
+     }
+     expect(run.state.draws).toBe(0);
+--- a/tests/core/validator.test.ts
++++ b/tests/core/validator.test.ts
+@@ -57,7 +57,7 @@
+   it('passes, including the on-disk manifest check', () => {
+     const r = run(loadRaw(), undefined, false);
+     expect(r.errors).toEqual([]);
+-    expect(r.contentVersion).toBe('0.4.0');
++    expect(r.contentVersion).toBe('0.5.0');
+     expect(r.fingerprint).toMatch(/^[0-9a-f]{64}$/);
+     expect(r.sweep.runs).toBe(56);
+     expect(r.sweep.outcomes.size).toBe(6);

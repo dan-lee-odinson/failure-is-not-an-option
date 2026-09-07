@@ -1,0 +1,13 @@
+{
+  "core/types.ts": "68e654710f75f29f3d19887a08e913818cbb513f3f107fbdb57a18039cd221c9",
+  "core/views.ts": "416677fb0a2a5ee5c04b9b9cf328e70e34c02b4d22f2e76c9853facf2e366c9c",
+  "app/render.ts": "681b1fe9277c88773e13cb1c1d66f8f2237901593bcd13740382695e834c99cf",
+  "schema/mission.schema.json": "a94fce98335ec06f727d02d81e5b9f9ecea05bf3aaf69697c21435c78fefeb56",
+  "schema/registry.schema.json": "5ebe279924f057886ff66124c23deb2cb9478be08e4f8ac5167ba0feaac361e9",
+  "tests/core/ac-05-09.test.ts": "579c928b7fe0d90c6fc55d8205ef4e0070ef129c34d0c8045bee87e63ecc9cd0",
+  "tests/core/ac-10-14.test.ts": "acda877f3c836dee5c23b00570f91dd98990d13d5593cb20bb1a965386ac956d",
+  "tests/core/content-050-presentation.test.ts": null,
+  "tests/core/dialogue-sheet.test.ts": "f11a26a0a0c37ad97fcdef9db6dcc5ac5dfe9d7f22ffe2fd9ae374c2f9ec7d2b",
+  "tests/core/replay.test.ts": "23ede5d10a759d310c88da88a50ab6b759162f187a386d4d476ce13ed1a848c2",
+  "tests/core/validator.test.ts": "991d5cfe3066bf0bd37f4b60816895463aecc494ff39fe5357021c54ffebb171"
+}

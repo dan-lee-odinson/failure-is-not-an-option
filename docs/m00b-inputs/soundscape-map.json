@@ -1,0 +1,44 @@
+{
+  "$comment": "FNO soundscape map — 21 §3, 22 (Dan's selection), audio/README. Files live in public/audio/soundscape-cc0/ under their original Freesound filenames; missing files play silence and are listed by npm run placeholders. Gains are linear multipliers on the effects/beds buses; all tunable without a rebuild.",
+  "version": 1,
+  "gains": {
+    "room_bed_gain": 0.3,
+    "walla_gain": 0.2,
+    "effects_gain": 0.6
+  },
+  "beds": [
+    {
+      "id": "room-bed",
+      "asset": "sfx-room-tone",
+      "file": "332417__seventhsamurai__room-tone-empty-room-with-ac-desktop-computer-running.wav",
+      "gain_ref": "room_bed_gain",
+      "screens": "all-console",
+      "loop": { "from": null, "to": null, "crossfade": 0.3, "note": "choose a steady-spectrum region by analysis once the file is present" },
+      "note": "Dan's ruling: 60–75 % below full scale by default."
+    },
+    {
+      "id": "walla",
+      "asset": "sfx-walla",
+      "file": "725718__sduggysounds__typing-office-chatter-in-background.wav",
+      "gain_ref": "walla_gain",
+      "screens": ["preparation", "postflight"],
+      "loop": { "from": null, "to": null, "crossfade": 0.3 },
+      "note": "Sits under the room bed, never above it."
+    }
+  ],
+  "one_shots": [
+    { "id": "button", "asset": "sfx-button", "file": "457411__ericssoundschmiede__switch-button-pressing.wav", "region": null, "events": ["ui:choose", "ui:commit", "ui:continue", "ui:begin"] },
+    { "id": "toggle", "asset": "sfx-switches", "file": "713997__trp__130111-light-switches-clicks-dimmer-slides-hotel-london-on.mp3", "region": { "start": null, "end": null, "note": "toggle click region — pick by listening" }, "events": ["ui:menu-select"] },
+    { "id": "rotary", "asset": "sfx-switches", "file": "713997__trp__130111-light-switches-clicks-dimmer-slides-hotel-london-on.mp3", "region": { "start": null, "end": null, "note": "dimmer/detent region — pick by listening" }, "events": ["ui:settings-change", "ui:volume-change"] },
+    { "id": "paper", "asset": "sfx-paper", "file": "171320__swidmark__paper-rustling-01.wav", "region": null, "events": ["ui:pin", "ui:unpin", "ui:binder-open", "ui:binder-close"] },
+    { "id": "headset", "asset": "sfx-headset", "file": "47646__readeonly__end-radio-transmission.wav", "region": null, "events": ["ui:history-open", "ui:history-close", "ui:loop-panel-toggle"] },
+    { "id": "alert", "asset": "sfx-alert", "file": "266156__jonnicholas__beep-8-count-loopable.wav", "region": { "start": 0.0, "end": null, "note": "ONE beep only — trim to the first beep; never loop" }, "events": ["ui:crisis-card-render"], "credit_required": "Beep 8 count (loopable) by JonNicholas, freesound.org, CC BY 3.0" },
+    { "id": "quindar-open", "asset": "sfx-quindar-open", "file": "generated/quindar-open.wav", "region": null, "events": ["ui:capcom-line-start"] },
+    { "id": "quindar-close", "asset": "sfx-quindar-close", "file": "generated/quindar-close.wav", "region": null, "events": ["ui:capcom-line-end"] }
+  ],
+  "generated": {
+    "script": "scripts/gen-quindar.ts",
+    "quindar": { "open_hz": 2525, "close_hz": 2475, "duration_ms": 250, "ramp_ms": 10, "sample_rate": 44100, "bits": 16, "peak_dbfs": -12 }
+  },
+  "never_commit": ["audio/soundscape/ (Epidemic Sound — not redistributable)"]
+}

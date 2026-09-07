@@ -1,0 +1,283 @@
+--- a/core/index.ts
++++ b/core/index.ts
+@@ -6,7 +6,7 @@
+ export { EngineError, Run, emptyLedger, optionAvailability, replay, describeInput, type ApplyResult } from './engine';
+ export { describeFollowOn, validateFollowOnLedger, trustLabel, holdsOnLedger, type FollowOnView } from './followon';
+ export {
+-  describeNode, describeEvidence, describeDebrief, describeFollowOnForRun, conditionHolds,
++  alternateHistoryActive, describeNode, describeEvidence, describeDebrief, describeFollowOnForRun, conditionHolds,
+   type NodeView, type OptionView, type LineView, type EvidenceView, type DebriefView, type SpeakerView, type EvidenceLink,
+ } from './views';
+ export { createSave, verifySave, checkStructure, checkReferences, SAVE_FORMAT, SAVE_VERSION, type SaveFile, type VerifyResult } from './save';
+--- a/core/types.ts
++++ b/core/types.ts
+@@ -165,7 +165,8 @@
+   /** null = unlimited; an integer is the declared budget (SC-02). */
+   attention: number | null;
+   /** From this phase on, the ALTERNATE HISTORY badge is shown. */
+-  alternate_history?: boolean;
++  /** Once active, persists for the rest of this run; absent means false. */
++  alternate_history?: boolean | Condition;
+   nodes: Node[];
+ }
+ 
+--- a/core/views.ts
++++ b/core/views.ts
+@@ -93,9 +93,39 @@
+   return { speaker: speaker(content, l.speaker), text: l.text, cites: (l.cites ?? []).map((c) => link(content, state, c)) };
+ }
+ 
+-function alternateHistoryActive(content: ContentIndex, phaseIndex: number): boolean {
+-  for (let i = 0; i <= phaseIndex; i++) if (content.mission.phases[i]?.alternate_history) return true;
+-  return false;
++/**
++ * Sticky presentation marker, derived without adding save/domain state.
++ * Project only condition inputs from the existing log, testing completed input
++ * boundaries (and the current boundary). This preserves activation even for
++ * negated conditions that become false later, including after save/replay.
++ * Only phases actually entered can activate a marker.
++ */
++export function alternateHistoryActive(run: Run): boolean {
++  const state: RunState = {
++    ...run.state,
++    ledger: { ...run.state.ledger, facts: { ...run.identity.initial_ledger.facts }, procedures: [...run.identity.initial_ledger.procedures] },
++    mission: { ...run.state.mission, evidence: {}, chosen: [], events_seen: [] },
++  };
++  const markers: (boolean | Condition)[] = [];
++  const active = () => markers.some((m) => m === true || (typeof m === 'object' && evaluate(m, state)));
++  for (const entry of run.log) {
++    if (entry.type === 'input' && active()) return true;
++    if (entry.type === 'phase') {
++      const marker = run.content.mission.phases.find((p) => p.id === entry.phase)?.alternate_history;
++      if (marker !== undefined) markers.push(marker);
++    } else if (entry.type === 'input' && entry.input.kind === 'option') {
++      state.mission.chosen.push({ option: entry.input.option, node: entry.input.node, at_event: entry.seq });
++    } else if (entry.type === 'acquire') {
++      state.mission.evidence[entry.evidence] = { at_event: entry.seq, phase: entry.phase, stage: entry.stage, channel: entry.channel, node: entry.node };
++    } else if (entry.type === 'resolution') {
++      state.mission.events_seen.push(entry.node, entry.resolution);
++    } else if (entry.type === 'effect' && entry.effect === 'set_fact') {
++      state.ledger.facts[entry.fact] = { set_by: state.mission.id, at_event: entry.seq, label: entry.label };
++    } else if (entry.type === 'effect' && entry.effect === 'adopt_procedure') {
++      state.ledger.procedures.push(entry.procedure);
++    }
++  }
++  return active();
+ }
+ 
+ function optionView(content: ContentIndex, state: RunState, node: Node, o: Option): OptionView {
+@@ -192,7 +222,7 @@
+   return {
+     phase: {
+       id: phase.id, title: phase.title, display_time: phase.display_time, contact: phase.contact,
+-      alternate_history: alternateHistoryActive(content, phaseIndex), index: phaseIndex, count: content.mission.phases.length,
++      alternate_history: alternateHistoryActive(run), index: phaseIndex, count: content.mission.phases.length,
+     },
+     attention: phase.attention === null || state.mission.attention === null ? null : { remaining: state.mission.attention, declared: phase.attention },
+     node: {
+--- a/app/render.ts
++++ b/app/render.ts
+@@ -3,7 +3,7 @@
+  * <button>, <a>, <input>, or <summary>, reachable by keyboard in DOM order.
+  * Actions are declared with data-action="name" or "name:arg".
+  */
+-import { describeDebrief, describeEvidence, describeFollowOnForRun, describeNode, type EvidenceView, type LineView, type NodeView, type OptionView } from '../core';
++import { alternateHistoryActive, describeDebrief, describeEvidence, describeFollowOnForRun, describeNode, type EvidenceView, type LineView, type NodeView, type OptionView } from '../core';
+ import manifest from '../assets/manifest.json';
+ import type { Store } from './main';
+ 
+@@ -340,7 +340,7 @@
+   const events = d.events.map((e) => `<div>${esc(JSON.stringify(e))}</div>`).join('');
+   return `
+   <main class="screen-debrief" data-testid="screen-debrief">
+-    <span class="badge alt">${esc(labels.alternate_history_badge)}</span>
++    ${alternateHistoryActive(run) ? `<span class="badge alt" data-testid="badge-alt-history">${esc(labels.alternate_history_badge)}</span>` : ''}
+     <h1>Debrief — ${esc(store.content.mission.title)}</h1>
+     <p class="outcome-title" data-testid="outcome-title">${esc(d.outcome.title)}</p>
+     <div class="panel fiction"><h2>Crew condition on pickup</h2><p data-testid="consequence-text">${esc(d.consequence?.text ?? '')}</p></div>
+@@ -387,7 +387,7 @@
+   };
+   return `
+   <main class="screen-planning" data-testid="screen-planning">
+-    <span class="badge alt">${esc(labels.alternate_history_badge)}</span>
++    ${alternateHistoryActive(run) ? `<span class="badge alt" data-testid="badge-alt-history">${esc(labels.alternate_history_badge)}</span>` : ''}
+     <h1>${esc(fo.display_title)}</h1>
+     <p class="muted">Initialized from the committed Gemini VIII record: ${esc(fo.completion.title)}.</p>
+     ${fo.constraint_text ? `<div class="constraint" data-testid="constraint">${esc(fo.constraint_text)}</div>` : ''}
+--- a/schema/mission.schema.json
++++ b/schema/mission.schema.json
+@@ -187,7 +187,16 @@
+           ]
+         },
+         "alternate_history": {
+-          "type": "boolean"
++          "oneOf": [
++            {
++              "type": "boolean"
++            },
++            {
++              "$ref": "defs.schema.json#/$defs/condition"
++            }
++          ],
++          "default": false,
++          "description": "Presentation marker: absent or false does not activate it. True or a condition that becomes active after this phase is entered persists for the rest of the run, even if the condition later becomes false. Derived from recorded run history; no domain-state effect."
+         },
+         "nodes": {
+           "type": "array",
+--- a/tests/core/ac-05-09.test.ts
++++ b/tests/core/ac-05-09.test.ts
+@@ -168,10 +168,10 @@
+   });
+ 
+   it('unsupported content versions from earlier packages', () => {
+-    for (const v of ['0.1.0', '0.2.0', '0.3.0']) {
++    for (const v of ['0.1.0', '0.2.0', '0.3.0', '0.4.0', '0.5.0']) {
+       const s = goodSave();
+       s.identity.content_version = v;
+-      reject(s, /unsupported-content-version/, new RegExp(`content version ${v.replace(/\./g, '\\.')}.*supports 0\\.5\\.0`));
++      reject(s, /unsupported-content-version/, new RegExp(`content version ${v.replace(/\./g, '\\.')}.*supports 0\\.5\\.1`));
+     }
+     const s = goodSave();
+     s.identity.content_fingerprint = 'deadbeef';
+--- a/tests/core/content-050-presentation.test.ts
++++ b/tests/core/content-050-presentation.test.ts
+@@ -4,18 +4,20 @@
+ import type { Store } from '../../app/main';
+ import { content, newRun, play, playScript, script, PREP_SETS } from './helpers';
+ 
+-function store(run: Run, screen: 'console' | 'debrief' = 'console'): Store {
++function store(run: Run, screen: 'console' | 'debrief' | 'planning' = 'console'): Store {
+   return { content: content(), run, ui: { screen, overlay: null, pinned: [], textSize: 'default', highlightPlan: null, message: null, saveMessage: null, hasBrowserSave: false, open: Object.keys(run.state.mission.evidence) } };
+ }
+ 
+-describe('0.5.0 presentation boundaries', () => {
+-  it('shows the historical marker at termination, then keeps alternate history through accountability on either return', () => {
++describe('0.5.1 presentation boundaries', () => {
++  it('marks historical return timing and keeps alternate history only on the earlier route', () => {
+     for (const route of ['earlier', 'later'] as const) {
+       const inputs = script({ route });
+       for (const [node, historical, alternate] of [
+         ['g8-rule-decision', true, false],
+-        ['g8-return-brief', false, true],
+-        ['g8-accountability-decision', false, true],
++        ['g8-return-brief', true, false],
++        ['g8-order-receipt', false, false],
++        ['g8-ground-execution', false, route === 'earlier'],
++        ['g8-accountability-decision', route === 'later', route === 'earlier'],
+       ] as const) {
+         const cut = inputs.findIndex((i) => 'node' in i && i.node === node);
+         const run = play(newRun(), inputs.slice(0, cut));
+@@ -35,6 +37,9 @@
+       const departures = describeDebrief(run)!.paragraphs.filter((p) => p.section === 'departures');
+       expect(departures.map((p) => p.id)).toEqual([`g8-db-departure-${route}`, `g8-db-departure-${stance}`]);
+       for (const p of departures) for (const id of p.provenance!.sources) expect(ids.has(id)).toBe(true);
++      for (const screen of ['debrief', 'planning'] as const) {
++        expect(render(store(run, screen)).includes('data-testid="badge-alt-history"')).toBe(route === 'earlier');
++      }
+       const output = render(store(run, 'debrief'));
+       expect(output).toContain('data-testid="departures-from-record"');
+       for (const match of output.matchAll(/<div class="notes">(.*?)<\/div>/g)) expect(match[1]).not.toMatch(/g[89]-/);
+--- /dev/null
++++ b/tests/core/content-051-history.test.ts
+@@ -0,0 +1,68 @@
++import { describe, expect, it } from 'vitest';
++import { alternateHistoryActive, canonical, evaluate, indexContent, replay, Run, type Condition } from '../../core';
++import { content, newRun, play, script, PREP_SETS } from './helpers';
++
++function withMarker(marker: boolean | Condition | undefined, phase = 5): Run {
++  const bundle = structuredClone(content().bundle);
++  for (const p of bundle.mission.phases) delete p.alternate_history;
++  if (marker !== undefined) bundle.mission.phases[phase]!.alternate_history = marker;
++  return new Run(indexContent(bundle), { seed: 1 });
++}
++
++describe('0.5.1 conditional history contract', () => {
++  it('switches at earlier-order execution on every route and survives replay at every input boundary without mutation', () => {
++    for (const prep of PREP_SETS) for (const route of ['earlier', 'later'] as const)
++      for (const lesson of ['provenance', 'recovery'] as const) for (const stance of ['blame', 'ground'] as const) {
++        const inputs = script({ prep, route, lesson, stance });
++        const cut = inputs.findIndex((i) => i.kind === 'continue' && i.id === 'g8-execute-return');
++        const run = newRun();
++        for (let count = 0; count <= inputs.length; count++) {
++          const expected = route === 'earlier' && count > cut;
++          const before = canonical({ state: run.state, log: run.log, identity: run.identity });
++          expect(alternateHistoryActive(run)).toBe(expected);
++          expect(canonical({ state: run.state, log: run.log, identity: run.identity })).toBe(before);
++          expect(alternateHistoryActive(replay(run.content, run.identity))).toBe(expected);
++          if (count < inputs.length) play(run, [inputs[count]!]);
++        }
++      }
++  });
++
++  it('absent and false do not activate; true activates only once its phase is entered', () => {
++    for (const marker of [undefined, false, true]) {
++      const run = withMarker(marker);
++      expect(alternateHistoryActive(run)).toBe(false);
++      play(run, script({ route: 'later' }));
++      expect(alternateHistoryActive(run)).toBe(marker === true);
++    }
++  });
++
++  it('keeps activation after a negated condition becomes false, including reconstruction from replay', () => {
++    const marker = { not: { chose: 'g8-return-later' } };
++    const run = withMarker(marker, 4);
++    const inputs = script({ route: 'later' });
++    const cut = inputs.findIndex((i) => i.kind === 'option' && i.option === 'g8-return-later');
++    play(run, inputs.slice(0, cut));
++    expect(alternateHistoryActive(run)).toBe(true);
++    play(run, inputs.slice(cut));
++    expect(evaluate(marker, run.state)).toBe(false);
++    expect(alternateHistoryActive(run)).toBe(true);
++    expect(alternateHistoryActive(replay(run.content, run.identity))).toBe(true);
++  });
++
++  it('reuses all existing condition primitives and compound grammar', () => {
++    const completed = play(newRun(), script({ prep: ['contact'], route: 'later' }));
++    const conditions: Condition[] = [
++      { fact: Object.keys(completed.state.ledger.facts)[0]! },
++      { evidence: Object.keys(completed.state.mission.evidence)[0]! },
++      { procedure: completed.state.ledger.procedures[0]! },
++      { event_seen: completed.state.mission.events_seen[0]! },
++      { all: [{ chose: 'g8-return-later' }, { not: { chose: 'g8-return-earlier' } }] },
++      { any: [{ chose: 'g8-return-earlier' }, { chose: 'g8-return-later' }] },
++    ];
++    for (const condition of conditions) {
++      const run = withMarker(condition, 0);
++      play(run, script({ prep: ['contact'], route: 'later' }));
++      expect(alternateHistoryActive(run)).toBe(true);
++    }
++  });
++});
+--- a/tests/core/dialogue-sheet.test.ts
++++ b/tests/core/dialogue-sheet.test.ts
+@@ -102,7 +102,7 @@
+     const csv = readFileSync(resolve(ROOT, 'docs', 'dialogue-sheet.csv'), 'utf8').replace(/\r\n/g, '\n');
+     expect(md).toBe(toMarkdown(s));
+     expect(csv).toBe(toCsv(s));
+-    expect(s.version).toBe('0.5.0');
++    expect(s.version).toBe('0.5.1');
+     expect(s.fingerprint).toBe(content().fingerprint);
+     expect(s.runs).toBe(56);
+   });
+--- a/tests/core/replay.test.ts
++++ b/tests/core/replay.test.ts
+@@ -54,7 +54,7 @@
+     expect(header.type).toBe('run');
+     if (header.type === 'run') {
+       expect(header.seed).toBe(42);
+-      expect(header.content_version).toBe('0.5.0');
++      expect(header.content_version).toBe('0.5.1');
+       expect(header.content_fingerprint).toBe(content().fingerprint);
+     }
+     expect(run.state.draws).toBe(0);
+--- a/tests/core/validator.test.ts
++++ b/tests/core/validator.test.ts
+@@ -57,7 +57,7 @@
+   it('passes, including the on-disk manifest check', () => {
+     const r = run(loadRaw(), undefined, false);
+     expect(r.errors).toEqual([]);
+-    expect(r.contentVersion).toBe('0.5.0');
++    expect(r.contentVersion).toBe('0.5.1');
+     expect(r.fingerprint).toMatch(/^[0-9a-f]{64}$/);
+     expect(r.sweep.runs).toBe(56);
+     expect(r.sweep.outcomes.size).toBe(6);

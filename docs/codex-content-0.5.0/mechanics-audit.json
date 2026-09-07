@@ -1,0 +1,7 @@
+{
+  "mission-gemini-8.json": "PASS: existing IDs, conditions, effects excluding display labels, sequencing, quantities, and outcome kinds preserved",
+  "evidence.json": "PASS: existing IDs, conditions, effects excluding display labels, sequencing, quantities, and outcome kinds preserved",
+  "procedures.json": "PASS: existing IDs, conditions, effects excluding display labels, sequencing, quantities, and outcome kinds preserved",
+  "followon-gemini-9a.json": "PASS: existing IDs, conditions, effects excluding display labels, sequencing, quantities, and outcome kinds preserved",
+  "characters.json": "PASS: existing IDs, conditions, effects excluding display labels, sequencing, quantities, and outcome kinds preserved"
+}

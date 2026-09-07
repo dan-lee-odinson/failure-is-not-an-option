@@ -1,0 +1,13 @@
+[
+  "core/types.ts",
+  "core/views.ts",
+  "app/render.ts",
+  "schema/mission.schema.json",
+  "schema/registry.schema.json",
+  "tests/core/ac-05-09.test.ts",
+  "tests/core/ac-10-14.test.ts",
+  "tests/core/content-050-presentation.test.ts",
+  "tests/core/dialogue-sheet.test.ts",
+  "tests/core/replay.test.ts",
+  "tests/core/validator.test.ts"
+]

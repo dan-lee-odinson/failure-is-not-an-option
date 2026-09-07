@@ -1,0 +1,16 @@
+{
+  "baseline": "0.5.0 accepted content adapter, not the older live checkout",
+  "files": {
+    "core/index.ts": "15237ae3ad148b74b7de660d7caa1d0faa298106cba97ed4bf7682fd33849dc1",
+    "core/types.ts": "eafdd36020b7c578a89fcc2b002fbd5b00216c70b626cdf86cc72871bcbe9443",
+    "core/views.ts": "64cab0ecf572676a417735218aa5794758ec192af4f44357f045a0a5d38bc671",
+    "app/render.ts": "39c98ab413b307bea0aa0bdf9cfb29b5f4977ce2c3ff753a24db0dc3ff7ed72d",
+    "schema/mission.schema.json": "68fa29794ff4c086ab4f44fad53228ad6daa76ebffcf635a3b375f7f3d86c9ef",
+    "tests/core/ac-05-09.test.ts": "2d8dfbbae4f8911722d925833e24368362a3ba8492373a7d187c0822c10a56a0",
+    "tests/core/content-050-presentation.test.ts": "80db69a02e424d2367cbc5ed71c693cc0456e248f57265bae8b0b03784974927",
+    "tests/core/content-051-history.test.ts": null,
+    "tests/core/dialogue-sheet.test.ts": "4491b9a1c9e7560dc4f5eef529d5fa484941656980b28331cba6f9e8590df571",
+    "tests/core/replay.test.ts": "607a25577061410209a8dafc327374b6bf59c7f63902b0cd4e3c3b2c9bfb09c7",
+    "tests/core/validator.test.ts": "c7454f84dffe1e79f646fcaaf11ab7998cba227f71ad33ce64c709acba388aad"
+  }
+}

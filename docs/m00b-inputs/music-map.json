@@ -1,0 +1,47 @@
+{
+  "$comment": "FNO music map — starting values from 20-Music-Scene-Entries.md §2/§5. Seconds. Trigger = screen id or node id entered; stop_on = input ids or screen ids. No loops on decision screens. All numbers tunable; 'provisional' cues expected to move after playtest 2.",
+  "version": 1,
+  "defaults": { "music_gain": 0.8 },
+  "cues": [
+    {
+      "id": "opening",
+      "asset": "audio-orbit-of-hope",
+      "trigger": "screen:opening-dedication",
+      "start": 0.0, "end": 42.0, "fade_in": 0.0, "fade_out": 2.5,
+      "loop": null,
+      "extend_to_seam_if_still_reading": 124.0,
+      "stop_on": ["screen:menu", "skip-to-menu"],
+      "note": "Crossfades into menu-loop. 0:42 is a section change; 2:04 is the next seam."
+    },
+    {
+      "id": "menu-loop",
+      "asset": "audio-orbit-of-hope-refrain",
+      "trigger": "screen:menu",
+      "start": 0.0, "end": null, "fade_in": 0.0, "fade_out": 2.0,
+      "loop": { "from": 60.5, "to": 111.7, "crossfade": 0.2 },
+      "stop_on": ["start-new", "start-load"]
+    },
+    {
+      "id": "crisis",
+      "asset": "audio-mission-in-danger",
+      "trigger": "node:g8-crisis-report",
+      "start": 0.0, "end": null, "fade_in": 0.0, "fade_out": 2.0,
+      "loop": null,
+      "stop_on": ["choose:g8-return-earlier", "choose:g8-return-later"],
+      "provisional": true,
+      "note": "Runs once through the return briefing and decision; silence after 2:37 is intended. Tune start offset first, then the fade on Choose."
+    },
+    {
+      "id": "postflight",
+      "asset": "audio-per-aspera",
+      "trigger": "node:g8-accountability-brief",
+      "start": 90.0, "end": null, "fade_in": 1.0, "fade_out": 0.0,
+      "loop": null,
+      "stop_on": [],
+      "note": "Dan's ruling: start at 1:30. Runs out naturally at 1:46; no retrigger for the IX-A briefing. Alternative if too short in play: start 64.0."
+    }
+  ],
+  "reserved": [
+    { "asset": "audio-disaster-and-loss", "note": "Not cued in M00; held for loss outcomes in later missions." }
+  ]
+}
