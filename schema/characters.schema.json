@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fno.local/schema/characters.schema.json",
+  "title": "Characters",
+  "type": "object",
+  "required": ["content_version", "characters"],
+  "properties": {
+    "content_version": { "$ref": "defs.schema.json#/$defs/semver" },
+    "characters": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "role", "display", "kind", "portrait", "portrayal", "dramatization"],
+        "properties": {
+          "id": { "$ref": "defs.schema.json#/$defs/id" },
+          "name": { "$ref": "defs.schema.json#/$defs/text" },
+          "role": { "$ref": "defs.schema.json#/$defs/text" },
+          "display": { "$ref": "defs.schema.json#/$defs/text" },
+          "kind": { "enum": ["player", "historical", "fictional-controller", "composite-controller"] },
+          "manner": { "enum": ["cautious", "direct", "challenging"] },
+          "portrait": { "oneOf": [{ "$ref": "defs.schema.json#/$defs/id" }, { "type": "null" }] },
+          "portrayal": { "$ref": "defs.schema.json#/$defs/text" },
+          "dramatization": { "const": true },
+          "sources": { "type": "array", "items": { "type": "string", "pattern": "^H[0-9]+$" } }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

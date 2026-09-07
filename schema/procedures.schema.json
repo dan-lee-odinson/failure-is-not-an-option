@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fno.local/schema/procedures.schema.json",
+  "title": "Procedures",
+  "type": "object",
+  "required": ["content_version", "procedures"],
+  "properties": {
+    "content_version": { "$ref": "defs.schema.json#/$defs/semver" },
+    "procedures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "text", "status", "provenance"],
+        "properties": {
+          "id": { "$ref": "defs.schema.json#/$defs/id" },
+          "title": { "$ref": "defs.schema.json#/$defs/text" },
+          "text": { "$ref": "defs.schema.json#/$defs/text" },
+          "status": { "enum": ["adopted-procedure", "commissioned-task"] },
+          "provenance": { "$ref": "defs.schema.json#/$defs/provenance" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

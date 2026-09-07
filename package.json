@@ -1,0 +1,30 @@
+{
+  "name": "failure-is-not-an-option",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Failure is Not an Option - a 2D NASA flight-director simulator. M00: Gemini VIII, The Weight of the Call.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "validate": "tsx scripts/validate.ts",
+    "placeholders": "tsx scripts/placeholders.ts",
+    "fingerprint": "tsx scripts/fingerprint.ts",
+    "validate:fail": "tsx scripts/fail-on-purpose.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.3.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "content_version": "0.4.0",
+  "labels": {
+    "start_notice": "A historical mission with fictional return decisions and alternate outcomes.",
+    "alternate_history_badge": "ALTERNATE HISTORY",
+    "alternate_history_explanation": "From return planning onward this scenario departs from the historical record. The two selectable return opportunities, the control-reserve warning, the recovery conditions, the crew-condition variations, the controllers' reactions, and the next-mission constraints are fictional game modeling (F7, F8, F9). The post-flight stance and its relationship consequences are fictional (F10). The historical opening — docking, the communications gap, the crew's stabilization of the spacecraft, the termination rule, and a western Pacific recovery — follows the sources H1–H4.",
+    "simulated_report": "Simulated report",
+    "postflight_header": "Historical disagreement; fictional player stance and relationship effects."
+  },
+  "notices": {
+    "dedication": [
+      "To the men and women of NASA, whose bravery, sacrifice, and vision embody the best of humanity.",
+      "To those who journeyed beyond our world, and to all whose work made those journeys possible."
+    ],
+    "project_disclaimer": "Failure is Not an Option is an independent homage to NASA and the people of the space program, created for appreciation and exploration, not for profit. It is not affiliated with, authorized, sponsored, or endorsed by NASA.",
+    "ai_disclosure": "This project was created using generative AI within a human-in-the-loop process, with human creative direction, review, and final decision-making.",
+    "dramatization": "Inspired by real missions and people, this game includes fictional dialogue, simplified systems, and alternate historical outcomes. These elements do not represent the actual words, beliefs, or actions of the people portrayed. NASA is not responsible for the game's interpretations, generated content, or accuracy."
+  },
+  "sources": [
+    {
+      "id": "H1",
+      "title": "Gemini's First Docking Turns to Wild Ride in Orbit",
+      "author": "NASA, Bob Granath",
+      "url": "https://www.nasa.gov/missions/gemini/gemini-viii/geminis-first-docking-turns-to-wild-ride-in-orbit/",
+      "note": "Supports the communication gap, crew stabilization and contingency return. It describes an orbit before historical recovery; it does not validate our two-option menu or invented extra-orbit margin. Its fault-cause wording is cautious. Used for the historical opening, not to claim simulated reserve telemetry or alternate crew conditions occurred."
+    },
+    {
+      "id": "H2",
+      "title": "55 Years Ago: Gemini VIII, the First Docking in Space",
+      "author": "NASA, John Uri",
+      "url": "https://www.nasa.gov/missions/gemini/55-years-ago-gemini-viii-the-first-docking-in-space/",
+      "note": "Supports ending the remaining objectives after RCS activation and the western Pacific contingency recovery. It describes a next-available-opportunity rule. Our fictional choice does not establish that both game opportunities met the real rule. Its inconsistent ship initials and unneeded precise recovery details are not used."
+    },
+    {
+      "id": "H3",
+      "title": "Project Gemini: A Chronology, Part III(B), March 16 entry",
+      "author": "NASA SP-4002",
+      "url": "https://www.nasa.gov/history/SP-4002/p3b.htm",
+      "note": "Supports the approximate docking anchor and broad termination/recovery sequence. The source's cited original mission-report pages have not been independently checked. This is not transcript-verified content."
+    },
+    {
+      "id": "H4",
+      "title": "Gemini VIII mission overview",
+      "author": "NASA",
+      "url": "https://www.nasa.gov/mission/gemini-viii/",
+      "note": "Crew/context cross-check. Earlier review found inconsistent caption/time/bearing details; these are not used in the scenario's exact timeline."
+    },
+    {
+      "id": "H5",
+      "title": "'Tumbling End Over End': The Trauma of Gemini VIII (Part 2), March 16, 2014",
+      "author": "Ben Evans, AmericaSpace",
+      "url": "https://www.americaspace.com/2014/03/16/tumbling-end-over-end-the-trauma-of-gemini-viii-part-2/",
+      "note": "User-supplied secondary account. Its post-flight discussion supports the attributed positions summarized in the context card, including the reported exoneration. The original memoir/interview passages and timing of each criticism have not been independently verified. No direct quotes are invented; the scene is not presented as a documented meeting. H5 does not support any numerical relationship adjustment or Glen's alternate response."
+    }
+  ],
+  "fiction": [
+    { "id": "F1", "title": "Contact rehearsal", "text": "Supplemental sender/acknowledgement exercise, readback document and its later ground handoff effects. These are performed fictional rehearsals, not astronaut training prerequisites." },
+    { "id": "F2", "title": "Recovery rehearsal", "text": "Supplemental pickup ownership/readback exercise and the fictional rework it can avoid. Preparation does not move recovery forces closer." },
+    { "id": "F3", "title": "Systems rehearsal", "text": "Supplemental warning-routing exercise, its readback and its operational handoff effects. Preparation does not add control reserve or identify the hardware fault." },
+    { "id": "F4", "title": "Air-support and surface-retrieval reports", "text": "Original abstract status reports, now supporting a real operational choice. No claim to historical ship/aircraft positions." },
+    { "id": "F5", "title": "Recovery coordination events", "text": "The fictional ground ownership clarification, acknowledgement retry and pickup approach consequences. These are explicitly events of the game room, not errors by historical astronauts or operators." },
+    { "id": "F6", "title": "Procedure adoption", "text": "Two original standing-procedure choices and their reference pages. Neither reverses the operational outcome or the next-mission rehearsal constraint." },
+    { "id": "F7", "title": "Alternate return envelope and outcomes", "text": "Both selectable opportunities, extra modeled orbit, ordinal critical-reserve warning, earlier sea wait, concentrated later pickup, all six execution/consequence cases, all crew-condition variations, and the six outcome titles. Both routes are authored to be viable in this simplified scenario and both end with the crew alive. There are no numerical chances or hidden survival roll. Actual orbital feasibility, exact fuel quantities, precise recovery time and medical diagnoses are not asserted. Neither branch is labeled the exact historical result. All figures who execute onboard operations remain competent." },
+    { "id": "F8", "title": "Named fictional controllers and operational relationships", "text": "Mara Voss and Elias Reed, their recommendations, recovery responses, trust-point changes and notes. These are original characters reusing the SYSTEMS and RECOVERY portrait slots. Negative trust never suppresses safety information. The separate user-authorized astronaut relationship branch is F10." },
+    { "id": "F9", "title": "Gemini IX-A planning constraints", "text": "Compulsory recovery or systems rehearsal following the experienced return risk; the three offered two-exercise plans; branch eligibility; and the player's persisted plan commitment. These are operational preparation consequences in the fictional campaign, not the historical IX-A roster, schedule or training program." },
+    { "id": "F10", "title": "Post-flight stance and social consequences", "text": "Glen's two statements; the compressed later discussion scene; blaming the crew versus accepting ground contingency responsibility; Armstrong/Scott trust -2 each and Cunningham/Stafford +1 each plus a deepened corps rift on the blame route; Armstrong/Scott +1 each and critics unchanged on the ground route; all associated narration, facts, notes and IX-A relationship displays; and the concrete commissioned docked-contingency task. These are fictional consequences of the player's choice. The ground-side criticism itself is sourced through H5, but its exact implementation and resulting relationship gains are not asserted as historical events. Choosing to blame the crew does not change their demonstrated actions or the source's reported exoneration. Choosing ground responsibility does not erase the existence of disagreement." }
+  ]
+}

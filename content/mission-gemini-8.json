@@ -1,0 +1,816 @@
+{
+  "content_version": "0.4.0",
+  "id": "gemini-8",
+  "title": "Gemini VIII",
+  "subtitle": "The Weight of the Call",
+  "chapter": "gemini",
+  "dramatization": true,
+  "anchors": [
+    { "label": "NASA: Gemini's First Docking Turns to Wild Ride in Orbit (H1)", "url": "https://www.nasa.gov/missions/gemini/gemini-viii/geminis-first-docking-turns-to-wild-ride-in-orbit/" },
+    { "label": "NASA: 55 Years Ago: Gemini VIII, the First Docking in Space (H2)", "url": "https://www.nasa.gov/missions/gemini/55-years-ago-gemini-viii-the-first-docking-in-space/" },
+    { "label": "NASA SP-4002, Project Gemini: A Chronology, Part III(B) (H3)", "url": "https://www.nasa.gov/history/SP-4002/p3b.htm" },
+    { "label": "NASA: Gemini VIII mission overview (H4)", "url": "https://www.nasa.gov/mission/gemini-viii/" },
+    { "label": "AmericaSpace: 'Tumbling End Over End': The Trauma of Gemini VIII (Part 2) (H5)", "url": "https://www.americaspace.com/2014/03/16/tumbling-end-over-end-the-trauma-of-gemini-viii-part-2/" }
+  ],
+  "start_notice": "A historical mission with fictional return decisions and alternate outcomes.",
+  "seed_people": ["g8-systems", "g8-recovery", "armstrong", "scott", "cunningham", "stafford"],
+  "finish": {
+    "id": "g8-finish",
+    "requires": {
+      "all": [
+        { "fact": "g8-return-directed" },
+        { "any": [
+          { "all": [{ "fact": "g8-return-earlier-ordered" }, { "not": { "fact": "g8-return-later-ordered" } }] },
+          { "all": [{ "fact": "g8-return-later-ordered" }, { "not": { "fact": "g8-return-earlier-ordered" } }] }
+        ] },
+        { "fact": "g8-ground-execution-complete" },
+        { "fact": "g8-crew-recovered" },
+        { "fact": "g8-relationships-recorded" },
+        { "any": [
+          { "all": [{ "fact": "g9-recovery-drill-required" }, { "not": { "fact": "g9-systems-drill-required" } }] },
+          { "all": [{ "fact": "g9-systems-drill-required" }, { "not": { "fact": "g9-recovery-drill-required" } }] }
+        ] },
+        { "any": [
+          { "all": [{ "procedure": "proc-report-provenance" }, { "not": { "procedure": "proc-recovery-crosscheck" } }] },
+          { "all": [{ "procedure": "proc-recovery-crosscheck" }, { "not": { "procedure": "proc-report-provenance" } }] }
+        ] },
+        { "fact": "g8-accountability-resolved" },
+        { "any": [
+          { "all": [{ "fact": "g8-crew-blame-chosen" }, { "not": { "fact": "g8-ground-accountability-chosen" } }, { "not": { "procedure": "proc-docked-contingencies" } }] },
+          { "all": [{ "fact": "g8-ground-accountability-chosen" }, { "not": { "fact": "g8-crew-blame-chosen" } }, { "procedure": "proc-docked-contingencies" }] }
+        ] }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "id": "g8-prep",
+      "title": "Preparation",
+      "display_time": "PRE-FLIGHT",
+      "contact": "not-in-flight",
+      "attention": 2,
+      "nodes": [
+        {
+          "type": "briefing",
+          "id": "g8-brief",
+          "title": "Mission briefing",
+          "text": "Your crew will attempt docking with Agena. Choose up to two supplemental ground rehearsals. The crew's training and the mission rules are already in place. You are deciding which handoffs this room will practice together.",
+          "documents": [{ "evidence": "g8-ev-rule" }, { "evidence": "g8-ev-contact-primer" }],
+          "continue": { "id": "g8-brief-continue", "label": "Go to preparation" }
+        },
+        {
+          "type": "prep_choice",
+          "id": "g8-prep-select",
+          "prompt": "Choose up to two supplemental ground rehearsals.",
+          "text": "Each rehearsal is a performed ground exercise. It records what this room practiced together; it does not change the crew's training, the radio coverage, the ships, or the spacecraft.",
+          "cost": 1,
+          "reasons": { "completed": "Completed", "exhausted": "No preparation opportunities remaining." },
+          "options": [
+            {
+              "id": "g8-prep-contact",
+              "intent": "Rehearse sender, receipt and acknowledgement handoffs.",
+              "evidence": ["g8-ev-contact-primer"],
+              "cost": "One opportunity.",
+              "uncertainty": "Supports either route; does not improve radio coverage.",
+              "effects": [
+                { "set_fact": "g8-prepared-contact", "label": "Contact rehearsal performed" },
+                { "add_evidence": "g8-ev-contact-worksheet" }
+              ]
+            },
+            {
+              "id": "g8-prep-recovery",
+              "intent": "Rehearse the aircraft-to-ship pickup handoff.",
+              "evidence": ["g8-ev-rule"],
+              "cost": "One opportunity.",
+              "uncertainty": "Helps a stretched recovery; does not put ships closer.",
+              "effects": [
+                { "set_fact": "g8-prepared-recovery", "label": "Recovery rehearsal performed" },
+                { "add_evidence": "g8-ev-recovery-worksheet" }
+              ]
+            },
+            {
+              "id": "g8-prep-systems",
+              "intent": "Rehearse routing an uncertain reserve warning.",
+              "evidence": ["g8-ev-contact-primer"],
+              "cost": "One opportunity.",
+              "uncertainty": "Helps the extra-orbit handoff; does not increase reserve.",
+              "effects": [
+                { "set_fact": "g8-prepared-systems", "label": "Systems rehearsal performed" },
+                { "add_evidence": "g8-ev-systems-worksheet" }
+              ]
+            }
+          ],
+          "finish": { "id": "g8-prep-finish", "label": "Finish preparation" }
+        }
+      ]
+    },
+    {
+      "id": "g8-docking",
+      "title": "Docking",
+      "display_time": "MET approximately 06:33",
+      "contact": "tracking-ship",
+      "attention": null,
+      "nodes": [
+        {
+          "type": "briefing",
+          "id": "g8-docking-report",
+          "title": "Docking report",
+          "documents": [{ "evidence": "g8-ev-docked" }],
+          "lines": [
+            { "speaker": "g8-capcom", "text": "Docking is confirmed. We'll carry that report into the next contact.", "cites": ["g8-ev-docked"] }
+          ],
+          "continue": { "id": "g8-docking-report-continue", "label": "Continue" }
+        }
+      ]
+    },
+    {
+      "id": "g8-gap",
+      "title": "Communications gap",
+      "display_time": "LOSS OF SIGNAL",
+      "contact": "none",
+      "attention": null,
+      "nodes": [
+        {
+          "type": "briefing",
+          "id": "g8-loss-of-contact",
+          "title": "Loss of contact",
+          "text": "The scheduled contact has ended. There is no new spacecraft report.",
+          "continue": { "id": "g8-loss-of-contact-continue", "label": "Continue" }
+        },
+        {
+          "type": "briefing",
+          "id": "g8-gap-note",
+          "title": "A silent loop is not a diagnosis.",
+          "lines": [
+            { "speaker": "g8-capcom", "text": "We have the last report. We do not have the next one.", "cites": ["g8-ev-docked", "g8-ev-contact-primer"] },
+            { "speaker": null, "text": "The handoff board has a blank acknowledgement field for the next report.", "when": { "fact": "g8-prepared-contact" }, "cites": ["g8-ev-contact-worksheet"] }
+          ],
+          "questions": [
+            {
+              "id": "g8-q-gap",
+              "text": "What can we confirm?",
+              "answer": { "speaker": "g8-capcom", "text": "Docking was reported. Current attitude and crew actions are not visible to us here." }
+            }
+          ],
+          "continue": { "id": "g8-gap-note-continue", "label": "Wait for the next contact" }
+        }
+      ]
+    },
+    {
+      "id": "g8-report",
+      "title": "Stabilization report",
+      "display_time": "TRACKING SHIP CONTACT",
+      "contact": "tracking-ship",
+      "attention": null,
+      "nodes": [
+        {
+          "type": "briefing",
+          "id": "g8-crisis-report",
+          "title": "Emergency report",
+          "documents": [{ "evidence": "g8-ev-crisis" }],
+          "lines": [
+            { "speaker": "g8-capcom", "text": "An emergency report has reached the tracking ship. The crew are dealing with the tumble onboard.", "cites": ["g8-ev-crisis"] }
+          ],
+          "continue": { "id": "g8-crisis-report-continue", "label": "Continue" }
+        },
+        {
+          "type": "briefing",
+          "id": "g8-stabilization-report",
+          "title": "Crew regain control",
+          "documents": [{ "evidence": "g8-ev-stabilized" }],
+          "lines": [
+            { "speaker": "g8-systems", "text": "They've regained control using RCS. End the remaining objectives. Now we decide how to bring them home.", "cites": ["g8-ev-stabilized", "g8-ev-rule"] },
+            { "speaker": "g8-systems", "text": "The room has rehearsed separating a warning from a diagnosis. We still do not have the complete diagnosis.", "when": { "fact": "g8-prepared-systems" }, "cites": ["g8-ev-systems-worksheet"] }
+          ],
+          "continue": { "id": "g8-stabilization-report-continue", "label": "Continue" }
+        },
+        {
+          "type": "decision",
+          "id": "g8-rule-decision",
+          "title": "The rule",
+          "prompt": "Terminate the mission after RCS use.",
+          "options": [
+            {
+              "id": "g8-order-return",
+              "intent": "Terminate the remaining mission and plan contingency return.",
+              "evidence": ["g8-ev-rule", "g8-ev-stabilized"],
+              "cost": "Remaining objectives relinquished.",
+              "uncertainty": "Reserve and recovery conditions.",
+              "requires": { "all": [{ "evidence": "g8-ev-rule" }, { "evidence": "g8-ev-stabilized" }] },
+              "unavailable_reason": "Requires the termination rule and the stabilization report.",
+              "effects": [{ "set_fact": "g8-return-directed", "label": "Contingency return directed" }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g8-recovery",
+      "title": "The operational decision",
+      "display_time": "RETURN PLANNING",
+      "contact": "houston",
+      "attention": null,
+      "alternate_history": true,
+      "nodes": [
+        {
+          "type": "decision",
+          "id": "g8-return-brief",
+          "title": "Return planning",
+          "prompt": "Which danger are you willing to carry?",
+          "documents": [
+            { "evidence": "g8-ev-return" },
+            { "evidence": "g8-ev-air" },
+            { "evidence": "g8-ev-reserve" },
+            { "evidence": "g8-ev-recovery-readback", "when": { "fact": "g8-prepared-recovery" } },
+            { "evidence": "g8-ev-systems-readback", "when": { "fact": "g8-prepared-systems" } },
+            { "evidence": "g8-ev-contact-readback", "when": { "fact": "g8-prepared-contact" } }
+          ],
+          "lines": [
+            { "speaker": "g8-flight-dynamics", "text": "Two return opportunities in this plan. The first gets them down sooner. The second puts the recovery force closer. We cannot have both.", "cites": ["g8-ev-return"] },
+            { "speaker": "g8-systems", "text": "Get them off the spacecraft. Stable is what they're doing now. It isn't a promise about another orbit.", "cites": ["g8-ev-reserve"] },
+            { "speaker": "g8-recovery", "text": "And the ocean is not a safe room. Give me the later opportunity and I can have the recovery force waiting closer to them.", "cites": ["g8-ev-air"] }
+          ],
+          "questions": [
+            {
+              "id": "g8-q-recovery-risk",
+              "text": "What does the earlier return cost them?",
+              "answer": { "speaker": "g8-recovery", "text": "A long wait for pickup. Air support helps, but it cannot turn a distant ship into a nearby one. A clean handoff can shorten the last part.", "cites": ["g8-ev-air"] }
+            },
+            {
+              "id": "g8-q-reserve-risk",
+              "text": "What does another orbit cost them?",
+              "answer": { "speaker": "g8-systems", "text": "More exposure on a damaged spacecraft and less room for a confused entry handoff. Rehearsal helps us handle the warning. It does not replenish the reserve.", "cites": ["g8-ev-reserve"] }
+            }
+          ],
+          "readout": [
+            { "label": "Recovery rehearsal", "fact": "g8-prepared-recovery", "ready": "READY", "not_ready": "NOT REHEARSED" },
+            { "label": "Systems-warning rehearsal", "fact": "g8-prepared-systems", "ready": "READY", "not_ready": "NOT REHEARSED" },
+            { "label": "Acknowledgement rehearsal", "fact": "g8-prepared-contact", "ready": "READY", "not_ready": "NOT REHEARSED" }
+          ],
+          "options": [
+            {
+              "id": "g8-return-earlier",
+              "intent": "Bring them down at the earlier opportunity.",
+              "evidence": ["g8-ev-return", "g8-ev-air", "g8-ev-reserve", "g8-ev-recovery-readback", "g8-ev-contact-readback"],
+              "attraction": "Ends exposure aboard the damaged spacecraft sooner. Backs Mara's priority.",
+              "cost": "Accept a prolonged wait at sea and the crew's increasing exhaustion. Elias must execute with sparse surface coverage.",
+              "uncertainty": "Supported by recovery + contact rehearsals.",
+              "supported_by": ["g8-prepared-recovery", "g8-prepared-contact"],
+              "requires": { "fact": "g8-return-directed" },
+              "unavailable_reason": "The contingency return has not been directed.",
+              "effects": [{ "set_fact": "g8-return-earlier-ordered", "label": "Ordered the earlier return opportunity" }]
+            },
+            {
+              "id": "g8-return-later",
+              "intent": "Take the later opportunity, one additional modeled orbit.",
+              "evidence": ["g8-ev-return", "g8-ev-air", "g8-ev-reserve", "g8-ev-systems-readback", "g8-ev-contact-readback"],
+              "attraction": "Concentrates recovery support near pickup and avoids the earlier route's long sea wait. Backs Elias's priority.",
+              "cost": "Keep the crew aboard as control reserve becomes critical. Mara must execute a more demanding warning/entry handoff.",
+              "uncertainty": "Supported by systems + contact rehearsals.",
+              "supported_by": ["g8-prepared-systems", "g8-prepared-contact"],
+              "requires": { "fact": "g8-return-directed" },
+              "unavailable_reason": "The contingency return has not been directed.",
+              "effects": [{ "set_fact": "g8-return-later-ordered", "label": "Ordered the later return opportunity, one additional modeled orbit" }]
+            }
+          ]
+        },
+        {
+          "type": "briefing",
+          "id": "g8-order-receipt",
+          "title": "Order receipt",
+          "variants": [
+            {
+              "when": { "chose": "g8-return-earlier" },
+              "text": "ORDER — Bring them down at the earlier opportunity.\n\nACCEPTED COST — Accept a prolonged wait at sea and the crew's increasing exhaustion. Elias must execute with sparse surface coverage."
+            },
+            {
+              "when": { "chose": "g8-return-later" },
+              "text": "ORDER — Take the later opportunity, one additional modeled orbit.\n\nACCEPTED COST — Keep the crew aboard as control reserve becomes critical. Mara must execute a more demanding warning/entry handoff."
+            }
+          ],
+          "continue": { "id": "g8-execute-return", "label": "Execute the order" }
+        }
+      ]
+    },
+    {
+      "id": "g8-return-execution",
+      "title": "Order execution and recovery",
+      "display_time": "RETURN EXECUTION",
+      "contact": "houston",
+      "attention": null,
+      "nodes": [
+        {
+          "type": "event",
+          "id": "g8-ground-execution",
+          "title": "The room executes the order",
+          "label": "Ground execution — logged from performed rehearsals",
+          "resolutions": [
+            {
+              "id": "g8-exec-earlier-0",
+              "when": { "all": [{ "fact": "g8-return-earlier-ordered" }, { "not": { "fact": "g8-prepared-recovery" } }, { "not": { "fact": "g8-prepared-contact" } }] },
+              "text": "Final pickup instruction requires an ownership clarification and an acknowledgement retry.",
+              "effects": [
+                { "set_fact": "g8-earlier-q0", "label": "Earlier return — execution grade 0" },
+                { "set_fact": "g8-pickup-ownership-rework", "label": "Pickup ownership clarification required" },
+                { "set_fact": "g8-ack-rework", "label": "Acknowledgement retry required" }
+              ],
+              "finally": [{ "set_fact": "g8-ground-execution-complete", "label": "Ground execution complete" }]
+            },
+            {
+              "id": "g8-exec-earlier-1",
+              "when": { "all": [
+                { "fact": "g8-return-earlier-ordered" },
+                { "any": [
+                  { "all": [{ "fact": "g8-prepared-recovery" }, { "not": { "fact": "g8-prepared-contact" } }] },
+                  { "all": [{ "fact": "g8-prepared-contact" }, { "not": { "fact": "g8-prepared-recovery" } }] }
+                ] }
+              ] },
+              "effects": [{ "set_fact": "g8-earlier-q1", "label": "Earlier return — execution grade 1" }],
+              "sub_effects": [
+                { "when": { "fact": "g8-prepared-recovery" }, "effects": [
+                  { "set_fact": "g8-pickup-handoff-clean", "label": "Successful pickup handoff" },
+                  { "set_fact": "g8-ack-rework", "label": "Acknowledgement retry required" }
+                ] },
+                { "when": { "fact": "g8-prepared-contact" }, "effects": [
+                  { "set_fact": "g8-ack-clean", "label": "Clean acknowledgement" },
+                  { "set_fact": "g8-pickup-ownership-rework", "label": "Pickup ownership clarification required" }
+                ] }
+              ],
+              "finally": [{ "set_fact": "g8-ground-execution-complete", "label": "Ground execution complete" }]
+            },
+            {
+              "id": "g8-exec-earlier-2",
+              "when": { "all": [{ "fact": "g8-return-earlier-ordered" }, { "fact": "g8-prepared-recovery" }, { "fact": "g8-prepared-contact" }] },
+              "effects": [
+                { "set_fact": "g8-earlier-q2", "label": "Earlier return — execution grade 2" },
+                { "set_fact": "g8-pickup-handoff-clean", "label": "Successful pickup handoff" },
+                { "set_fact": "g8-ack-clean", "label": "Clean acknowledgement" }
+              ],
+              "finally": [{ "set_fact": "g8-ground-execution-complete", "label": "Ground execution complete" }]
+            },
+            {
+              "id": "g8-exec-later-0",
+              "when": { "all": [{ "fact": "g8-return-later-ordered" }, { "not": { "fact": "g8-prepared-systems" } }, { "not": { "fact": "g8-prepared-contact" } }] },
+              "text": "Reserve-warning assessment requires a routing clarification and its protective recommendation an acknowledgement retry.",
+              "effects": [
+                { "set_fact": "g8-later-q0", "label": "Later return — execution grade 0" },
+                { "set_fact": "g8-warning-routing-rework", "label": "Warning-routing clarification required" },
+                { "set_fact": "g8-ack-rework", "label": "Acknowledgement retry required" }
+              ],
+              "finally": [{ "set_fact": "g8-ground-execution-complete", "label": "Ground execution complete" }]
+            },
+            {
+              "id": "g8-exec-later-1",
+              "when": { "all": [
+                { "fact": "g8-return-later-ordered" },
+                { "any": [
+                  { "all": [{ "fact": "g8-prepared-systems" }, { "not": { "fact": "g8-prepared-contact" } }] },
+                  { "all": [{ "fact": "g8-prepared-contact" }, { "not": { "fact": "g8-prepared-systems" } }] }
+                ] }
+              ] },
+              "effects": [{ "set_fact": "g8-later-q1", "label": "Later return — execution grade 1" }],
+              "sub_effects": [
+                { "when": { "fact": "g8-prepared-systems" }, "effects": [
+                  { "set_fact": "g8-warning-handoff-clean", "label": "Prompt warning handoff" },
+                  { "set_fact": "g8-ack-rework", "label": "Acknowledgement retry required" }
+                ] },
+                { "when": { "fact": "g8-prepared-contact" }, "effects": [
+                  { "set_fact": "g8-ack-clean", "label": "Clean acknowledgement" },
+                  { "set_fact": "g8-warning-routing-rework", "label": "Warning-routing clarification required" }
+                ] }
+              ],
+              "finally": [{ "set_fact": "g8-ground-execution-complete", "label": "Ground execution complete" }]
+            },
+            {
+              "id": "g8-exec-later-2",
+              "when": { "all": [{ "fact": "g8-return-later-ordered" }, { "fact": "g8-prepared-systems" }, { "fact": "g8-prepared-contact" }] },
+              "effects": [
+                { "set_fact": "g8-later-q2", "label": "Later return — execution grade 2" },
+                { "set_fact": "g8-warning-handoff-clean", "label": "Prompt warning handoff" },
+                { "set_fact": "g8-ack-clean", "label": "Clean acknowledgement" }
+              ],
+              "finally": [{ "set_fact": "g8-ground-execution-complete", "label": "Ground execution complete" }]
+            }
+          ],
+          "continue": { "id": "g8-ground-execution-continue", "label": "Continue" }
+        },
+        {
+          "type": "event",
+          "id": "g8-return-beat-1",
+          "title": "Return — first beat",
+          "resolutions": [
+            {
+              "id": "g8-beat1-earlier",
+              "when": { "all": [{ "fact": "g8-return-earlier-ordered" }, { "fact": "g8-ground-execution-complete" }] },
+              "effects": [
+                { "set_fact": "g8-earlier-splashdown", "label": "Earlier splashdown" },
+                { "set_fact": "g8-long-sea-wait", "label": "Long sea wait" }
+              ],
+              "lines": [
+                { "speaker": "g8-capcom", "text": "Splashdown confirmed. Both crew members responding." },
+                { "speaker": "g8-recovery", "text": "They're down. My part is not over." }
+              ],
+              "status": ["SPACECRAFT EXPOSURE ENDED", "SURFACE PICKUP DISTANT"]
+            },
+            {
+              "id": "g8-beat1-later",
+              "when": { "all": [{ "fact": "g8-return-later-ordered" }, { "fact": "g8-ground-execution-complete" }] },
+              "effects": [
+                { "set_fact": "g8-extra-orbit-flown", "label": "Extra modeled orbit flown" },
+                { "set_fact": "g8-control-reserve-critical", "label": "Control reserve critical" }
+              ],
+              "lines": [
+                { "speaker": "g8-systems", "text": "Reserve warning. This is the margin we spent to reach their recovery force." }
+              ],
+              "status": ["PICKUP COVERAGE IMPROVED", "CONTROL RESERVE CRITICAL"]
+            }
+          ],
+          "continue": { "id": "g8-return-beat-1-continue", "label": "Continue" }
+        },
+        {
+          "type": "event",
+          "id": "g8-return-beat-2",
+          "title": "Return — second beat",
+          "label": "Consequence report — authored fiction (F7)",
+          "resolutions": [
+            {
+              "id": "g8-beat2-earlier-0",
+              "when": { "all": [{ "fact": "g8-earlier-q0" }, { "fact": "g8-pickup-ownership-rework" }, { "fact": "g8-ack-rework" }] },
+              "text": "The pickup approach is delayed by the two ground handoff corrections. The crew are badly exhausted by the time the retrieval team reaches them; both need help transferring aboard.",
+              "effects": [{ "set_fact": "g8-sea-exhaustion-severe", "label": "Sea exhaustion — severe" }]
+            },
+            {
+              "id": "g8-beat2-earlier-1",
+              "when": { "all": [{ "fact": "g8-earlier-q1" }, { "any": [{ "fact": "g8-pickup-ownership-rework" }, { "fact": "g8-ack-rework" }] }] },
+              "text": "One ground handoff needs correction before pickup. The crew are exhausted after the sea wait, but the retrieval team completes the transfer.",
+              "effects": [{ "set_fact": "g8-sea-exhaustion-moderate", "label": "Sea exhaustion — moderate" }]
+            },
+            {
+              "id": "g8-beat2-earlier-2",
+              "when": { "all": [{ "fact": "g8-earlier-q2" }, { "fact": "g8-pickup-handoff-clean" }, { "fact": "g8-ack-clean" }] },
+              "text": "The rehearsed handoffs avoid an additional pickup delay. The sea wait still leaves the crew worn down; the retrieval team brings both aboard.",
+              "effects": [{ "set_fact": "g8-sea-exhaustion-limited", "label": "Sea exhaustion — limited" }]
+            },
+            {
+              "id": "g8-beat2-later-0",
+              "when": { "all": [{ "fact": "g8-later-q0" }, { "fact": "g8-warning-routing-rework" }, { "fact": "g8-ack-rework" }] },
+              "text": "The reserve warning and its acknowledgement need two ground handoff corrections. Entry coordination becomes a scramble. The crew complete entry and reach the closer recovery force visibly spent.",
+              "effects": [{ "set_fact": "g8-entry-handoff-compressed", "label": "Entry handoff — compressed" }]
+            },
+            {
+              "id": "g8-beat2-later-1",
+              "when": { "all": [{ "fact": "g8-later-q1" }, { "any": [{ "fact": "g8-warning-routing-rework" }, { "fact": "g8-ack-rework" }] }] },
+              "text": "One ground handoff needs correction under the reserve warning. The room completes the entry handoff under strain. The crew reach the closer recovery force tired but responsive.",
+              "effects": [{ "set_fact": "g8-entry-handoff-strained", "label": "Entry handoff — strained" }]
+            },
+            {
+              "id": "g8-beat2-later-2",
+              "when": { "all": [{ "fact": "g8-later-q2" }, { "fact": "g8-warning-handoff-clean" }, { "fact": "g8-ack-clean" }] },
+              "text": "The reserve warning and protective recommendation pass through the rehearsed handoffs without rework. Reserve remains critical through the modeled entry sequence. The crew reach the closer recovery force tired but responsive.",
+              "effects": [{ "set_fact": "g8-entry-handoff-clean", "label": "Entry handoff — clean" }]
+            }
+          ],
+          "continue": { "id": "g8-return-beat-2-continue", "label": "Continue" }
+        },
+        {
+          "type": "event",
+          "id": "g8-pickup-report",
+          "title": "Pickup report",
+          "resolutions": [
+            {
+              "id": "g8-pickup-earlier",
+              "when": { "all": [{ "fact": "g8-return-earlier-ordered" }, { "fact": "g8-earlier-splashdown" }, { "any": [{ "fact": "g8-sea-exhaustion-severe" }, { "fact": "g8-sea-exhaustion-moderate" }, { "fact": "g8-sea-exhaustion-limited" }] }] },
+              "effects": [
+                { "add_evidence": "g8-ev-recovered" },
+                { "set_fact": "g8-crew-recovered", "label": "Both crew members recovered alive" }
+              ]
+            },
+            {
+              "id": "g8-pickup-later",
+              "when": { "all": [{ "fact": "g8-return-later-ordered" }, { "fact": "g8-extra-orbit-flown" }, { "any": [{ "fact": "g8-entry-handoff-compressed" }, { "fact": "g8-entry-handoff-strained" }, { "fact": "g8-entry-handoff-clean" }] }] },
+              "effects": [
+                { "add_evidence": "g8-ev-recovered" },
+                { "set_fact": "g8-crew-recovered", "label": "Both crew members recovered alive" },
+                { "set_fact": "g8-later-splashdown", "label": "Later splashdown" },
+                { "set_fact": "g8-concentrated-pickup", "label": "Concentrated pickup" }
+              ]
+            }
+          ],
+          "continue": { "id": "g8-pickup-report-continue", "label": "Continue" }
+        }
+      ]
+    },
+    {
+      "id": "g8-recovered",
+      "title": "The room remembers",
+      "display_time": "RECOVERY",
+      "contact": "houston",
+      "attention": null,
+      "nodes": [
+        {
+          "type": "event",
+          "id": "g8-relationship-response",
+          "title": "The room remembers",
+          "label": "Relationship reactions — fictional controllers (F8)",
+          "resolutions": [
+            {
+              "id": "g8-rel-earlier-0",
+              "when": { "all": [{ "fact": "g8-return-earlier-ordered" }, { "fact": "g8-earlier-q0" }, { "fact": "g8-sea-exhaustion-severe" }, { "fact": "g8-crew-recovered" }] },
+              "lines": [
+                { "speaker": "g8-systems", "text": "You got them off the spacecraft. I stand by that priority." },
+                { "speaker": "g8-recovery", "text": "I accepted the order. But we sent them into that wait, then made the pickup harder. Next time recovery needs rehearsal time." }
+              ],
+              "effects": [
+                { "adjust": { "path": "people.g8-systems.trust", "by": 1 } },
+                { "adjust": { "path": "people.g8-recovery.trust", "by": -2 } },
+                { "append_note": { "person": "g8-systems", "fact": "g8-sea-exhaustion-severe" } },
+                { "append_note": { "person": "g8-recovery", "fact": "g8-sea-exhaustion-severe" } },
+                { "set_fact": "g8-relationships-recorded", "label": "Return relationship response recorded" },
+                { "set_fact": "g9-recovery-drill-required", "label": "Gemini IX-A: recovery rehearsal required" }
+              ]
+            },
+            {
+              "id": "g8-rel-earlier-1",
+              "when": { "all": [{ "fact": "g8-return-earlier-ordered" }, { "fact": "g8-earlier-q1" }, { "fact": "g8-sea-exhaustion-moderate" }, { "fact": "g8-crew-recovered" }] },
+              "lines": [
+                { "speaker": "g8-systems", "text": "You got them off the spacecraft. I stand by that priority." },
+                { "speaker": "g8-recovery", "text": "We brought them aboard. One handoff still cost them. I want the recovery rehearsal before the next flight." }
+              ],
+              "effects": [
+                { "adjust": { "path": "people.g8-systems.trust", "by": 1 } },
+                { "adjust": { "path": "people.g8-recovery.trust", "by": -1 } },
+                { "append_note": { "person": "g8-systems", "fact": "g8-sea-exhaustion-moderate" } },
+                { "append_note": { "person": "g8-recovery", "fact": "g8-sea-exhaustion-moderate" } },
+                { "set_fact": "g8-relationships-recorded", "label": "Return relationship response recorded" },
+                { "set_fact": "g9-recovery-drill-required", "label": "Gemini IX-A: recovery rehearsal required" }
+              ]
+            },
+            {
+              "id": "g8-rel-earlier-2",
+              "when": { "all": [{ "fact": "g8-return-earlier-ordered" }, { "fact": "g8-earlier-q2" }, { "fact": "g8-sea-exhaustion-limited" }, { "fact": "g8-crew-recovered" }] },
+              "lines": [
+                { "speaker": "g8-systems", "text": "You got them off the spacecraft. I stand by that priority." },
+                { "speaker": "g8-recovery", "text": "I wanted the later return. You gave my team the preparation to make the earlier one work. We still need to practice that sea-recovery problem." }
+              ],
+              "effects": [
+                { "adjust": { "path": "people.g8-systems.trust", "by": 1 } },
+                { "adjust": { "path": "people.g8-recovery.trust", "by": 0 } },
+                { "append_note": { "person": "g8-systems", "fact": "g8-sea-exhaustion-limited" } },
+                { "append_note": { "person": "g8-recovery", "fact": "g8-sea-exhaustion-limited" } },
+                { "set_fact": "g8-relationships-recorded", "label": "Return relationship response recorded" },
+                { "set_fact": "g9-recovery-drill-required", "label": "Gemini IX-A: recovery rehearsal required" }
+              ]
+            },
+            {
+              "id": "g8-rel-later-0",
+              "when": { "all": [{ "fact": "g8-return-later-ordered" }, { "fact": "g8-later-q0" }, { "fact": "g8-entry-handoff-compressed" }, { "fact": "g8-crew-recovered" }] },
+              "lines": [
+                { "speaker": "g8-recovery", "text": "The closer recovery force paid off. I stand by that priority." },
+                { "speaker": "g8-systems", "text": "The crew carried that reserve risk for us. Our handoff made the end tighter. Systems needs the next rehearsal." }
+              ],
+              "effects": [
+                { "adjust": { "path": "people.g8-systems.trust", "by": -2 } },
+                { "adjust": { "path": "people.g8-recovery.trust", "by": 1 } },
+                { "append_note": { "person": "g8-systems", "fact": "g8-entry-handoff-compressed" } },
+                { "append_note": { "person": "g8-recovery", "fact": "g8-entry-handoff-compressed" } },
+                { "set_fact": "g8-relationships-recorded", "label": "Return relationship response recorded" },
+                { "set_fact": "g9-systems-drill-required", "label": "Gemini IX-A: systems-warning rehearsal required" }
+              ]
+            },
+            {
+              "id": "g8-rel-later-1",
+              "when": { "all": [{ "fact": "g8-return-later-ordered" }, { "fact": "g8-later-q1" }, { "fact": "g8-entry-handoff-strained" }, { "fact": "g8-crew-recovered" }] },
+              "lines": [
+                { "speaker": "g8-recovery", "text": "The closer recovery force paid off. I stand by that priority." },
+                { "speaker": "g8-systems", "text": "We got through the warning. One handoff still cost us room to think. Systems takes the next rehearsal." }
+              ],
+              "effects": [
+                { "adjust": { "path": "people.g8-systems.trust", "by": -1 } },
+                { "adjust": { "path": "people.g8-recovery.trust", "by": 1 } },
+                { "append_note": { "person": "g8-systems", "fact": "g8-entry-handoff-strained" } },
+                { "append_note": { "person": "g8-recovery", "fact": "g8-entry-handoff-strained" } },
+                { "set_fact": "g8-relationships-recorded", "label": "Return relationship response recorded" },
+                { "set_fact": "g9-systems-drill-required", "label": "Gemini IX-A: systems-warning rehearsal required" }
+              ]
+            },
+            {
+              "id": "g8-rel-later-2",
+              "when": { "all": [{ "fact": "g8-return-later-ordered" }, { "fact": "g8-later-q2" }, { "fact": "g8-entry-handoff-clean" }, { "fact": "g8-crew-recovered" }] },
+              "lines": [
+                { "speaker": "g8-recovery", "text": "The closer recovery force paid off. I stand by that priority." },
+                { "speaker": "g8-systems", "text": "I wanted them down sooner. You had the room ready for the warning. We still have to rehearse that reserve constraint before another flight." }
+              ],
+              "effects": [
+                { "adjust": { "path": "people.g8-systems.trust", "by": 0 } },
+                { "adjust": { "path": "people.g8-recovery.trust", "by": 1 } },
+                { "append_note": { "person": "g8-systems", "fact": "g8-entry-handoff-clean" } },
+                { "append_note": { "person": "g8-recovery", "fact": "g8-entry-handoff-clean" } },
+                { "set_fact": "g8-relationships-recorded", "label": "Return relationship response recorded" },
+                { "set_fact": "g9-systems-drill-required", "label": "Gemini IX-A: systems-warning rehearsal required" }
+              ]
+            }
+          ],
+          "continue": { "id": "g8-relationship-response-continue", "label": "Continue" }
+        },
+        {
+          "type": "decision",
+          "id": "g8-lesson-decision",
+          "title": "Baseline lesson",
+          "prompt": "Adopt one standing procedure.",
+          "options": [
+            {
+              "id": "g8-adopt-provenance",
+              "intent": "Require reports to distinguish confirmation from unknowns.",
+              "evidence": ["g8-ev-contact-primer", "g8-ev-crisis"],
+              "cost": "One selection only; no numeric resources.",
+              "uncertainty": "Better provenance cannot restore radio coverage.",
+              "requires": { "all": [{ "fact": "g8-crew-recovered" }, { "fact": "g8-relationships-recorded" }] },
+              "unavailable_reason": "Requires the recovered crew and the recorded relationship response.",
+              "effects": [{ "adopt_procedure": "proc-report-provenance" }]
+            },
+            {
+              "id": "g8-adopt-recovery",
+              "intent": "Require a combined recovery sheet with separate confirmation fields.",
+              "evidence": ["g8-ev-return", "g8-ev-air", "g8-ev-recovered"],
+              "cost": "One selection only; no numeric resources.",
+              "uncertainty": "Better coordination does not create recovery assets.",
+              "requires": { "all": [{ "fact": "g8-crew-recovered" }, { "fact": "g8-relationships-recorded" }] },
+              "unavailable_reason": "Requires the recovered crew and the recorded relationship response.",
+              "effects": [{ "adopt_procedure": "proc-recovery-crosscheck" }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g8-postflight",
+      "title": "Post-flight — Who carries the blame?",
+      "display_time": "WEEKS LATER — POST-FLIGHT DISCUSSION",
+      "contact": "not-in-flight",
+      "attention": null,
+      "nodes": [
+        {
+          "type": "briefing",
+          "id": "g8-accountability-brief",
+          "title": "Who carries the blame?",
+          "header_label": "Historical disagreement; fictional player stance and relationship effects.",
+          "text": "They came home. Now the argument moves from the flight room to the astronaut office. Some call the crew's judgment into question. Others ask what the ground failed to prepare for. Your position will tell the crews whether this room stands behind them when the checklist runs out.",
+          "documents": [{ "evidence": "g8-ev-postflight-context" }],
+          "continue": { "id": "g8-accountability-brief-continue", "label": "Take a position" }
+        },
+        {
+          "type": "decision",
+          "id": "g8-accountability-decision",
+          "title": "Who carries the blame?",
+          "header_label": "Historical disagreement; fictional player stance and relationship effects.",
+          "prompt": "Who carries the blame?",
+          "options": [
+            {
+              "id": "g8-back-crew-criticism",
+              "intent": "Side with Cunningham and Stafford; blame the crew's handling of the emergency.",
+              "statement": "I agree with the criticism. Armstrong and Scott's handling of the emergency deserves the blame.",
+              "evidence": ["g8-ev-postflight-context"],
+              "attraction": "Align with the critics and keep the director's ground organization out of the center of his own criticism. Fictional support from Cunningham and Stafford strengthens.",
+              "cost": "Armstrong and Scott lose trust in Glen; the director's endorsement deepens division within the corps.",
+              "uncertainty": "This stance does not overturn the reported analysis clearing the crew.",
+              "requires": { "all": [
+                { "fact": "g8-crew-recovered" }, { "fact": "g8-relationships-recorded" },
+                { "any": [{ "procedure": "proc-report-provenance" }, { "procedure": "proc-recovery-crosscheck" }] },
+                { "evidence": "g8-ev-postflight-context" },
+                { "not": { "fact": "g8-crew-blame-chosen" } }, { "not": { "fact": "g8-ground-accountability-chosen" } }
+              ] },
+              "unavailable_reason": "Requires the recovered crew, the recorded relationship response, one baseline lesson, the post-flight context, and no prior stance.",
+              "effects": [{ "set_fact": "g8-crew-blame-chosen", "label": "Glen sided with the crew's critics" }]
+            },
+            {
+              "id": "g8-own-ground-contingencies",
+              "intent": "Take the historically grounded Kranz position: the ground lacked docked-flight contingencies.",
+              "subtitle": "Historically grounded response",
+              "statement": "The failure we own is the lack of ground contingency procedures for the docked phase. We will correct that. I will not blame Armstrong and Scott for bringing the spacecraft home.",
+              "evidence": ["g8-ev-postflight-context"],
+              "attraction": "Back the crew and direct the program toward a concrete contingency-procedure response.",
+              "cost": "Glen openly accepts responsibility for a failure in the ground organization.",
+              "uncertainty": "Historical disagreement among astronauts is not magically erased; no invented funding penalty is attached.",
+              "requires": { "all": [
+                { "fact": "g8-crew-recovered" }, { "fact": "g8-relationships-recorded" },
+                { "any": [{ "procedure": "proc-report-provenance" }, { "procedure": "proc-recovery-crosscheck" }] },
+                { "evidence": "g8-ev-postflight-context" },
+                { "not": { "fact": "g8-crew-blame-chosen" } }, { "not": { "fact": "g8-ground-accountability-chosen" } }
+              ] },
+              "unavailable_reason": "Requires the recovered crew, the recorded relationship response, one baseline lesson, the post-flight context, and no prior stance.",
+              "effects": [{ "set_fact": "g8-ground-accountability-chosen", "label": "Glen took responsibility for the ground contingency gap" }]
+            }
+          ]
+        },
+        {
+          "type": "briefing",
+          "id": "g8-accountability-receipt",
+          "title": "Statement recorded",
+          "header_label": "Historical disagreement; fictional player stance and relationship effects.",
+          "variants": [
+            { "when": { "chose": "g8-back-crew-criticism" }, "text": "“I agree with the criticism. Armstrong and Scott's handling of the emergency deserves the blame.”\n\nResponse pending." },
+            { "when": { "chose": "g8-own-ground-contingencies" }, "text": "“The failure we own is the lack of ground contingency procedures for the docked phase. We will correct that. I will not blame Armstrong and Scott for bringing the spacecraft home.”\n\nResponse pending." }
+          ],
+          "continue": { "id": "g8-resolve-accountability", "label": "Hear the response" }
+        },
+        {
+          "type": "event",
+          "id": "g8-accountability-response",
+          "title": "The response",
+          "label": "Fictional relationship consequences (F10) — alternate history",
+          "resolutions": [
+            {
+              "id": "g8-response-crew-blame",
+              "when": { "all": [{ "fact": "g8-crew-blame-chosen" }, { "not": { "fact": "g8-ground-accountability-chosen" } }] },
+              "text": "Your endorsement gives the critics a stronger position in this fictional timeline. Armstrong and Scott's confidence in you falls. A disagreement within the astronaut corps has become a division sharpened by its flight director.",
+              "effects": [
+                { "adjust": { "path": "people.armstrong.trust", "by": -2 } },
+                { "adjust": { "path": "people.scott.trust", "by": -2 } },
+                { "adjust": { "path": "people.cunningham.trust", "by": 1 } },
+                { "adjust": { "path": "people.stafford.trust", "by": 1 } },
+                { "set_fact": "g8-corps-division-deepened", "label": "Astronaut corps division deepened" },
+                { "set_fact": "g8-critic-support-gained", "label": "Support from the crew's critics gained" },
+                { "append_note": { "person": "armstrong", "fact": "g8-corps-division-deepened" } },
+                { "append_note": { "person": "scott", "fact": "g8-corps-division-deepened" } },
+                { "append_note": { "person": "cunningham", "fact": "g8-critic-support-gained" } },
+                { "append_note": { "person": "stafford", "fact": "g8-critic-support-gained" } },
+                { "set_fact": "g8-accountability-resolved", "label": "Accountability response applied" }
+              ]
+            },
+            {
+              "id": "g8-response-ground-accountability",
+              "when": { "all": [{ "fact": "g8-ground-accountability-chosen" }, { "not": { "fact": "g8-crew-blame-chosen" } }] },
+              "text": "You take responsibility for the ground's missing contingencies. In this fictional timeline, Armstrong and Scott's confidence in you strengthens. The criticism remains part of the record; your organization begins addressing the procedural gap.",
+              "effects": [
+                { "adjust": { "path": "people.armstrong.trust", "by": 1 } },
+                { "adjust": { "path": "people.scott.trust", "by": 1 } },
+                { "adjust": { "path": "people.cunningham.trust", "by": 0 } },
+                { "adjust": { "path": "people.stafford.trust", "by": 0 } },
+                { "set_fact": "g8-crew-confidence-strengthened", "label": "Crew confidence in Glen strengthened" },
+                { "set_fact": "g8-docked-contingency-work-ordered", "label": "Docked-flight contingency work commissioned" },
+                { "append_note": { "person": "armstrong", "fact": "g8-crew-confidence-strengthened" } },
+                { "append_note": { "person": "scott", "fact": "g8-crew-confidence-strengthened" } },
+                { "adopt_procedure": "proc-docked-contingencies" },
+                { "set_fact": "g8-accountability-resolved", "label": "Accountability response applied" }
+              ]
+            }
+          ],
+          "continue": { "id": "g8-finish", "label": "Close the mission" }
+        }
+      ]
+    }
+  ],
+  "outcomes": [
+    { "id": "g8-out-earlier-0", "kind": "abort-safe", "title": "Crew recovered — earlier return, punishing sea wait",
+      "requires": { "all": [{ "fact": "g8-return-directed" }, { "fact": "g8-crew-recovered" }, { "fact": "g8-ground-execution-complete" }, { "fact": "g8-relationships-recorded" }, { "fact": "g8-return-earlier-ordered" }, { "fact": "g8-earlier-q0" }, { "fact": "g8-sea-exhaustion-severe" }] } },
+    { "id": "g8-out-earlier-1", "kind": "abort-safe", "title": "Crew recovered — earlier return, difficult pickup",
+      "requires": { "all": [{ "fact": "g8-return-directed" }, { "fact": "g8-crew-recovered" }, { "fact": "g8-ground-execution-complete" }, { "fact": "g8-relationships-recorded" }, { "fact": "g8-return-earlier-ordered" }, { "fact": "g8-earlier-q1" }, { "fact": "g8-sea-exhaustion-moderate" }] } },
+    { "id": "g8-out-earlier-2", "kind": "abort-safe", "title": "Crew recovered — earlier return, coordinated pickup",
+      "requires": { "all": [{ "fact": "g8-return-directed" }, { "fact": "g8-crew-recovered" }, { "fact": "g8-ground-execution-complete" }, { "fact": "g8-relationships-recorded" }, { "fact": "g8-return-earlier-ordered" }, { "fact": "g8-earlier-q2" }, { "fact": "g8-sea-exhaustion-limited" }] } },
+    { "id": "g8-out-later-0", "kind": "abort-safe", "title": "Crew recovered — extra orbit, critical-reserve scramble",
+      "requires": { "all": [{ "fact": "g8-return-directed" }, { "fact": "g8-crew-recovered" }, { "fact": "g8-ground-execution-complete" }, { "fact": "g8-relationships-recorded" }, { "fact": "g8-return-later-ordered" }, { "fact": "g8-later-q0" }, { "fact": "g8-entry-handoff-compressed" }] } },
+    { "id": "g8-out-later-1", "kind": "abort-safe", "title": "Crew recovered — extra orbit, strained entry handoff",
+      "requires": { "all": [{ "fact": "g8-return-directed" }, { "fact": "g8-crew-recovered" }, { "fact": "g8-ground-execution-complete" }, { "fact": "g8-relationships-recorded" }, { "fact": "g8-return-later-ordered" }, { "fact": "g8-later-q1" }, { "fact": "g8-entry-handoff-strained" }] } },
+    { "id": "g8-out-later-2", "kind": "abort-safe", "title": "Crew recovered — extra orbit, coordinated reserve response",
+      "requires": { "all": [{ "fact": "g8-return-directed" }, { "fact": "g8-crew-recovered" }, { "fact": "g8-ground-execution-complete" }, { "fact": "g8-relationships-recorded" }, { "fact": "g8-return-later-ordered" }, { "fact": "g8-later-q2" }, { "fact": "g8-entry-handoff-clean" }] } }
+  ],
+  "debrief": [
+    { "id": "g8-db-return", "when": { "all": [{ "fact": "g8-return-directed" }, { "fact": "g8-crew-recovered" }] },
+      "text": "Docking was achieved. The remaining objectives were terminated. Both crew members were recovered alive." },
+    { "id": "g8-db-earlier", "when": { "all": [{ "chose": "g8-return-earlier" }, { "fact": "g8-earlier-splashdown" }, { "fact": "g8-long-sea-wait" }] },
+      "text": "You chose to end spacecraft exposure sooner and accepted a prolonged sea recovery." },
+    { "id": "g8-db-later", "when": { "all": [{ "chose": "g8-return-later" }, { "fact": "g8-extra-orbit-flown" }, { "fact": "g8-control-reserve-critical" }, { "fact": "g8-concentrated-pickup" }] },
+      "text": "You chose another modeled orbit to improve pickup coverage. The crew carried the control-reserve warning through that return." },
+    { "id": "g8-db-pickup-clean", "when": { "all": [{ "chose": "g8-prep-recovery" }, { "fact": "g8-pickup-handoff-clean" }, { "any": [{ "fact": "g8-sea-exhaustion-severe" }, { "fact": "g8-sea-exhaustion-moderate" }, { "fact": "g8-sea-exhaustion-limited" }] }] },
+      "text": "The recovery rehearsal was used in the pickup handoff. It avoided an ownership correction; it did not shorten the ship's transit." },
+    { "id": "g8-db-warning-clean", "when": { "all": [{ "chose": "g8-prep-systems" }, { "fact": "g8-warning-handoff-clean" }, { "any": [{ "fact": "g8-entry-handoff-compressed" }, { "fact": "g8-entry-handoff-strained" }, { "fact": "g8-entry-handoff-clean" }] }] },
+      "text": "The systems rehearsal was used to route the reserve warning. It avoided a repeated ground assessment; it did not replenish the reserve." },
+    { "id": "g8-db-ack-clean", "when": { "all": [{ "chose": "g8-prep-contact" }, { "fact": "g8-ack-clean" }, { "any": [{ "fact": "g8-sea-exhaustion-moderate" }, { "fact": "g8-sea-exhaustion-limited" }, { "fact": "g8-entry-handoff-strained" }, { "fact": "g8-entry-handoff-clean" }] }] },
+      "text": "The contact rehearsal was used to confirm the instruction's receipt. It avoided an acknowledgement retry during the return." },
+    { "id": "g8-db-rework", "when": { "all": [
+        { "any": [{ "fact": "g8-pickup-ownership-rework" }, { "fact": "g8-ack-rework" }, { "fact": "g8-warning-routing-rework" }] },
+        { "any": [{ "fact": "g8-sea-exhaustion-severe" }, { "fact": "g8-sea-exhaustion-moderate" }, { "fact": "g8-entry-handoff-compressed" }, { "fact": "g8-entry-handoff-strained" }] }
+      ] },
+      "text": "The logged handoff corrections affected the return you ordered. Their effects are recorded in the crew-condition and entry/pickup reports." },
+    { "id": "g8-db-recovery-next", "when": { "all": [{ "chose": "g8-return-earlier" }, { "fact": "g8-long-sea-wait" }, { "event_seen": "g8-relationship-response" }, { "fact": "g9-recovery-drill-required" }] },
+      "text": "Elias's response is recorded above. The next mission must include a recovery rehearsal; you will choose its companion exercise." },
+    { "id": "g8-db-systems-next", "when": { "all": [{ "chose": "g8-return-later" }, { "fact": "g8-control-reserve-critical" }, { "event_seen": "g8-relationship-response" }, { "fact": "g9-systems-drill-required" }] },
+      "text": "Mara's response is recorded above. The next mission must include a systems-warning rehearsal; you will choose its companion exercise." },
+    { "id": "g8-db-provenance", "when": { "all": [{ "chose": "g8-adopt-provenance" }, { "procedure": "proc-report-provenance" }] },
+      "text": "You carried report provenance into the procedures binder." },
+    { "id": "g8-db-recovery-procedure", "when": { "all": [{ "chose": "g8-adopt-recovery" }, { "procedure": "proc-recovery-crosscheck" }] },
+      "text": "You carried recovery cross-checking into the procedures binder." },
+    { "id": "g8-db-crew-blame", "when": { "all": [{ "fact": "g8-crew-blame-chosen" }, { "event_seen": "g8-response-crew-blame" }, { "fact": "g8-accountability-resolved" }, { "fact": "g8-corps-division-deepened" }, { "fact": "g8-critic-support-gained" }] },
+      "text": "You endorsed the criticism of Armstrong and Scott. The recorded fictional response strengthened your support among the critics, reduced both crew members' trust in you, and deepened division in the astronaut corps." },
+    { "id": "g8-db-ground-accountability", "when": { "all": [{ "fact": "g8-ground-accountability-chosen" }, { "event_seen": "g8-response-ground-accountability" }, { "fact": "g8-accountability-resolved" }, { "fact": "g8-crew-confidence-strengthened" }, { "fact": "g8-docked-contingency-work-ordered" }, { "procedure": "proc-docked-contingencies" }] },
+      "text": "You took responsibility for the ground contingency gap. The recorded fictional response strengthened the crew's trust in you and commissioned docked-flight contingency work. This follows the direction of Kranz's criticism as reported in the historical source." }
+  ],
+  "debrief_layout": {
+    "consequence_node": "g8-return-beat-2",
+    "relationship_node": "g8-relationship-response",
+    "accountability_node": "g8-accountability-response",
+    "controllers": ["g8-systems", "g8-recovery"],
+    "astronauts": ["armstrong", "scott", "cunningham", "stafford"],
+    "constraint_facts": ["g9-recovery-drill-required", "g9-systems-drill-required"]
+  }
+}

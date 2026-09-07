@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fno.local/schema/manifest.schema.json",
+  "title": "Asset manifest",
+  "type": "object",
+  "required": ["content_version", "manifest_version", "task", "status", "assets"],
+  "properties": {
+    "content_version": { "$ref": "defs.schema.json#/$defs/semver" },
+    "manifest_version": { "type": "string" },
+    "task": { "type": "string" },
+    "status": { "type": "string" },
+    "notes": { "type": "string" },
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "filename", "width", "height", "alpha", "color_space", "framing", "reference_version", "origin", "attribution", "status"],
+        "properties": {
+          "id": { "$ref": "defs.schema.json#/$defs/id" },
+          "filename": { "type": "string", "pattern": "^fno_[a-z0-9]+_[a-z0-9]+_[a-z0-9-]+_[a-z0-9]+_v[0-9]{3}\\.png$" },
+          "width": { "type": "integer", "minimum": 1 },
+          "height": { "type": "integer", "minimum": 1 },
+          "alpha": { "type": "boolean" },
+          "color_space": { "const": "sRGB" },
+          "framing": { "type": "string" },
+          "reference_version": { "type": "string" },
+          "origin": { "type": "string" },
+          "attribution": { "type": "string" },
+          "status": { "enum": ["to-generate", "placeholder", "final"] }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

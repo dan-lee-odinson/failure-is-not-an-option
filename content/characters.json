@@ -1,0 +1,103 @@
+{
+  "content_version": "0.4.0",
+  "characters": [
+    {
+      "id": "glen-kurtz",
+      "name": "Glen Kurtz",
+      "role": "FLIGHT",
+      "display": "Glen Kurtz — FLIGHT",
+      "kind": "player",
+      "portrait": null,
+      "portrayal": "Fictional player director. An unmistakable fictional homage; not a portrayal of any real flight director.",
+      "dramatization": true
+    },
+    {
+      "id": "armstrong",
+      "name": "Neil Armstrong",
+      "role": "Command Pilot",
+      "display": "Neil Armstrong — Command Pilot",
+      "kind": "historical",
+      "portrait": null,
+      "portrayal": "Historical person; fictional relationship toward Glen. Text only. No dialogue is attributed to him in this content.",
+      "dramatization": true,
+      "sources": ["H1", "H2", "H4", "H5"]
+    },
+    {
+      "id": "scott",
+      "name": "David Scott",
+      "role": "Pilot",
+      "display": "David Scott — Pilot",
+      "kind": "historical",
+      "portrait": null,
+      "portrayal": "Historical person; fictional relationship toward Glen. Text only. No dialogue is attributed to him in this content.",
+      "dramatization": true,
+      "sources": ["H1", "H2", "H4", "H5"]
+    },
+    {
+      "id": "cunningham",
+      "name": "Walt Cunningham",
+      "role": "Astronaut",
+      "display": "Walt Cunningham — Astronaut",
+      "kind": "historical",
+      "portrait": null,
+      "portrayal": "Historical criticism attributed to H5; fictional relationship toward Glen. Text only. His reported position is summarized in the context card, never quoted verbatim.",
+      "dramatization": true,
+      "sources": ["H5"]
+    },
+    {
+      "id": "stafford",
+      "name": "Tom Stafford",
+      "role": "Astronaut",
+      "display": "Tom Stafford — Astronaut",
+      "kind": "historical",
+      "portrait": null,
+      "portrayal": "Historical criticism attributed to H5; fictional relationship toward Glen. Text only. His reported position is summarized in the context card, never quoted verbatim.",
+      "dramatization": true,
+      "sources": ["H5"]
+    },
+    {
+      "id": "g8-capcom",
+      "name": "CAPCOM",
+      "role": "CAPCOM",
+      "display": "CAPCOM",
+      "kind": "composite-controller",
+      "manner": "direct",
+      "portrait": "portrait-capcom",
+      "portrayal": "Unnamed composite; direct. Not an actual historical console operator.",
+      "dramatization": true
+    },
+    {
+      "id": "g8-systems",
+      "name": "Mara Voss",
+      "role": "SYSTEMS",
+      "display": "Mara Voss — SYSTEMS",
+      "kind": "fictional-controller",
+      "manner": "cautious",
+      "portrait": "portrait-systems",
+      "portrayal": "Original fictional controller; cautious. Reuses the SYSTEMS portrait slot. Neither represents an actual historical console operator (F8).",
+      "dramatization": true
+    },
+    {
+      "id": "g8-flight-dynamics",
+      "name": "FLIGHT DYNAMICS",
+      "role": "FLIGHT DYNAMICS",
+      "display": "FLIGHT DYNAMICS",
+      "kind": "composite-controller",
+      "manner": "direct",
+      "portrait": "portrait-flight-dynamics",
+      "portrayal": "Unnamed composite; direct. Not an actual historical console operator.",
+      "dramatization": true
+    },
+    {
+      "id": "g8-recovery",
+      "name": "Elias Reed",
+      "role": "RECOVERY",
+      "display": "Elias Reed — RECOVERY",
+      "kind": "fictional-controller",
+      "manner": "challenging",
+      "portrait": "portrait-recovery",
+      "portrayal": "Original fictional controller; challenging. Reuses the RECOVERY portrait slot. Neither represents an actual historical console operator (F8).",
+      "dramatization": true
+    }
+  ]
+}

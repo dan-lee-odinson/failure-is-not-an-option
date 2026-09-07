@@ -1,0 +1,74 @@
+{
+  "content_version": "0.4.0",
+  "manifest_version": "0.1.0-draft",
+  "task": "FNO-M00",
+  "status": "placeholder-declarations-only",
+  "notes": "Proposed schema. PNG files are not included. Claude generates placeholders before runtime file and dimension validation. Paths are relative to this manifest's assets directory.",
+  "assets": [
+    {
+      "id": "room-gemini-console",
+      "filename": "fno_gemini_room_console_placeholder_v001.png",
+      "width": 1920,
+      "height": 1080,
+      "alpha": false,
+      "color_space": "sRGB",
+      "framing": "Director's first-person console view; low-detail areas behind dialogue and evidence panels.",
+      "reference_version": "04-Codex-Response asset contract; FNO-M00 0.1.0",
+      "origin": "Planned procedural labeled placeholder; not generated artwork.",
+      "attribution": "No third-party imagery used in this declaration.",
+      "status": "to-generate"
+    },
+    {
+      "id": "portrait-capcom",
+      "filename": "fno_gemini_portrait_capcom_placeholder_v001.png",
+      "width": 768,
+      "height": 1024,
+      "alpha": true,
+      "color_space": "sRGB",
+      "framing": "Consistent bust portrait slot for an unnamed composite controller.",
+      "reference_version": "04-Codex-Response asset contract; FNO-M00 0.1.0",
+      "origin": "Planned procedural labeled placeholder; not a real-person portrait.",
+      "attribution": "No third-party imagery used in this declaration.",
+      "status": "to-generate"
+    },
+    {
+      "id": "portrait-systems",
+      "filename": "fno_gemini_portrait_systems_placeholder_v001.png",
+      "width": 768,
+      "height": 1024,
+      "alpha": true,
+      "color_space": "sRGB",
+      "framing": "Consistent bust portrait slot for an unnamed composite controller.",
+      "reference_version": "04-Codex-Response asset contract; FNO-M00 0.1.0",
+      "origin": "Planned procedural labeled placeholder; not a real-person portrait.",
+      "attribution": "No third-party imagery used in this declaration.",
+      "status": "to-generate"
+    },
+    {
+      "id": "portrait-flight-dynamics",
+      "filename": "fno_gemini_portrait_flight-dynamics_placeholder_v001.png",
+      "width": 768,
+      "height": 1024,
+      "alpha": true,
+      "color_space": "sRGB",
+      "framing": "Consistent bust portrait slot for an unnamed composite controller.",
+      "reference_version": "04-Codex-Response asset contract; FNO-M00 0.1.0",
+      "origin": "Planned procedural labeled placeholder; not a real-person portrait.",
+      "attribution": "No third-party imagery used in this declaration.",
+      "status": "to-generate"
+    },
+    {
+      "id": "portrait-recovery",
+      "filename": "fno_gemini_portrait_recovery_placeholder_v001.png",
+      "width": 768,
+      "height": 1024,
+      "alpha": true,
+      "color_space": "sRGB",
+      "framing": "Consistent bust portrait slot for an unnamed composite controller.",
+      "reference_version": "04-Codex-Response asset contract; FNO-M00 0.1.0",
+      "origin": "Planned procedural labeled placeholder; not a real-person portrait.",
+      "attribution": "No third-party imagery used in this declaration.",
+      "status": "to-generate"
+    }
+  ]
+}

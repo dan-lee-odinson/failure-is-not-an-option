@@ -1,0 +1,143 @@
+{
+  "content_version": "0.4.0",
+  "evidence": [
+    {
+      "id": "g8-ev-rule",
+      "kind": "reference",
+      "title": "Terminate the mission after RCS use.",
+      "body": "Once RCS use is reported, the remaining docking and EVA objectives are relinquished and the room plans the contingency return. The selectable return opportunities later in this scenario are fictional.",
+      "simulated": false,
+      "provenance": { "sources": ["H2"], "fiction": ["F7"], "note": "Automatic at briefing; reference. Historical termination principle H2; game selection boundary F7." }
+    },
+    {
+      "id": "g8-ev-contact-primer",
+      "kind": "reference",
+      "title": "A report is not continuous coverage.",
+      "body": "Separate the last received observation from the spacecraft's current unknown state. The crew must act onboard when contact is unavailable.",
+      "simulated": false,
+      "provenance": { "sources": ["H1"], "fiction": [], "note": "Automatic at briefing; instructional reference grounded in H1." }
+    },
+    {
+      "id": "g8-ev-contact-worksheet",
+      "kind": "reference",
+      "title": "Rehearsed contact handoff.",
+      "body": "One desk sends each request; the receiving desk confirms receipt. Record unknown observation times as unknown. A sent instruction is not yet an acknowledged instruction.",
+      "simulated": false,
+      "provenance": { "sources": [], "fiction": ["F1"], "note": "Acquired by g8-prep-contact; original F1 reference." }
+    },
+    {
+      "id": "g8-ev-recovery-worksheet",
+      "kind": "reference",
+      "title": "Rehearsed recovery coordination.",
+      "body": "Assign the final pickup instruction to one desk and rehearse its readback. Keep aircraft support and surface retrieval distinct. A request cannot move a ship instantly.",
+      "simulated": false,
+      "provenance": { "sources": [], "fiction": ["F2"], "note": "Acquired by g8-prep-recovery; original F2 reference." }
+    },
+    {
+      "id": "g8-ev-systems-worksheet",
+      "kind": "reference",
+      "title": "Rehearsed reserve-warning handoff.",
+      "body": "Separate the observed warning from a diagnosis. Route an operational warning and its protective recommendation together; do not wait for a complete fault explanation.",
+      "simulated": false,
+      "provenance": { "sources": [], "fiction": ["F3"], "note": "Acquired by g8-prep-systems; original F3 reference." }
+    },
+    {
+      "id": "g8-ev-docked",
+      "kind": "report",
+      "title": "Docking confirmed.",
+      "body": "The crew have confirmed docking with Agena.",
+      "observation": "known",
+      "simulated": false,
+      "provenance": { "sources": ["H3"], "fiction": [], "note": "Docking event; H3. No roll data appended during gap." }
+    },
+    {
+      "id": "g8-ev-crisis",
+      "kind": "report",
+      "title": "Emergency report through the tracking ship.",
+      "body": "The crew report an uncontrolled tumble after undocking. The report reaches the ground through Coastal Sentry Quebec.",
+      "observation": "unknown",
+      "simulated": false,
+      "provenance": { "sources": ["H1"], "fiction": [], "note": "Crisis receipt only; H1." }
+    },
+    {
+      "id": "g8-ev-stabilized",
+      "kind": "report",
+      "title": "Crew regain control.",
+      "body": "The crew have used the reentry control system to stabilize the spacecraft. The remaining mission objectives must be relinquished.",
+      "observation": "unknown",
+      "simulated": false,
+      "provenance": { "sources": ["H2"], "fiction": [], "note": "Later stabilization receipt; H2." }
+    },
+    {
+      "id": "g8-ev-return",
+      "kind": "simulated-report",
+      "title": "Two modeled return opportunities.",
+      "body": "Both offered routes terminate the mission and return to the western Pacific. Earlier return ends spacecraft exposure sooner but leaves a long wait for surface pickup. The later opportunity improves pickup coverage and costs another orbit aboard the damaged spacecraft.",
+      "observation": "known",
+      "simulated": true,
+      "provenance": { "sources": ["H2"], "fiction": ["F7"], "note": "Automatic at return planning; F7 simulated planning report. Western Pacific historical context only is H2." }
+    },
+    {
+      "id": "g8-ev-air",
+      "kind": "simulated-report",
+      "title": "Recovery support — simulated report.",
+      "body": "Air support is available on either route. In the earlier area, the retrieval ship is still distant. In the later area, recovery forces are concentrated closer to the modeled splashdown point.",
+      "observation": "known",
+      "simulated": true,
+      "provenance": { "sources": [], "fiction": ["F4", "F7"], "note": "Automatic at return planning; F4/F7. No real coordinates or ships assigned." }
+    },
+    {
+      "id": "g8-ev-reserve",
+      "kind": "simulated-report",
+      "title": "Control reserve — simulated report.",
+      "body": "Attitude is stable now. Reserve is limited. An extra orbit buys recovery coverage at the cost of reserve and another critical handoff. An exact remaining-fuel figure is not available in this model.",
+      "observation": "known",
+      "simulated": true,
+      "provenance": { "sources": [], "fiction": ["F7"], "note": "Automatic at return planning; F7. This is not actual Gemini VIII telemetry." }
+    },
+    {
+      "id": "g8-ev-recovery-readback",
+      "kind": "simulated-report",
+      "title": "Pickup desk readback — simulated report.",
+      "body": "The rehearsed desks have confirmed which station owns the final pickup instruction. This can avoid an approach being repeated; it cannot remove the ship's transit.",
+      "observation": "known",
+      "simulated": true,
+      "provenance": { "sources": [], "fiction": ["F2", "F7"], "note": "Automatic at planning only if recovery preparation selected; F2/F7." }
+    },
+    {
+      "id": "g8-ev-systems-readback",
+      "kind": "simulated-report",
+      "title": "Warning-routing readback — simulated report.",
+      "body": "The rehearsed desks have agreed how a reserve warning reaches FLIGHT and CAPCOM together. This can avoid repeating the assessment while the entry handoff is under way.",
+      "observation": "known",
+      "simulated": true,
+      "provenance": { "sources": [], "fiction": ["F3", "F7"], "note": "Automatic at planning only if systems preparation selected; F3/F7." }
+    },
+    {
+      "id": "g8-ev-contact-readback",
+      "kind": "simulated-report",
+      "title": "Acknowledgement plan — simulated report.",
+      "body": "The next instruction has a named sender and an acknowledgement route. The room will distinguish pending from received. This arrangement serves either return plan.",
+      "observation": "known",
+      "simulated": true,
+      "provenance": { "sources": [], "fiction": ["F1", "F7"], "note": "Automatic at planning only if contact preparation selected; F1/F7." }
+    },
+    {
+      "id": "g8-ev-recovered",
+      "kind": "simulated-report",
+      "title": "Both crew members aboard the recovery ship.",
+      "body": "Armstrong and Scott have been recovered alive. Their condition and the course of this return are recorded below.",
+      "observation": "known",
+      "simulated": true,
+      "provenance": { "sources": ["H3"], "fiction": ["F7"], "note": "Only at actual modeled pickup event. Alive recovery has H3 context; branch details F7." }
+    },
+    {
+      "id": "g8-ev-postflight-context",
+      "kind": "reference",
+      "title": "Disagreement after Gemini VIII.",
+      "body": "AmericaSpace reports that later analysis cleared Armstrong and Scott. Cunningham nevertheless criticized their performance, while Stafford criticized undocking. Kranz instead identified insufficient ground contingency procedures for the docked phase. Borman and Schirra defended the crew.",
+      "simulated": false,
+      "provenance": { "sources": ["H5"], "fiction": [], "note": "Automatic only in the later post-flight scene. Attributed paraphrase of H5, a secondary account; not a transcript or an investigation document reproduced here." }
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fno.local/schema/mission.schema.json",
+  "title": "Mission",
+  "type": "object",
+  "required": ["content_version", "id", "title", "chapter", "dramatization", "anchors", "start_notice", "seed_people", "finish", "phases", "outcomes", "debrief", "debrief_layout"],
+  "properties": {
+    "content_version": { "$ref": "defs.schema.json#/$defs/semver" },
+    "id": { "$ref": "defs.schema.json#/$defs/id" },
+    "title": { "$ref": "defs.schema.json#/$defs/text" },
+    "subtitle": { "$ref": "defs.schema.json#/$defs/text" },
+    "chapter": { "$ref": "defs.schema.json#/$defs/id" },
+    "dramatization": { "const": true },
+    "anchors": { "type": "array", "items": { "type": "object", "required": ["label", "url"], "properties": { "label": { "$ref": "defs.schema.json#/$defs/text" }, "url": { "$ref": "defs.schema.json#/$defs/url" } }, "additionalProperties": false } },
+    "start_notice": { "$ref": "defs.schema.json#/$defs/text" },
+    "seed_people": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/id" }, "uniqueItems": true },
+    "finish": { "type": "object", "required": ["id", "requires"], "properties": { "id": { "$ref": "defs.schema.json#/$defs/id" }, "requires": { "$ref": "defs.schema.json#/$defs/condition" } }, "additionalProperties": false },
+    "phases": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/phase" } },
+    "outcomes": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/outcome" } },
+    "debrief": { "type": "array", "items": { "$ref": "#/$defs/debrief_rule" } },
+    "debrief_layout": {
+      "type": "object",
+      "required": ["consequence_node", "relationship_node", "accountability_node", "controllers", "astronauts", "constraint_facts"],
+      "properties": {
+        "consequence_node": { "$ref": "defs.schema.json#/$defs/id" },
+        "relationship_node": { "$ref": "defs.schema.json#/$defs/id" },
+        "accountability_node": { "$ref": "defs.schema.json#/$defs/id" },
+        "controllers": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/id" } },
+        "astronauts": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/id" } },
+        "constraint_facts": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/id" }, "minItems": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "phase": {
+      "type": "object",
+      "required": ["id", "title", "display_time", "contact", "attention", "nodes"],
+      "properties": {
+        "id": { "$ref": "defs.schema.json#/$defs/id" },
+        "title": { "$ref": "defs.schema.json#/$defs/text" },
+        "display_time": { "$ref": "defs.schema.json#/$defs/text" },
+        "contact": { "enum": ["houston", "tracking-ship", "none", "not-in-flight"] },
+        "attention": { "oneOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] },
+        "alternate_history": { "type": "boolean" },
+        "nodes": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/node" } }
+      },
+      "additionalProperties": false
+    },
+    "node": {
+      "oneOf": [
+        { "$ref": "#/$defs/briefing" },
+        { "$ref": "#/$defs/prep_choice" },
+        { "$ref": "#/$defs/decision" },
+        { "$ref": "#/$defs/event" }
+      ]
+    },
+    "briefing": {
+      "type": "object",
+      "required": ["type", "id", "continue"],
+      "properties": {
+        "type": { "const": "briefing" },
+        "id": { "$ref": "defs.schema.json#/$defs/id" },
+        "title": { "$ref": "defs.schema.json#/$defs/text" },
+        "header_label": { "$ref": "defs.schema.json#/$defs/text" },
+        "text": { "$ref": "defs.schema.json#/$defs/text" },
+        "variants": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/conditional_text" } },
+        "documents": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/document" } },
+        "lines": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/line" } },
+        "questions": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/question" } },
+        "continue": { "$ref": "defs.schema.json#/$defs/continue" }
+      },
+      "additionalProperties": false
+    },
+    "prep_choice": {
+      "type": "object",
+      "required": ["type", "id", "prompt", "cost", "options", "reasons", "finish"],
+      "properties": {
+        "type": { "const": "prep_choice" },
+        "id": { "$ref": "defs.schema.json#/$defs/id" },
+        "prompt": { "$ref": "defs.schema.json#/$defs/text" },
+        "text": { "$ref": "defs.schema.json#/$defs/text" },
+        "cost": { "type": "integer", "minimum": 1 },
+        "options": { "type": "array", "minItems": 1, "items": { "$ref": "defs.schema.json#/$defs/option" } },
+        "reasons": { "type": "object", "required": ["completed", "exhausted"], "properties": { "completed": { "$ref": "defs.schema.json#/$defs/text" }, "exhausted": { "$ref": "defs.schema.json#/$defs/text" } }, "additionalProperties": false },
+        "finish": { "$ref": "defs.schema.json#/$defs/continue" }
+      },
+      "additionalProperties": false
+    },
+    "decision": {
+      "type": "object",
+      "required": ["type", "id", "prompt", "options"],
+      "properties": {
+        "type": { "const": "decision" },
+        "id": { "$ref": "defs.schema.json#/$defs/id" },
+        "title": { "$ref": "defs.schema.json#/$defs/text" },
+        "header_label": { "$ref": "defs.schema.json#/$defs/text" },
+        "prompt": { "$ref": "defs.schema.json#/$defs/text" },
+        "text": { "$ref": "defs.schema.json#/$defs/text" },
+        "documents": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/document" } },
+        "lines": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/line" } },
+        "questions": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/question" } },
+        "readout": { "type": "array", "items": { "type": "object", "required": ["label", "fact", "ready", "not_ready"], "properties": { "label": { "$ref": "defs.schema.json#/$defs/text" }, "fact": { "$ref": "defs.schema.json#/$defs/id" }, "ready": { "$ref": "defs.schema.json#/$defs/text" }, "not_ready": { "$ref": "defs.schema.json#/$defs/text" } }, "additionalProperties": false } },
+        "options": { "type": "array", "minItems": 1, "items": { "$ref": "defs.schema.json#/$defs/option" } }
+      },
+      "additionalProperties": false
+    },
+    "event": {
+      "type": "object",
+      "required": ["type", "id", "resolutions", "continue"],
+      "properties": {
+        "type": { "const": "event" },
+        "id": { "$ref": "defs.schema.json#/$defs/id" },
+        "title": { "$ref": "defs.schema.json#/$defs/text" },
+        "label": { "$ref": "defs.schema.json#/$defs/text" },
+        "resolutions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/resolution" } },
+        "continue": { "$ref": "defs.schema.json#/$defs/continue" }
+      },
+      "additionalProperties": false
+    },
+    "resolution": {
+      "type": "object",
+      "required": ["id", "when", "effects"],
+      "properties": {
+        "id": { "$ref": "defs.schema.json#/$defs/id" },
+        "when": { "$ref": "defs.schema.json#/$defs/condition" },
+        "effects": { "$ref": "defs.schema.json#/$defs/effects" },
+        "sub_effects": { "type": "array", "items": { "type": "object", "required": ["when", "effects"], "properties": { "when": { "$ref": "defs.schema.json#/$defs/condition" }, "effects": { "$ref": "defs.schema.json#/$defs/effects" } }, "additionalProperties": false } },
+        "finally": { "$ref": "defs.schema.json#/$defs/effects" },
+        "lines": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/line" } },
+        "text": { "$ref": "defs.schema.json#/$defs/text" },
+        "status": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/text" } }
+      },
+      "additionalProperties": false
+    },
+    "outcome": {
+      "type": "object",
+      "required": ["id", "title", "kind", "requires"],
+      "properties": {
+        "id": { "$ref": "defs.schema.json#/$defs/id" },
+        "title": { "$ref": "defs.schema.json#/$defs/text" },
+        "kind": { "enum": ["success", "partial", "abort-safe", "loss"] },
+        "requires": { "$ref": "defs.schema.json#/$defs/condition" }
+      },
+      "additionalProperties": false
+    },
+    "debrief_rule": {
+      "type": "object",
+      "required": ["id", "when", "text"],
+      "properties": {
+        "id": { "$ref": "defs.schema.json#/$defs/id" },
+        "when": { "$ref": "defs.schema.json#/$defs/condition" },
+        "text": { "$ref": "defs.schema.json#/$defs/text" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "content_version": "0.4.0",
+  "procedures": [
+    {
+      "id": "proc-report-provenance",
+      "title": "Report provenance",
+      "text": "Record sender, known observation time, receipt and unconfirmed information.",
+      "status": "adopted-procedure",
+      "provenance": { "sources": [], "fiction": ["F6"], "note": "Original standing-procedure choice (F6). Adoption does not reverse the experienced outcome, trust, or compulsory rehearsal." }
+    },
+    {
+      "id": "proc-recovery-crosscheck",
+      "title": "Recovery cross-check",
+      "text": "List air support and surface retrieval separately; distinguish requested from confirmed support.",
+      "status": "adopted-procedure",
+      "provenance": { "sources": [], "fiction": ["F6"], "note": "Original standing-procedure choice (F6). Adoption does not reverse the experienced outcome, trust, or compulsory rehearsal." }
+    },
+    {
+      "id": "proc-docked-contingencies",
+      "title": "Docked-flight contingency development",
+      "text": "Develop and rehearse ground contingencies for failures while docked: distinguish observed symptoms from suspected sources, identify the information available to crew and ground, and define coordination before communications are lost.",
+      "status": "commissioned-task",
+      "provenance": { "sources": ["H5"], "fiction": ["F10"], "note": "A commissioned program task, not a completed engineering procedure, flight rule or proven safety improvement. Its wording and adoption are original F10, inspired by the reported Kranz criticism; not an exact historical NASA corrective document." }
+    }
+  ]
+}

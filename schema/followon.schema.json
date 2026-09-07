@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fno.local/schema/followon.schema.json",
+  "title": "Follow-on planning screen",
+  "type": "object",
+  "required": ["content_version", "id", "title", "display_title", "node", "confirm_input", "requires_completion_of", "constraint_facts", "constraint", "trust_labels", "controllers", "astronauts", "status_blocks", "plans", "committed_text"],
+  "properties": {
+    "content_version": { "$ref": "defs.schema.json#/$defs/semver" },
+    "id": { "$ref": "defs.schema.json#/$defs/id" },
+    "title": { "$ref": "defs.schema.json#/$defs/text" },
+    "display_title": { "$ref": "defs.schema.json#/$defs/text" },
+    "node": { "$ref": "defs.schema.json#/$defs/id" },
+    "confirm_input": { "$ref": "defs.schema.json#/$defs/id" },
+    "requires_completion_of": { "$ref": "defs.schema.json#/$defs/id" },
+    "constraint_facts": { "type": "array", "minItems": 1, "items": { "$ref": "defs.schema.json#/$defs/id" }, "uniqueItems": true },
+    "constraint": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/conditional_text" } },
+    "trust_labels": { "type": "object", "patternProperties": { "^-?[0-9]+$": { "$ref": "defs.schema.json#/$defs/text" } }, "additionalProperties": false },
+    "controllers": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/id" } },
+    "astronauts": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/id" } },
+    "status_blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "when", "title", "text"],
+        "properties": {
+          "id": { "$ref": "defs.schema.json#/$defs/id" },
+          "when": { "$ref": "defs.schema.json#/$defs/condition" },
+          "title": { "$ref": "defs.schema.json#/$defs/text" },
+          "text": { "$ref": "defs.schema.json#/$defs/text" },
+          "procedure": { "$ref": "defs.schema.json#/$defs/id" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "plans": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "benefit", "available_when", "disabled_reasons", "effects"],
+        "properties": {
+          "id": { "$ref": "defs.schema.json#/$defs/id" },
+          "label": { "$ref": "defs.schema.json#/$defs/text" },
+          "benefit": { "$ref": "defs.schema.json#/$defs/text" },
+          "available_when": { "$ref": "defs.schema.json#/$defs/condition" },
+          "disabled_reasons": { "type": "array", "items": { "$ref": "defs.schema.json#/$defs/conditional_text" } },
+          "effects": { "$ref": "defs.schema.json#/$defs/effects" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "committed_text": { "$ref": "defs.schema.json#/$defs/text" }
+  },
+  "additionalProperties": false
+}
