@@ -16,7 +16,7 @@ import {
   alternateHistoryActive, describeCommittedDecision, describeDebrief, describeEvidence, describeFollowOnForRun, describeNode,
   type EvidenceView, type LineView, type MovingElement, type NodeView, type Option, type OptionView, type Participant,
 } from '../core';
-import { assetEntry, assetUrl } from './assets';
+import { assetEntry, assetUrl, videoUrl } from './assets';
 import { describeResolution } from './resolution';
 import { MODERN_UI_AVAILABLE } from './theme';
 import type { Store } from './ui-state';
@@ -25,6 +25,8 @@ import soundscapeMap from './soundscape-map.json';
 import titleLayout from './title-layout.json';
 
 export const PIN_HINT = 'Pin to keep this report in view. Pinning changes nothing in the mission.';
+/** The home page of the site the demo lives on (finaogame.com/, the demo at /demo/): an absolute path, the same in dev, preview and the deployed site. */
+export const HOME_HREF = '/';
 export const FULLSCREEN_LINE = 'Best played full screen — press F11 on Windows.';
 
 /** Set per render: the idle highlight is on (30 s without an input, hints on, motion allowed, no overlay). */
@@ -118,7 +120,7 @@ export function render(store: Store): string {
 }
 
 // ---------------------------------------------------------------------------
-// Opening: start → dedication → notices → (montage) → hero title → main menu
+// Opening: start → the film → the credits on the den wall → hero title → main menu (FNO-DEPLOY)
 // ---------------------------------------------------------------------------
 
 /** The room composite: the plate and the emblem on Glen's vest, one layer beneath every panel, card region and status bar. */
@@ -147,41 +149,23 @@ function renderOpening(store: Store): string {
     </div>
   </main>`;
   }
-  if (stage === 'dedication' || stage === 'notices') {
-    const dedication = reg.notices.dedication;
-    const notices = [reg.notices.project_disclaimer, reg.notices.ai_disclosure, reg.notices.dramatization];
-    // One continuous scroll: the dedication, a chapter gap, then the notices; no Continue between them.
-    // Under reduced motion: two static pages (dedication, notices) with Continue and immediate cuts.
-    const chapters = ui.reducedMotion ? [stage === 'dedication' ? dedication : notices] : [dedication, notices];
-    const words = chapters.flat().join(' ').split(/\s+/).length;
-    const seconds = Math.round(6 + words / 3.5); // a reading pace; Continue is always available
-    const column = chapters.map((c, i) => `${i ? '<div class="op-chapter-gap" aria-hidden="true"></div>' : ''}<div class="op-chapter-text">${c.map((t) => `<p>${esc(t)}</p>`).join('')}</div>`).join('');
-    const label = ui.reducedMotion ? (stage === 'dedication' ? 'Dedication' : 'Notices') : 'Dedication and notices';
-    const fade = ui.fade === 'out' ? ` fade-out${ui.fadeQuick ? ' quick' : ''}` : '';
+  if (stage === 'film') {
+    // The opening film (FNO-DEPLOY, docs 38 §2 / 40 item 4): the deployed 2:18 cut in a native <video>, letterboxed, with its own
+    // sound (Orbit of Hope). The element is created once and kept across repaints (see paint() in main.ts); only the controls repaint.
+    const src = videoUrl('video-opening-film');
     return `
-  <main class="screen-opening op-chapter${fade}" data-testid="screen-opening" data-stage="${stage}"${ui.fade ? ` data-fade="${ui.fade}"` : ''}>
-    <section id="op-scroll" class="op-scroll${ui.reducedMotion ? ' static' : ''}${ui.scrollPaused ? ' paused' : ''}" data-testid="op-scroll" data-seconds="${seconds}" tabindex="0" aria-label="${label}">
-      <div class="op-prose" data-testid="op-prose">${column}</div>
-    </section>
-    <div class="op-controls" data-testid="op-controls">
-      ${ui.reducedMotion ? '' : key({ family: 'selector', action: 'scroll-toggle', focus: 'scroll-toggle', testid: 'scroll-toggle', pressed: ui.scrollPaused, label: ui.scrollPaused ? 'RESUME' : 'PAUSE' })}
-      ${key({ family: 'key', action: 'stage-next', focus: 'stage-next', testid: 'stage-next', focusDefault: true, label: 'CONTINUE' })}
-      ${key({ family: 'selector', action: 'skip-to-menu', focus: 'skip-to-menu', testid: 'skip-to-menu', label: 'SKIP TO MENU' })}
-      ${soundControl(store, stage)}
-    </div>
-    ${message}
+  <main class="screen-opening op-film" data-testid="screen-opening" data-stage="film">
+    <div class="film-frame" data-testid="film-frame">${src ? `<video id="film" class="film" data-testid="film" playsinline preload="auto" src="${src}" aria-label="The opening film"></video>` : ''}</div>
+    <div class="op-controls film-controls" data-testid="film-controls">${renderFilmControls(store)}</div>
   </main>`;
   }
-  if (stage === 'montage') {
-    // Named empty slot for the future archival montage (07): a 0-duration pass-through in M00b.
-    return `<main class="screen-opening op-montage" data-testid="screen-opening" data-stage="montage" aria-hidden="true"></main>`;
-  }
+  if (stage === 'credits') return renderCredits(store);
   // title / menu — Study A, Engineering block: live text at title-layout.json coordinates, scaled with the plate.
   const study = titleLayout.studies.find((s) => s.id === 'a') ?? titleLayout.studies[0]!;
   const menu = stage === 'menu';
   const cs = ui.continueSave;
   const svg = `<svg class="hero-svg" viewBox="0 0 ${study.canvas[0]} ${study.canvas[1]}" role="img" aria-label="Failure is Not an Option" focusable="false">${study.rows.map((r) => `<text x="${r.x}" y="${r.baseline}" font-size="${r.font_size}">${esc(r.text)}</text>`).join('')}</svg>`;
-  const fadeIn = ui.fade === 'in' ? ` fade-in${ui.fadeQuick ? ' quick' : ''}` : '';
+  const fadeIn = ui.fade === 'in' ? ` fade-in${ui.fadeQuick ? ' quick' : ''}${ui.fadeDen ? ' den' : ''}` : '';
   return `
   <main class="screen-opening op-hero ${menu ? 'stage-menu' : 'stage-title'}${fadeIn}" data-testid="screen-opening" data-stage="${stage}"${ui.fade ? ` data-fade="${ui.fade}"` : ''}>
     ${roomLayer()}
@@ -190,6 +174,7 @@ function renderOpening(store: Store): string {
     ${menu ? '' : `<button type="button" class="hero-continue" data-action="stage-next" data-focus="hero-continue" data-focus-default data-testid="hero-continue">CONTINUE →</button>`}
     ${menu ? `
     <div class="menu-block">
+      <p class="menu-demo" data-testid="demo-tag">DEMO</p>
       <nav class="menu" aria-label="Main menu" data-testid="menu">
         ${key({ family: 'title', action: 'start-new', focus: 'start-new', testid: 'start-new', focusDefault: true, label: 'NEW CAMPAIGN' })}
         ${key({ family: 'title', action: 'start-load', focus: 'start-load', testid: 'start-load', disabled: !cs.ok, describedBy: cs.ok ? undefined : 'continue-reason', label: 'CONTINUE' })}
@@ -207,6 +192,62 @@ function renderOpening(store: Store): string {
       </div>
       ${message}
     </div>` : ''}
+    </div>
+  </main>`;
+}
+
+
+/** The film stage's controls (repainted on their own so the playing <video> survives a repaint). */
+export function renderFilmControls(store: Store): string {
+  const { ui } = store;
+  const message = ui.message ? `<p class="message" role="alert" data-testid="message">${esc(ui.message)}</p>` : '';
+  return `${key({ family: 'selector', action: 'film-skip', focus: 'film-skip', testid: 'film-skip', focusDefault: true, label: 'SKIP FILM' })}
+      ${key({ family: 'selector', action: 'skip-to-menu', focus: 'skip-to-menu', testid: 'skip-to-menu', label: 'SKIP TO MENU' })}
+      ${soundControl(store, 'film')}
+      ${message}`;
+}
+
+/**
+ * The credits on the den wall (docs 30 §8, 38 §2, 40 items 2 and 4, OPENING-DEN.md): the den plate in the 1920×1080 design
+ * frame, the dedication, the three notices and the registry's credit sections scrolling inside `projection_rect` as dark ink
+ * on the projector's lit field, the beam and two smoke instances over it (composite order room → credits → beam → smoke;
+ * the animation is driven in main.ts), and the run-out darkening. Static (Skip, reduced motion): the same block,
+ * keyboard-scrollable, no timed scroll. Controls stay outside the wall.
+ */
+function renderCredits(store: Store): string {
+  const { ui } = store;
+  const reg = store.content.bundle.registry;
+  const den = reg.opening_den;
+  const rect = den?.projection_rect ?? { x: 830, y: 115, width: 928, height: 522 };
+  const box = (p: { x: number; y: number; width: number; height: number }) => `left:${pct(p.x, DESIGN.width)};top:${pct(p.y, DESIGN.height)};width:${pct(p.width, DESIGN.width)};height:${pct(p.height, DESIGN.height)}`;
+  const plate = assetUrl(den?.background ?? 'opening-den');
+  const smoke = den ? assetUrl(den.smoke.asset) : null;
+  const beam = den ? assetUrl(den.beam.asset) : null;
+  const isStatic = ui.creditsStatic || ui.reducedMotion;
+  const sections = (reg.credits ?? []).map((s) => `<section class="wall-section"><h2 class="wall-heading">${esc(s.heading)}</h2>${s.lines.map((l) => `<p class="wall-line">${esc(l)}</p>`).join('')}</section>`).join('');
+  const column = `<div class="wall-dedication">${reg.notices.dedication.map((t) => `<p>${esc(t)}</p>`).join('')}</div>
+        <div class="wall-notices">${[reg.notices.project_disclaimer, reg.notices.ai_disclosure, reg.notices.dramatization].map((t) => `<p>${esc(t)}</p>`).join('')}</div>
+        ${sections}`;
+  const message = ui.message ? `<p class="message" role="alert" data-testid="message">${esc(ui.message)}</p>` : '';
+  const fade = ui.fade === 'out' ? ` fade-out${ui.fadeQuick ? ' quick' : ''}` : '';
+  const smokeLayer = (which: 'a' | 'b') => smoke && den ? `<img class="pl-layer den-smoke" data-smoke="${which}" src="${smoke}" alt="" aria-hidden="true" data-backdrop style="${box(den.smoke.placement)};opacity:${den.smoke.placement.opacity}" data-seconds="${den.smoke.motion.seconds}" data-rise="${den.smoke.motion.to.y - den.smoke.motion.from.y}" data-loop="${den.smoke_loop.seconds}" data-crossfade="${den.smoke_loop.crossfade_seconds}" data-testid="den-smoke-${which}" />` : '';
+  return `
+  <main class="screen-opening screen-plate op-credits${fade}" data-testid="screen-opening" data-stage="credits" data-runout="${ui.runout}" data-credits="${isStatic ? 'static' : 'scroll'}"${ui.fade ? ` data-fade="${ui.fade}"` : ''}>
+    <div class="pl-frame den-frame" data-testid="den-frame">
+      ${plate ? `<img class="pl-bg den-plate" src="${plate}" alt="" aria-hidden="true" data-backdrop data-testid="den-plate" />` : ''}
+      <section id="op-scroll" class="op-scroll wall-credits${isStatic ? ' static' : ''}${ui.scrollPaused ? ' paused' : ''}" data-testid="op-scroll" style="${box(rect)}" tabindex="0" aria-label="Credits">
+        <div class="op-prose wall-prose" data-testid="op-prose">${column}</div>
+      </section>
+      ${beam && den ? `<img class="pl-layer den-beam" src="${beam}" alt="" aria-hidden="true" data-backdrop style="${box(den.beam.placement)};opacity:${den.beam.placement.opacity}" data-opacity="${den.beam.placement.opacity}" data-testid="den-beam" />` : ''}
+      ${smokeLayer('a')}${isStatic ? '' : smokeLayer('b')}
+      <div class="den-dark" data-testid="den-dark" aria-hidden="true"></div>
+    </div>
+    <div class="op-controls pl-controls" data-testid="op-controls">
+      ${isStatic ? '' : key({ family: 'selector', action: 'scroll-toggle', focus: 'scroll-toggle', testid: 'scroll-toggle', pressed: ui.scrollPaused, label: ui.scrollPaused ? 'RESUME' : 'PAUSE' })}
+      ${key({ family: 'key', action: 'stage-next', focus: 'stage-next', testid: 'stage-next', focusDefault: true, label: 'CONTINUE' })}
+      ${key({ family: 'selector', action: 'skip-to-menu', focus: 'skip-to-menu', testid: 'skip-to-menu', label: 'SKIP TO MENU' })}
+      ${soundControl(store, 'credits')}
+      ${message}
     </div>
   </main>`;
 }
@@ -581,7 +622,7 @@ function renderAbout(store: Store): string {
   const sfxIds = new Set<string>([...soundscapeMap.beds.map((b) => b.asset), ...soundscapeMap.one_shots.map((o) => o.asset)]);
   const sfx = [...sfxIds].map((id) => assetEntry(id)).filter((e): e is NonNullable<typeof e> => !!e);
   return `
-    <div class="actions">${key({ family: 'selector', action: 'replay-opening', testid: 'replay-opening', label: 'REPLAY OPENING' })}</div>
+    <div class="actions">${key({ family: 'selector', action: 'replay-opening', testid: 'replay-opening', label: 'REPLAY OPENING' })}<a class="k k-selector k-link" href="${HOME_HREF}" data-testid="home-link">HOME</a></div>
     <div class="dedication">${reg.notices.dedication.map((d) => `<p>${esc(d)}</p>`).join('')}</div>
     <h3>Project disclaimer</h3><p>${esc(reg.notices.project_disclaimer)}</p>
     <h3>Generative AI disclosure</h3><p>${esc(reg.notices.ai_disclosure)}</p>

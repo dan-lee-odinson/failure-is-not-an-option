@@ -232,7 +232,7 @@ describe('dialogue sheet', () => {
     expect(seen).toEqual(missionNodes); // every node present, in content order
     for (let i = 1; i < seen.length; i++) expect(firstIndex.get(seen[i]!)!).toBeGreaterThan(firstIndex.get(seen[i - 1]!)!);
     expect(firstIndex.get('opening-start')).toBe(0);
-    for (const stage of STAGES) if (stage !== 'montage') expect(firstIndex.has('opening-' + stage), `opening stage ${stage} on the sheet`).toBe(true);
+    for (const stage of STAGES) expect(firstIndex.has('opening-' + stage), `opening stage ${stage} on the sheet`).toBe(true);
     expect(firstIndex.get('opening-menu')!).toBeLessThan(firstIndex.get(missionNodes[0]!)!);
     // The prologue sits between the menu and the first console screen, in plate order; the resolution between the last node and the debrief.
     const prologue = content().mission.prologue!;

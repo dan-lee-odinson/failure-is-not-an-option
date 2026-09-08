@@ -4,7 +4,9 @@
  *   - images (`kind` room / portrait / emblem / layer / image) live under
  *     assets/ and are bundled by Vite (hashed URLs, never inlined);
  *   - audio (`kind: audio`) lives under public/audio/ and is served as a
- *     plain file so the tracks stay byte-identical to Dan's originals.
+ *     plain file so the tracks stay byte-identical to Dan's originals;
+ *   - video (`kind: video`) lives under public/video/: the opening film's
+ *     deployed cut (FNO-DEPLOY), served as a plain file.
  */
 import manifest from '../assets/manifest.json';
 
@@ -25,6 +27,7 @@ export interface ManifestAsset {
   license?: string;
   source_url?: string;
   duration_s?: number;
+  sha256?: string;
 }
 
 export const MANIFEST = manifest as { content_version: string; assets: ManifestAsset[] };
@@ -39,7 +42,7 @@ export function assetEntry(id: string | null): ManifestAsset | null {
 /** URL of a manifest image, or null when the id is unknown or not an image. */
 export function assetUrl(id: string | null): string | null {
   const entry = assetEntry(id);
-  if (!entry || entry.kind === 'audio') return null;
+  if (!entry || entry.kind === 'audio' || entry.kind === 'video') return null;
   return imageUrls[`../assets/${entry.filename}`] ?? null;
 }
 
@@ -49,6 +52,14 @@ export function audioUrl(id: string | null): string | null {
   if (!entry || entry.kind !== 'audio') return null;
   const base = (import.meta.env?.BASE_URL as string | undefined) ?? './';
   return `${base.endsWith('/') ? base : base + '/'}audio/${entry.filename.split('/').map(encodeURIComponent).join('/')}`;
+}
+
+/** URL of a manifest video file under public/video/ (the opening film). A missing or unplayable file is handled by the player (the opening skips to the den). */
+export function videoUrl(id: string | null): string | null {
+  const entry = assetEntry(id);
+  if (!entry || entry.kind !== 'video') return null;
+  const base = (import.meta.env?.BASE_URL as string | undefined) ?? './';
+  return `${base.endsWith('/') ? base : base + '/'}video/${entry.filename.split('/').map(encodeURIComponent).join('/')}`;
 }
 
 export function audioAssets(): ManifestAsset[] {

@@ -28,7 +28,7 @@ const sfx = soundscapeMap as SoundscapeMap & { crisis_cards: string[]; generated
 
 /** Every id a cue may trigger on or stop on. */
 function knownSignals(): Set<string> {
-  const out = new Set<string>(['start-new', 'start-load', 'skip-to-menu']);
+  const out = new Set<string>(['start-new', 'start-load', 'skip-to-menu', 'opening-runout']); // opening-runout: the app's signal when the credits' run-out starts (FNO-DEPLOY)
   for (const screen of ['prologue', 'console', 'resolution', 'debrief', 'planning'] as Screen[]) out.add(screenId({ screen, stage: 'start' }));
   for (const stage of STAGES) out.add(screenId({ screen: 'opening', stage: stage as Stage }));
   for (const id of content().nodes.keys()) out.add(`node:${id}`);
@@ -84,9 +84,19 @@ describe('music map', () => {
     expect((music.reserved ?? []).some((r) => r.asset === 'audio-mission-in-danger')).toBe(true);
     for (const c of music.cues) if (c.gain !== undefined) { expect(c.gain).toBeGreaterThan(0); expect(c.gain).toBeLessThanOrEqual(1); }
     expect(crisis.stop_on).toEqual(expect.arrayContaining(['choose:g8-return-earlier', 'choose:g8-return-later']));
-    const opening = music.cues.find((c) => c.id === 'opening')!;
-    expect(opening.end).toBe(42);
-    expect(opening.extend_to_seam_if_still_reading).toBe(124);
+    // FNO-DEPLOY (doc 40 item 1): the film carries its own Orbit of Hope; the refrain runs under the wall credits from its start and
+    // fades over 2 s when the run-out starts (0.4 s under Continue's quick fade); the M00c `opening` cue is retired with the prose scroll.
+    expect(music.cues.some((c) => c.id === 'opening')).toBe(false);
+    const credits = music.cues.find((c) => c.id === 'credits')!;
+    expect(credits.asset).toBe('audio-orbit-of-hope-refrain');
+    expect(credits.trigger).toBe('screen:opening-credits');
+    expect(credits.start).toBe(0);
+    expect(credits.end).toBeNull();
+    expect(credits.loop).toBeNull();
+    expect(credits.fade_out).toBe(2);
+    expect(credits.stop_on).toEqual(expect.arrayContaining(['opening-runout', 'screen:opening-title', 'screen:menu', 'skip-to-menu', 'screen:opening-start']));
+    expect(credits.stop_fade).toEqual({ 'screen:opening-title': 0.4 });
+    expect(music.cues.some((c) => c.trigger === 'screen:opening-film')).toBe(false); // the film's audio is the video's own
   });
 
   it('M01: Orbit of Hope runs under the prologue from 0:00 once, the menu loop fades over 1 s on New Campaign, and the room stops the cue', () => {

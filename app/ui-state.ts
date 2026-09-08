@@ -12,9 +12,17 @@ import type { ContentIndex, Run } from '../core';
 /** `prologue` runs once after NEW CAMPAIGN; `resolution` sits between the outcome record and the debrief (FNO-M01). */
 export type Screen = 'opening' | 'prologue' | 'console' | 'resolution' | 'debrief' | 'planning';
 
-/** Stages of the opening screen, in order. `montage` is the named empty slot for the future archival montage (07). */
-export type Stage = 'start' | 'dedication' | 'notices' | 'montage' | 'title' | 'menu';
-export const STAGES: readonly Stage[] = ['start', 'dedication', 'notices', 'montage', 'title', 'menu'];
+/**
+ * Stages of the opening screen, in order (FNO-DEPLOY, docs 30 §7–8 / 38 §2 / 40): Start (Begin) → the film (the opening
+ * cut to 2:18, the projector filling the frame) → the credits on the den wall (the dedication, the notices and the
+ * registry's credit sections over the live den layers) → the hero title → the menu. The M00c prose scroll is retired:
+ * its texts are the first sections of the wall credits.
+ */
+export type Stage = 'start' | 'film' | 'credits' | 'title' | 'menu';
+export const STAGES: readonly Stage[] = ['start', 'film', 'credits', 'title', 'menu'];
+
+/** The run-out after the last credit line clears: the beam dies, the den darkens, black, then the title dissolves in. */
+export type Runout = 'none' | 'beam' | 'dark' | 'black';
 
 /** `evidence` is the evidence list as an overlay panel in the stacked layout (M02). */
 export type Overlay = null | 'binder' | 'history' | 'saveload' | 'about' | 'settings' | 'evidence';
@@ -45,8 +53,14 @@ export interface UiState {
   open: string[];
   /** Explicit Details-disclosure overrides per option card; absent = the card's default. */
   details: Record<string, boolean>;
-  /** Opening prose scroll paused by the player. */
+  /** The wall credits' scroll paused by the player. */
   scrollPaused: boolean;
+  /** The wall credits as a static, keyboard-scrollable block (after Skip during the film, or under reduced motion) instead of the timed scroll. */
+  creditsStatic: boolean;
+  /** Where the run-out is (credits stage only). */
+  runout: Runout;
+  /** The 700 ms dissolve from the black den into the title (instead of the 1.5 s / 0.4 s fades). */
+  fadeDen: boolean;
   /** prefers-reduced-motion at paint time: static chapters, immediate cuts. */
   reducedMotion: boolean;
   /** The once-only pin hint has been shown and dismissed (persisted per player). */
@@ -113,6 +127,9 @@ export function defaultUi(overrides: Partial<UiState> = {}): UiState {
     open: [],
     details: {},
     scrollPaused: false,
+    creditsStatic: false,
+    runout: 'none',
+    fadeDen: false,
     reducedMotion: false,
     pinHintSeen: false,
     pinHintOpen: false,
@@ -144,7 +161,7 @@ export const PREF_KEYS = {
   hints: 'fno.hints',
 } as const;
 
-/** Screen id used by the cue maps for a UI state: `screen:menu`, `screen:opening-dedication`, `screen:prologue`, `screen:console`, `screen:resolution`, … */
+/** Screen id used by the cue maps for a UI state: `screen:menu`, `screen:opening-film`, `screen:opening-credits`, `screen:prologue`, `screen:console`, `screen:resolution`, … */
 export function screenId(ui: Pick<UiState, 'screen' | 'stage'>): string {
   if (ui.screen !== 'opening') return `screen:${ui.screen}`;
   return ui.stage === 'menu' ? 'screen:menu' : `screen:opening-${ui.stage}`;

@@ -1,0 +1,52 @@
+# Deploys the site (the home page at / and the game at /demo/) to GitHub Pages on every push to main, and on demand.
+# A failing step publishes nothing: the validator, the unit tests, the build and the release check gate the deploy
+# (doc 35 §4; the deploy handoff, Part 4). The Playwright suite runs separately in ci.yml: it needs a browser install and
+# minutes of wall time, and the deploy path should stay short and deterministic; ci.yml is what reviews a pull request.
+#
+# Dan's one-time steps (doc 35 §3): verify the domain, set the DNS records, choose "GitHub Actions" as the Pages source
+# with finaogame.com as the custom domain, make the repository public. Until then this workflow runs and the deploy step
+# fails harmlessly on a private repository without Pages enabled.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run validate
+      - run: npm test
+      - run: npm run build
+      - run: npm run release-check
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

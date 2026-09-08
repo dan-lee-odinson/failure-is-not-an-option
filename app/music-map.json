@@ -1,26 +1,31 @@
 {
-  "$comment": "FNO music map — starting values from 20-Music-Scene-Entries.md §2/§5 as ruled by Dan. Seconds. trigger = a screen id (screen:menu, screen:opening-dedication, screen:console, …) or a node id (node:<id>) entered; stop_on = input ids (start-new, start-load, skip-to-menu, choose:<option id>) or screen ids that fade the cue out. No loops on any screen where the player reads and decides. A cue may carry a gain (0-1) applied to that cue only, and stop_fade: per-signal fade-out seconds that override fade_out for that stop signal. All numbers are tunable without a rebuild; cues marked provisional are expected to move after playtest 2. Nothing here enters the ledger, the log, or the replay.",
+  "$comment": "FNO music map — starting values from 20-Music-Scene-Entries.md §2/§5 as ruled by Dan. Seconds. trigger = a screen id (screen:menu, screen:opening-credits, screen:console, …) or a node id (node:<id>) entered; stop_on = input ids (start-new, start-load, skip-to-menu, choose:<option id>) or screen ids that fade the cue out. No loops on any screen where the player reads and decides. A cue may carry a gain (0-1) applied to that cue only, and stop_fade: per-signal fade-out seconds that override fade_out for that stop signal. All numbers are tunable without a rebuild; cues marked provisional are expected to move after playtest 2. Nothing here enters the ledger, the log, or the replay.",
   "version": 1,
   "defaults": {
     "music_gain": 0.8
   },
   "cues": [
     {
-      "id": "opening",
-      "asset": "audio-orbit-of-hope",
-      "trigger": "screen:opening-dedication",
+      "id": "credits",
+      "asset": "audio-orbit-of-hope-refrain",
+      "trigger": "screen:opening-credits",
       "start": 0.0,
-      "end": 42.0,
-      "fade_in": 0.0,
-      "fade_out": 2.5,
+      "end": null,
+      "fade_in": 1.5,
+      "fade_out": 2.0,
       "loop": null,
-      "extend_to_seam_if_still_reading": 124.0,
       "stop_on": [
+        "opening-runout",
+        "screen:opening-title",
         "screen:menu",
         "skip-to-menu",
-        "screen:opening-start"
+        "screen:opening-start",
+        "screen:opening-film"
       ],
-      "note": "Under the dedication, the notices and the hero title; crossfades into menu-loop. 0:42 is a section change; if the player is still reading at 0:42 the cue extends to the next seam at 2:04."
+      "stop_fade": {
+        "screen:opening-title": 0.4
+      },
+      "note": "FNO-DEPLOY (doc 40 item 1): Orbit of Hope (refrain) under the wall credits from its quiet start, once; the film before it carries its own Orbit of Hope. Fades over 2 s when the run-out starts (the `opening-runout` signal), 0.4 s under Continue's quick fade to the title. The M00c `opening` cue (Orbit of Hope under the prose scroll) is retired with that scroll."
     },
     {
       "id": "menu-loop",

@@ -155,14 +155,31 @@ export async function measureTextContrast(page: Page, selectors: string[]): Prom
     const ctx = canvas.getContext('2d')!;
     const ground = parse(getComputedStyle(document.querySelector('.screen-opening, .screen-plate') ?? document.body).backgroundColor);
     const out: { selector: string; ratio: number; worst: string }[] = [];
+    /** The viewport clipped by every overflow ancestor (a scroll box such as the credits wall shows only part of its text). */
+    const clipOf = (el: HTMLElement): { x0: number; y0: number; x1: number; y1: number } => {
+      let x0 = 0, y0 = 0, x1 = innerWidth, y1 = innerHeight;
+      for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
+        const o = getComputedStyle(node);
+        if (o.overflowX === 'visible' && o.overflowY === 'visible') continue;
+        const r = node.getBoundingClientRect();
+        x0 = Math.max(x0, r.left); y0 = Math.max(y0, r.top); x1 = Math.min(x1, r.right); y1 = Math.min(y1, r.bottom);
+      }
+      return { x0, y0, x1, y1 };
+    };
     for (const selector of selectors) {
-      const el = document.querySelector<HTMLElement>(selector);
-      if (!el) continue;
-      const b = el.getBoundingClientRect();
-      if (b.width === 0 || b.height === 0) continue;
-      const x0 = Math.max(0, b.left), y0 = Math.max(0, b.top);
-      const x1 = Math.min(innerWidth, b.right), y1 = Math.min(innerHeight, b.bottom);
-      if (x1 <= x0 || y1 <= y0) continue;
+      // The first match that is actually visible (a paragraph scrolled out of its box is not measured).
+      let picked: { el: HTMLElement; x0: number; y0: number; x1: number; y1: number } | null = null;
+      for (const cand of Array.from(document.querySelectorAll<HTMLElement>(selector))) {
+        const b = cand.getBoundingClientRect();
+        if (b.width === 0 || b.height === 0) continue;
+        const c = clipOf(cand);
+        const x0 = Math.max(c.x0, b.left), y0 = Math.max(c.y0, b.top), x1 = Math.min(c.x1, b.right), y1 = Math.min(c.y1, b.bottom);
+        if (x1 - x0 < 4 || y1 - y0 < 4) continue;
+        picked = { el: cand, x0, y0, x1, y1 };
+        break;
+      }
+      if (!picked) continue;
+      const { el, x0, y0, x1, y1 } = picked;
       ctx.clearRect(0, 0, 48, 48);
       ctx.globalAlpha = 1;
       ctx.fillStyle = `rgb(${ground[0]},${ground[1]},${ground[2]})`;
@@ -180,6 +197,7 @@ export async function measureTextContrast(page: Page, selectors: string[]): Prom
       const data = ctx.getImageData(0, 0, 48, 48).data;
       const tints: [number, number, number, number][] = [];
       for (let node: HTMLElement | null = el; node && node !== document.body; node = node.parentElement) {
+        if (node.matches('.screen-opening, .screen-plate')) continue; // the ground: beneath the backdrops, never over them
         const [r, g, bb, a] = parse(getComputedStyle(node).backgroundColor);
         if (a > 0) tints.unshift([r, g, bb, a]);
       }
@@ -199,10 +217,10 @@ export async function measureTextContrast(page: Page, selectors: string[]): Prom
   }, { selectors });
 }
 
-export async function assertTextContrast(page: Page, selectors: string[], minimum = 4.5): Promise<ContrastResult[]> {
+export async function assertTextContrast(page: Page, selectors: string[], minimum = 4.5, requireSample = true): Promise<ContrastResult[]> {
   const results = await measureTextContrast(page, selectors);
   for (const r of results) expect(r.ratio, `${r.selector} against ${r.worst}`).toBeGreaterThanOrEqual(minimum);
-  expect(results.length, 'at least one text sample measured').toBeGreaterThan(0);
+  if (requireSample) expect(results.length, 'at least one text sample measured').toBeGreaterThan(0);
   return results;
 }
 
@@ -268,6 +286,11 @@ export const PLATE_TEXT_SAMPLES = [
   '.res-change.up',
   '.res-change.down',
   '[data-testid="tier-meaning"]',
+  // The wall credits on the den (FNO-DEPLOY): ink on the projector's lit field, under the beam and the smoke.
+  '.wall-dedication p',
+  '.wall-notices p',
+  '.wall-heading',
+  '.wall-line',
 ];
 
 /**
@@ -295,7 +318,8 @@ export async function assertPlateScreen(page: Page): Promise<{ text: ContrastRes
   expect(srcs.length).toBeGreaterThan(0);
   for (const s of srcs) expect(MANIFEST_FILES.has(unhash(decodeURIComponent(s.split('/').pop() ?? ''))), `image ${s} is not in assets/manifest.json`).toBe(true);
   await page.evaluate(() => Promise.all(Array.from(document.images).map((i) => i.decode().catch(() => undefined))));
-  const text = await assertTextContrast(page, PLATE_TEXT_SAMPLES);
+  // The den's wall is legitimately blank during the credits' lead and after the last line has cleared it.
+  const text = await assertTextContrast(page, PLATE_TEXT_SAMPLES, 4.5, (await page.locator('.op-credits').count()) === 0);
   const kit = await assertKitContrast(page);
   return { text, kit };
 }

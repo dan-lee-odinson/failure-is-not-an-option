@@ -7,13 +7,13 @@
  */
 import { Run, describeNode, indexContent, type Input } from '../core';
 import { bundle } from './content-bundle';
-import { DESIGN, esc, render } from './render';
+import { DESIGN, esc, render, renderFilmControls } from './render';
 import { describeResolution } from './resolution';
 import { exportFilename, exportText, hasBrowserSave, importFromText, loadFromBrowser, saveToBrowser } from './storage';
 import { layoutEmblem } from './plate';
 import { applyTheme } from './theme';
 import { AudioDirector, type MusicMap, type SoundscapeMap } from './audio';
-import { audioUrl } from './assets';
+import { audioUrl, videoUrl } from './assets';
 import { DEFAULT_AUDIO, PREF_KEYS, STAGES, defaultUi, screenId, type AudioPrefs, type Overlay, type Stage, type Store, type UiState } from './ui-state';
 export { FULLSCREEN_LINE } from './render';
 import musicMap from './music-map.json';
@@ -67,7 +67,7 @@ const store: Store = {
 };
 
 const director = new AudioDirector(musicMap as MusicMap, soundscapeMap as SoundscapeMap, audioUrl);
-director.stillReading = () => store.ui.screen === 'opening' && (store.ui.stage === 'dedication' || store.ui.stage === 'notices');
+director.stillReading = () => store.ui.screen === 'opening' && store.ui.stage === 'credits';
 director.setPrefs(store.ui.audio);
 
 function announce(text: string): void {
@@ -331,6 +331,8 @@ function markOpeningSeen(): void {
 }
 
 function goToStage(stage: Stage): void {
+  if (store.ui.stage === 'film' && stage !== 'film') stopFilm();
+  if (store.ui.stage === 'credits' && stage !== 'credits') { stopProseScroll(); clearRunout(); }
   store.ui.screen = 'opening';
   store.ui.stage = stage;
   store.ui.scrollPaused = false;
@@ -345,6 +347,7 @@ function clearFade(): void {
   if (fadeTimer) { clearTimeout(fadeTimer); fadeTimer = null; }
   store.ui.fade = null;
   store.ui.fadeQuick = false;
+  store.ui.fadeDen = false;
 }
 
 function fadeToTitle(quick: boolean): void {
@@ -365,20 +368,216 @@ function fadeToTitle(quick: boolean): void {
 
 function nextStage(): void {
   const s = store.ui.stage;
-  if (s === 'dedication') {
-    if (store.ui.reducedMotion) goToStage('notices'); // two static pages
-    else fadeToTitle(true); // the notices are in the same column; Continue cuts to the title with a quick fade
-    return;
-  }
-  if (s === 'notices') { goToStage('title'); return; } // the montage slot is a 0-duration pass-through
+  if (s === 'start') { beginOpening(); return; }
+  if (s === 'film') { enterCredits(true); return; }
+  if (s === 'credits') { fadeToTitle(true); return; } // Continue cuts to the title with a quick fade (a cut under reduced motion)
   const i = STAGES.indexOf(s);
   goToStage(STAGES[Math.min(i + 1, STAGES.length - 1)]!);
+}
+
+// ---------------------------------------------------------------------------
+// The opening film and the den (FNO-DEPLOY, docs 30 §7–8, 38 §2, 40, OPENING-DEN.md)
+// ---------------------------------------------------------------------------
+
+/** The film plays to this timestamp (doc 40 item 4): the last pull-back frame, the wide den at rest; the live layers take over from there. */
+export const FILM_HANDOVER_S = 138.0;
+/** The film has not started playing after this long: the opening goes on without it (never block the menu). */
+const FILM_WATCHDOG_MS = 8000;
+/** The wall credits' pace: 150 px/s at the film's slot resolution (doc 40 item 2) = 72.5 design px/s on the 928-px-wide rectangle; each line is on the wall about seven seconds. */
+export const CREDITS_PX_PER_S = 72.5;
+/** The scroll starts this long after the den appears (the film's own one-second blank before its credits). */
+const CREDITS_LEAD_MS = 1000;
+/** Run-out (deploy handoff Part 2.5): the last line clears → hold → the beam dies → the den darkens → black → the 700 ms dissolve to the title. */
+export const RUNOUT = { hold_ms: 1200, beam_ms: 600, dark_ms: 1500, black_ms: 500, dissolve_ms: 700 } as const;
+
+let filmVideo: HTMLVideoElement | null = null;
+let filmWatchdog: ReturnType<typeof setTimeout> | null = null;
+let filmFrameCallback = 0;
+let filmDone = false;
+
+/** Begin: the film, or (reduced motion) straight to the den with the static credits. */
+function beginOpening(): void {
+  if (store.ui.reducedMotion || !videoUrl('video-opening-film')) { enterCredits(true); return; }
+  goToStage('film');
+  filmDone = false;
+  paint();
+  playFilm();
+}
+
+function stopFilm(): void {
+  if (filmWatchdog) { clearTimeout(filmWatchdog); filmWatchdog = null; }
+  const v = filmVideo;
+  filmVideo = null;
+  if (!v) return;
+  if (filmFrameCallback && 'cancelVideoFrameCallback' in v) (v as HTMLVideoElement & { cancelVideoFrameCallback(h: number): void }).cancelVideoFrameCallback(filmFrameCallback);
+  filmFrameCallback = 0;
+  try { v.pause(); } catch { /* not playing */ }
+  v.removeAttribute('src');
+  try { v.load(); } catch { /* released */ }
+}
+
+/** The film's sound follows the master and music settings; SOUND: OFF mutes it. */
+function syncFilmVolume(): void {
+  const v = filmVideo;
+  if (!v) return;
+  const a = store.ui.audio;
+  v.muted = !a.enabled;
+  v.volume = Math.max(0, Math.min(1, a.master * a.music));
+}
+
+function playFilm(): void {
+  const v = document.getElementById('film') as HTMLVideoElement | null;
+  if (!v) { enterCredits(false); return; }
+  filmVideo = v;
+  syncFilmVolume();
+  // Both apply only while this element is still the film: Skip stops it, and the pause rejects a pending play().
+  const handover = (): void => {
+    if (filmVideo !== v || filmDone) return;
+    filmDone = true;
+    enterCredits(false);
+  };
+  const fail = (): void => {
+    if (filmVideo !== v || filmDone) return;
+    filmDone = true;
+    enterCredits(false);
+  };
+  const check = (): void => {
+    if (filmVideo !== v || filmDone) return;
+    if (v.currentTime >= FILM_HANDOVER_S) { handover(); return; }
+    if ('requestVideoFrameCallback' in v) filmFrameCallback = (v as HTMLVideoElement & { requestVideoFrameCallback(cb: () => void): number }).requestVideoFrameCallback(check);
+  };
+  v.addEventListener('timeupdate', () => { if (filmVideo === v && !filmDone && v.currentTime >= FILM_HANDOVER_S) handover(); });
+  v.addEventListener('ended', () => { if (filmVideo === v) handover(); });
+  v.addEventListener('error', () => { if (filmVideo === v) fail(); });
+  v.addEventListener('playing', () => {
+    if (filmWatchdog) { clearTimeout(filmWatchdog); filmWatchdog = null; }
+    if ('requestVideoFrameCallback' in v) check();
+  }, { once: true });
+  filmWatchdog = setTimeout(() => { filmWatchdog = null; if (filmVideo === v && v.readyState < 3 && v.currentTime === 0) fail(); }, FILM_WATCHDOG_MS);
+  const p = v.play();
+  if (p && typeof p.catch === 'function') p.catch(() => fail());
+}
+
+/** The den after the film: the live layers, the credits on the wall (timed, or static after Skip / under reduced motion). */
+function enterCredits(staticCredits: boolean): void {
+  const ui = store.ui;
+  if (ui.stage === 'film') stopFilm();
+  clearRunout();
+  ui.creditsStatic = staticCredits || ui.reducedMotion;
+  ui.runout = 'none';
+  goToStage('credits');
+  denStartedAt = performance.now();
+  paint();
+  announce('The credits.');
+}
+
+// The den's live layers: two smoke instances rising 12 s each, started 9 s apart and crossfaded over 3 s; the beam's
+// flicker (±8 % at 8–12 Hz, a seeded pattern); nothing moves under reduced motion. Animations are re-created after every
+// repaint at the time they had reached, so a repaint never resets the smoke.
+let denStartedAt = 0;
+let runoutStartedAt = 0;
+let runoutTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** A small seeded generator (mulberry32) so the flicker pattern is the same on every run and in every test. */
+function seeded(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** The beam's flicker keyframes: 24 steps over 2.4 s (10 Hz), opacity within ±8 % of the base, looped. */
+export function beamFlickerKeyframes(base: number): Keyframe[] {
+  const rnd = seeded(19660316);
+  const frames: Keyframe[] = [];
+  for (let i = 0; i < 24; i++) frames.push({ opacity: Math.max(0, base * (1 + (rnd() * 2 - 1) * 0.08)), offset: i / 24 });
+  frames.push({ opacity: base, offset: 1 });
+  return frames;
+}
+
+function driveDen(): void {
+  const ui = store.ui;
+  if (ui.screen !== 'opening' || ui.stage !== 'credits') return;
+  const frame = document.querySelector<HTMLElement>('.den-frame');
+  if (!frame) return;
+  const unit = frame.getBoundingClientRect().width / DESIGN.width || 1;
+  const elapsed = Math.max(0, performance.now() - denStartedAt);
+  const reduced = ui.reducedMotion;
+  for (const el of frame.querySelectorAll<HTMLElement>('.den-smoke')) {
+    for (const a of el.getAnimations()) a.cancel();
+    if (reduced) continue;
+    const seconds = Number(el.dataset.seconds) || 12;
+    const loop = Number(el.dataset.loop) || seconds;
+    const cross = Number(el.dataset.crossfade) || 3;
+    const rise = (Number(el.dataset.rise) || -55) * unit;
+    const period = 2 * (loop - cross); // two instances alternate: each starts every (loop − crossfade) seconds
+    const base = parseFloat(el.style.opacity) || 0.16;
+    const f = (s: number) => s / period;
+    const keyframes: Keyframe[] = [
+      { offset: 0, transform: 'translateY(0px)', opacity: 0 },
+      { offset: f(cross), transform: `translateY(${(rise * cross) / seconds}px)`, opacity: base },
+      { offset: f(seconds - cross), transform: `translateY(${(rise * (seconds - cross)) / seconds}px)`, opacity: base },
+      { offset: f(seconds), transform: `translateY(${rise}px)`, opacity: 0 },
+      { offset: 1, transform: 'translateY(0px)', opacity: 0 },
+    ];
+    const anim = el.animate(keyframes, { duration: period * 1000, iterations: Infinity, easing: 'linear' });
+    const offset = el.dataset.smoke === 'b' ? (loop - cross) * 1000 : 0;
+    anim.currentTime = (elapsed + offset) % (period * 1000);
+  }
+  const beam = frame.querySelector<HTMLElement>('.den-beam');
+  if (beam) {
+    for (const a of beam.getAnimations()) a.cancel();
+    const base = Number(beam.dataset.opacity) || 0.32;
+    if (ui.runout !== 'none') {
+      // The beam dies over 0.6 s with two stutters, then stays out.
+      const dying = beam.animate([{ opacity: base }, { opacity: base * 0.2, offset: 0.25 }, { opacity: base * 0.85, offset: 0.4 }, { opacity: 0, offset: 0.6 }, { opacity: base * 0.35, offset: 0.75 }, { opacity: 0, offset: 1 }], { duration: RUNOUT.beam_ms, fill: 'forwards', easing: 'linear' });
+      dying.currentTime = Math.min(RUNOUT.beam_ms, Math.max(0, performance.now() - runoutStartedAt));
+    } else if (!reduced) {
+      const flicker = beam.animate(beamFlickerKeyframes(base), { duration: 2400, iterations: Infinity, easing: 'steps(1, end)' });
+      flicker.currentTime = elapsed % 2400;
+    }
+  }
+}
+
+function clearRunout(): void {
+  if (runoutTimer) { clearTimeout(runoutTimer); runoutTimer = null; }
+  store.ui.runout = 'none';
+}
+
+/** After the last credit line has cleared: the beam dies, the den darkens, black, then the title dissolves in over 700 ms. */
+function startRunout(): void {
+  const ui = store.ui;
+  if (ui.stage !== 'credits' || ui.runout !== 'none') return;
+  director.signal('opening-runout'); // the credits cue fades over 2 s
+  runoutStartedAt = performance.now();
+  ui.runout = 'beam';
+  paint();
+  const step = (next: () => void, ms: number): void => { runoutTimer = setTimeout(() => { runoutTimer = null; if (store.ui.stage === 'credits') next(); }, ms); };
+  step(() => {
+    store.ui.runout = 'dark'; paint();
+    step(() => {
+      store.ui.runout = 'black'; paint();
+      step(() => {
+        stopProseScroll();
+        goToStage('title');
+        store.ui.fade = 'in';
+        store.ui.fadeDen = true;
+        paint();
+        fadeTimer = setTimeout(() => { fadeTimer = null; clearFade(); paint(); }, RUNOUT.dissolve_ms);
+      }, RUNOUT.black_ms);
+    }, RUNOUT.dark_ms);
+  }, RUNOUT.beam_ms);
 }
 
 function persistAudio(): void {
   audioPersisted = true;
   writePref(PREF_KEYS.audio, JSON.stringify(store.ui.audio));
   director.setPrefs(store.ui.audio);
+  syncFilmVolume();
 }
 
 /**
@@ -441,7 +640,12 @@ export function dispatch(action: string, arg?: string): void {
     case 'begin': {
       audioOnAtBegin();
       director.event('ui:begin');
-      goToStage('dedication');
+      beginOpening();
+      break;
+    }
+    case 'film-skip': {
+      director.event('ui:continue');
+      enterCredits(true);
       break;
     }
     case 'skip-to-menu': {
@@ -707,7 +911,7 @@ function syncAudio(): void {
   for (const id of [...openCapcomLines]) if (!present.has(id)) { openCapcomLines.delete(id); director.event('ui:capcom-line-end'); }
 }
 
-// Opening prose: a real scroll box driven at reading pace; the player can pause, scroll by hand, or continue.
+// The wall credits: a real scroll box inside the projection rectangle, driven at the treatment's pace; the player can pause, scroll by hand, or continue.
 let scrollFrame = 0;
 let scrollLastTs = 0;
 let scrollHold: ReturnType<typeof setTimeout> | null = null;
@@ -722,29 +926,44 @@ function stopProseScroll(): void {
 function driveProseScroll(): void {
   stopProseScroll();
   const ui = store.ui;
-  if (ui.screen !== 'opening' || (ui.stage !== 'dedication' && ui.stage !== 'notices') || ui.reducedMotion || ui.scrollPaused || ui.overlay || ui.fade) return;
+  if (ui.screen !== 'opening' || ui.stage !== 'credits' || ui.creditsStatic || ui.reducedMotion || ui.scrollPaused || ui.overlay || ui.fade || ui.runout !== 'none') return;
   const el = document.getElementById('op-scroll');
-  if (!el) return;
-  const seconds = Math.max(4, Number(el.dataset.seconds) || 30);
-  const stage = ui.stage;
+  const frame = document.querySelector<HTMLElement>('.den-frame');
+  if (!el || !frame) return;
+  const lead = Math.max(0, CREDITS_LEAD_MS - (performance.now() - denStartedAt));
+  let pos = el.scrollTop;
   const step = (ts: number): void => {
+    const unit = frame.getBoundingClientRect().width / DESIGN.width || 1;
     const max = el.scrollHeight - el.clientHeight;
-    if (scrollLastTs) el.scrollTop += (max / seconds) * ((ts - scrollLastTs) / 1000);
+    if (Math.abs(el.scrollTop - pos) > 2) pos = el.scrollTop; // scrolled by hand meanwhile
+    if (scrollLastTs) { pos = Math.min(max, pos + CREDITS_PX_PER_S * unit * ((ts - scrollLastTs) / 1000)); el.scrollTop = pos; }
     scrollLastTs = ts;
     if (el.scrollTop >= max - 0.5) {
-      // The last line has cleared the top: a 1.2 s hold, then the fade to black and the title (never while the player has paused).
+      // The last line has cleared the top: a 1.2 s hold, then the run-out (never while the player has paused).
       scrollFrame = 0;
-      scrollHold = setTimeout(() => { scrollHold = null; if (store.ui.stage === stage && !store.ui.scrollPaused && !store.ui.overlay && !store.ui.fade) fadeToTitle(false); }, 1200);
+      scrollHold = setTimeout(() => { scrollHold = null; if (store.ui.stage === 'credits' && !store.ui.scrollPaused && !store.ui.overlay && !store.ui.fade) startRunout(); }, RUNOUT.hold_ms);
       return;
     }
     scrollFrame = requestAnimationFrame(step);
   };
-  scrollFrame = requestAnimationFrame(step);
+  scrollHold = setTimeout(() => { scrollHold = null; scrollFrame = requestAnimationFrame(step); }, lead);
 }
 
 function paint(): void {
   const root = document.getElementById('app');
   if (!root) return;
+  // The film stage repaints its controls only: rebuilding the <video> would restart the film.
+  const filmControls = store.ui.screen === 'opening' && store.ui.stage === 'film' ? root.querySelector<HTMLElement>('[data-stage="film"] .film-controls') : null;
+  if (filmControls && document.getElementById('film')) {
+    const focusKey = lastFocus ?? (document.activeElement as HTMLElement | null)?.getAttribute('data-focus') ?? null;
+    lastFocus = null;
+    idleDirty = false;
+    filmControls.innerHTML = renderFilmControls(store);
+    syncFilmVolume();
+    const target = (focusKey ? filmControls.querySelector<HTMLElement>(`[data-focus="${CSS.escape(focusKey)}"]`) : null) ?? filmControls.querySelector<HTMLElement>('[data-focus-default]');
+    target?.focus({ preventScroll: true });
+    return;
+  }
   const active = document.activeElement as HTMLElement | null;
   // An explicit lastFocus (set by a click or by Escape) wins over the element that happened to be active.
   const focusKey = lastFocus ?? active?.getAttribute('data-focus') ?? null;
@@ -762,6 +981,7 @@ function paint(): void {
   driveLayer(layerBefore);
   const newScroll = document.getElementById('op-scroll');
   if (newScroll && keepScroll !== null) newScroll.scrollTop = keepScroll;
+  driveDen();
   // In the stacked layout the page scrolls: a new node is read from the top, and the automatic focus on the next key (below the fold) must not drag the page down to it.
   const stacked = store.ui.stacked;
   const nodeNow = store.ui.screen === 'console' ? store.run?.currentNode()?.node.id ?? null : null;
@@ -813,6 +1033,7 @@ function wire(): void {
     const v = Math.max(0, Math.min(1, Number(input.value) / 100));
     store.ui.audio = { ...store.ui.audio, [id]: v };
     director.setPrefs(store.ui.audio);
+    syncFilmVolume();
   });
   // Details disclosures are native; remember their state so a repaint keeps them.
   root.addEventListener('toggle', (ev) => {
@@ -867,7 +1088,7 @@ function splitAction(s: string): [string, string | undefined] {
 
 declare global {
   interface Window {
-    __fno?: { store: Store; dispatch: typeof dispatch; fingerprint: string; audio: { enabled: () => boolean; unlocked: () => boolean }; idle: () => boolean; guarded: () => boolean; stacked: () => boolean };
+    __fno?: { store: Store; dispatch: typeof dispatch; fingerprint: string; audio: { enabled: () => boolean; unlocked: () => boolean }; idle: () => boolean; guarded: () => boolean; stacked: () => boolean; film: { handoverAt: number; video: () => HTMLVideoElement | null } };
   }
 }
 
@@ -877,4 +1098,4 @@ wire();
 window.addEventListener('resize', () => { layoutEmblem(); driveLayer(layerState()); if (store.ui.screen === 'console') schedulePaint(); });
 if (store.ui.stage === 'menu') refreshContinueSave();
 paint();
-window.__fno = { store, dispatch, fingerprint: content.fingerprint, audio: { enabled: () => director.enabled, unlocked: () => director.unlocked }, idle: () => store.ui.idle, guarded: () => Date.now() < guardUntil, stacked: () => store.ui.stacked };
+window.__fno = { store, dispatch, fingerprint: content.fingerprint, audio: { enabled: () => director.enabled, unlocked: () => director.unlocked }, idle: () => store.ui.idle, guarded: () => Date.now() < guardUntil, stacked: () => store.ui.stacked, film: { handoverAt: FILM_HANDOVER_S, video: () => filmVideo } };

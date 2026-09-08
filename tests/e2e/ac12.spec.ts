@@ -15,7 +15,7 @@ import { expect, test } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { assertGlenUncovered, assertManifestImagesOnly, kitFaceTable } from './room';
-import { ARTIFACTS, TEXT, VIEWPORTS, assertNoHorizontalOverflow, assertParticipants, assertVisibleWithinViewport, awaitRoom, click, fresh, isStacked, node, setText, shot, skipPrologue, stage, start, toMenu, withEvidence } from './helpers';
+import { ARTIFACTS, TEXT, VIEWPORTS, assertNoHorizontalOverflow, assertParticipants, assertVisibleWithinViewport, awaitRoom, click, fakeFilm, fresh, isStacked, node, seekFilm, setText, shot, skipPrologue, stage, start, toMenu, withEvidence } from './helpers';
 
 // ---------------------------------------------------------------------------
 // Opening, menu, About
@@ -24,6 +24,7 @@ import { ARTIFACTS, TEXT, VIEWPORTS, assertNoHorizontalOverflow, assertParticipa
 for (const vp of VIEWPORTS) for (const text of TEXT) {
   test(`opening, menu and About screenshots: ${vp.name} ${text} text`, async ({ page }) => {
     await page.setViewportSize({ width: vp.width, height: vp.height });
+    await fakeFilm(page); // the film under a fake media clock here; the real file plays in deploy.spec.ts
     await fresh(page, false);
     expect(await stage(page)).toBe('start');
     // Text size is a per-player setting; set it once on the menu, then replay the opening at that size.
@@ -40,32 +41,36 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     // Silent before the first Begin; the large-text run has already skipped once, which turned the master on.
     await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', text === 'default' ? 'false' : 'true');
 
+    // FNO-DEPLOY: Begin plays the film; at 2:18 the den takes over and the credits scroll on its wall.
     await click(page, 'begin');
-    expect(await stage(page)).toBe('dedication');
+    expect(await stage(page)).toBe('film');
+    await expect(page.getByTestId('film')).toHaveAttribute('src', /\/video\/opening-film\.mp4$/);
+    await shot(page, vp.name, text, '01-opening-film');
+    await seekFilm(page, 138);
+    await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'credits');
+    await expect(page.getByTestId('film')).toHaveCount(0);
     await click(page, 'scroll-toggle'); // pause so the shots are repeatable
     await expect(page.getByTestId('scroll-toggle')).toHaveText('RESUME');
     const prose = page.getByTestId('op-prose');
     await expect(prose).toBeVisible();
-    // One continuous column: the dedication, a chapter gap, the notices; no visible scrollbar.
-    await expect(prose.locator('.op-chapter-text')).toHaveCount(2);
-    await expect(prose.locator('.op-chapter-gap')).toHaveCount(1);
+    // One column on the wall: the dedication, the three notices, then the credit sections; no visible scrollbar.
+    await expect(prose.locator('.wall-dedication p')).toHaveCount(2);
+    await expect(prose.locator('.wall-notices p')).toHaveCount(3);
+    await expect(prose.locator('.wall-section')).toHaveCount(6);
     await expect(prose).toContainText('To the men and women of NASA');
     await expect(prose).toContainText('independent homage to NASA');
     expect(await page.getByTestId('op-scroll').evaluate((el) => getComputedStyle(el).scrollbarWidth)).toBe('none');
-    const fontSize = await prose.locator('p').first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
-    expect(fontSize).toBeGreaterThanOrEqual(20);
     await prose.locator('p').first().evaluate((el) => el.scrollIntoView({ block: 'center' }));
-    await shot(page, vp.name, text, '01-opening-dedication');
-    await prose.locator('.op-chapter-text').nth(1).locator('p').first().evaluate((el) => el.scrollIntoView({ block: 'start' }));
-    await shot(page, vp.name, text, '01b-opening-notices');
-    // Manual scrolling while paused reaches every word: the last paragraph can be brought fully into the scroll box.
+    await shot(page, vp.name, text, '01b-opening-credits-dedication');
+    await prose.locator('.wall-section').nth(4).evaluate((el) => el.scrollIntoView({ block: 'start' }));
+    await shot(page, vp.name, text, '01c-opening-credits-archive');
+    // Manual scrolling while paused reaches every word: the last line can be brought fully into the wall.
     await prose.locator('p').last().evaluate((el) => el.scrollIntoView({ block: 'center' }));
-    const lastVisible = await prose.locator('p').last().evaluate((el) => { const r = el.getBoundingClientRect(); const box = el.closest('#op-scroll')!.getBoundingClientRect(); return r.top >= box.top && r.bottom <= box.bottom; });
+    const lastVisible = await prose.locator('p').last().evaluate((el) => { const r = el.getBoundingClientRect(); const box = el.closest('#op-scroll')!.getBoundingClientRect(); return r.top >= box.top - 1 && r.bottom <= box.bottom + 1; });
     expect(lastVisible).toBe(true);
-    await shot(page, vp.name, text, '01c-opening-scroll-end');
     await page.getByTestId('op-scroll').evaluate((el) => { el.scrollTop = 0; });
 
-    // Continue at any time: a quick fade to the hero title (no notices stage in between).
+    // Continue at any time: a quick fade to the hero title.
     await click(page, 'stage-next');
     await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'title');
     await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/, { timeout: 5000 });
@@ -364,11 +369,15 @@ for (const vp of VIEWPORTS) {
 
 test('keyboard reaches every stage of the opening, the menu, every card and lamp; focus never lands on a removed key', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
+  await fakeFilm(page);
   await fresh(page, false);
   await page.keyboard.press('Tab');
   await expect(page.getByTestId('begin')).toBeFocused();
   await page.keyboard.press('Enter');
-  expect(await stage(page)).toBe('dedication');
+  expect(await stage(page)).toBe('film');
+  await expect(page.getByTestId('film-skip')).toBeFocused(); // the film's controls are reachable while it plays
+  await seekFilm(page, 138);
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'credits');
   await expect(page.getByTestId('stage-next')).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'title');
@@ -455,23 +464,21 @@ test('keyboard reaches every stage of the opening, the menu, every card and lamp
   await expect(page.getByTestId('lamp-explanation')).toContainText('HISTORICAL CHOICE');
 });
 
-test('reduced motion: static chapters with Continue, immediate cuts, no animations', async ({ page }) => {
+test('reduced motion: no film, the static den and credits with Continue, immediate cuts, no animations', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await fakeFilm(page);
   await fresh(page, false);
   await click(page, 'begin');
-  expect(await stage(page)).toBe('dedication');
+  expect(await stage(page)).toBe('credits'); // no video under reduced motion: the wide den with the static credits
+  await expect(page.getByTestId('film')).toHaveCount(0);
   await expect(page.getByTestId('op-scroll')).toHaveClass(/static/);
   await expect(page.getByTestId('scroll-toggle')).toHaveCount(0);
-  await expect(page.getByTestId('op-prose').locator('.op-chapter-text')).toHaveCount(1); // two static pages, not one column
-  await expect(page.getByTestId('op-prose')).not.toContainText('independent homage');
+  await expect(page.getByTestId('op-prose')).toContainText('independent homage');
   const top = await page.getByTestId('op-scroll').evaluate((el) => el.scrollTop);
   await page.waitForTimeout(1500);
   expect(await page.getByTestId('op-scroll').evaluate((el) => el.scrollTop)).toBe(top);
-  await click(page, 'stage-next');
-  expect(await stage(page)).toBe('notices');
-  await expect(page.getByTestId('op-scroll')).toHaveClass(/static/);
-  await expect(page.getByTestId('op-prose')).toContainText('independent homage');
+  expect(await page.evaluate(() => document.getAnimations().length)).toBe(0); // no smoke, no flicker
   await click(page, 'stage-next');
   expect(await stage(page)).toBe('title'); // an immediate cut
   await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/);
@@ -498,6 +505,7 @@ test('reduced motion: static chapters with Continue, immediate cuts, no animatio
 
 test('a second launch goes straight to the menu; Replay opening starts it again', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
+  await fakeFilm(page);
   await fresh(page, false);
   expect(await stage(page)).toBe('start');
   await click(page, 'skip-to-menu');
@@ -508,18 +516,21 @@ test('a second launch goes straight to the menu; Replay opening starts it again'
   await click(page, 'replay-opening');
   expect(await stage(page)).toBe('start');
   await click(page, 'begin');
-  expect(await stage(page)).toBe('dedication');
+  expect(await stage(page)).toBe('film');
   await click(page, 'skip-to-menu');
   expect(await stage(page)).toBe('menu');
 });
 
-test('the opening scroll runs on its own, pauses, resumes, and advances when the text has cleared', async ({ page }) => {
+test('the wall credits scroll on their own, pause, resume, and run out when the text has cleared', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
+  await fakeFilm(page);
   await fresh(page, false);
   await click(page, 'begin');
+  await seekFilm(page, 138);
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'credits');
   const box = page.getByTestId('op-scroll');
   const t0 = await box.evaluate((el) => el.scrollTop);
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(2400); // the scroll starts after the film's one-second blank
   const t1 = await box.evaluate((el) => el.scrollTop);
   expect(t1).toBeGreaterThan(t0);
   await click(page, 'scroll-toggle');
@@ -529,49 +540,60 @@ test('the opening scroll runs on its own, pauses, resumes, and advances when the
   await click(page, 'scroll-toggle');
   await page.waitForTimeout(800);
   expect(await box.evaluate((el) => el.scrollTop)).toBeGreaterThan(p0);
-  // Jump to the end: the text has cleared; after the hold the prose fades to black and the title fades in on its own.
+  // Jump to the end: the last line has cleared; after the hold the run-out runs on its own — the beam dies, the den darkens, black — and the title dissolves in.
   await box.evaluate((el) => { el.scrollTop = el.scrollHeight; });
-  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'out', { timeout: 5000 });
-  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'title', { timeout: 5000 });
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-runout', 'beam', { timeout: 5000 });
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-runout', 'dark', { timeout: 5000 });
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'title', { timeout: 8000 });
   await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'in');
   await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/, { timeout: 5000 });
 });
 
-test('fade sequence timing under fake timers: 1.2 s hold, 1.0 s to black, 1.5 s title fade-in; Continue fades in 0.4 s', async ({ page }) => {
+test('run-out timing under fake timers: 1.2 s hold, the beam 0.6 s, the den dark 1.5 s, black 0.5 s, the title in 0.7 s; Continue fades in 0.4 s', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
+  await fakeFilm(page);
   await page.clock.install();
   await fresh(page, false);
   await page.clock.pauseAt(Date.now() + 1000); // from here the page's clock moves only when the test advances it
+  const runout = async (): Promise<string> => (await page.getByTestId('screen-opening').getAttribute('data-runout')) ?? '';
   await click(page, 'begin');
+  await seekFilm(page, 138);
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'credits');
+  await page.clock.runFor(1100); // past the film's one-second blank: the scroll is driving
   const box = page.getByTestId('op-scroll');
   await box.evaluate((el) => { el.scrollTop = el.scrollHeight; });
   // The driver notices the end on its first fake frame (within the first ~32 ms); the timings below are measured from there.
   await page.clock.runFor(100);
-  await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/);
+  expect(await runout()).toBe('none');
   await page.clock.runFor(1050); // t ≈ 1.15 s: still holding
-  await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/);
-  await page.clock.runFor(100); // t ≈ 1.25 s: the 1.2 s hold is over, the prose is fading to black
-  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'out');
-  expect(await stage(page)).toBe('dedication');
-  await page.clock.runFor(900); // t ≈ 2.15 s: still black-bound
-  expect(await stage(page)).toBe('dedication');
-  await page.clock.runFor(100); // t ≈ 2.25 s: 1.0 s later the title is fading in
+  expect(await runout()).toBe('none');
+  await page.clock.runFor(100); // t ≈ 1.25 s: the 1.2 s hold is over, the beam is dying
+  expect(await runout()).toBe('beam');
+  expect(await stage(page)).toBe('credits');
+  await page.clock.runFor(600); // t ≈ 1.85 s: the den is darkening
+  expect(await runout()).toBe('dark');
+  await page.clock.runFor(1500); // t ≈ 3.35 s: black
+  expect(await runout()).toBe('black');
+  await page.clock.runFor(500); // t ≈ 3.85 s: the title dissolving in over 0.7 s
   await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'title');
   await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'in');
-  await page.clock.runFor(1400); // t ≈ 3.65 s: still fading in
+  await expect(page.getByTestId('screen-opening')).toHaveClass(/den/);
+  await page.clock.runFor(600); // t ≈ 4.45 s: still dissolving
   await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'in');
-  await page.clock.runFor(100); // t ≈ 3.75 s: the 1.5 s fade-in is done
+  await page.clock.runFor(150); // t ≈ 4.6 s: done
   await expect(page.getByTestId('screen-opening')).not.toHaveAttribute('data-fade', /.+/);
-  // Continue from the prose: a quick fade (0.4 s out, 0.4 s in).
+  // Continue from the credits: a quick fade (0.4 s out, 0.4 s in).
   await click(page, 'hero-continue');
   await click(page, 'menu-about');
   await click(page, 'replay-opening');
   await click(page, 'begin');
+  await seekFilm(page, 138);
+  await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'credits');
   await click(page, 'stage-next');
   await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'out');
   await expect(page.getByTestId('screen-opening')).toHaveClass(/quick/);
   await page.clock.runFor(350);
-  expect(await stage(page)).toBe('dedication');
+  expect(await stage(page)).toBe('credits');
   await page.clock.runFor(100);
   await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-stage', 'title');
   await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-fade', 'in');
@@ -649,6 +671,7 @@ test('idle help is absent under reduced motion', async ({ page }) => {
 
 test('audio is silent until Begin, on after Begin, a persisted off stays off, and never enters the log', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
+  await fakeFilm(page);
   await fresh(page, false);
   const audio = () => page.evaluate(() => ({ enabled: window.__fno!.audio.enabled(), unlocked: window.__fno!.audio.unlocked() }));
   expect(await audio()).toEqual({ enabled: false, unlocked: false });

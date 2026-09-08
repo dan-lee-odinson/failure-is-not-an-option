@@ -35,25 +35,28 @@ describe('opening screens', () => {
     expect(start).toContain('data-testid="begin"');
     expect(start).toContain('data-testid="skip-to-menu"');
     expect(start).toContain('data-testid="sound-toggle"');
-    for (const stage of ['dedication', 'notices'] as const) {
-      const html = render(store(null, { stage }));
-      expect(html).toContain('data-testid="op-scroll"');
-      expect(html).toContain('data-testid="scroll-toggle"');
+    // FNO-DEPLOY: the film, then the credits on the den wall (the M00c prose scroll is retired; its texts lead the credits).
+    const film = render(store(null, { stage: 'film' }));
+    expect(film).toMatch(/<video id="film"[^>]*\bplaysinline\b[^>]*preload="auto"[^>]*src="[^"]*video\/opening-film\.mp4"/);
+    expect(film).not.toMatch(/<video[^>]*\bmuted\b/);
+    expect(film).not.toMatch(/<video[^>]*\bcontrols\b/);
+    for (const id of ['film-skip', 'skip-to-menu', 'sound-toggle']) expect(film).toContain(`data-testid="${id}"`);
+    const credits = render(store(null, { stage: 'credits' }));
+    for (const id of ['op-scroll', 'scroll-toggle', 'stage-next', 'skip-to-menu', 'sound-toggle', 'den-plate', 'den-beam', 'den-smoke-a', 'den-smoke-b', 'den-dark']) expect(credits).toContain(`data-testid="${id}"`);
+    expect(credits).not.toMatch(/class="notice/); // ink on the wall, not boxes
+    const reg = content().bundle.registry;
+    for (const p of [...reg.notices.dedication, reg.notices.project_disclaimer, reg.notices.ai_disclosure, reg.notices.dramatization]) expect(credits).toContain(esc(p));
+    for (const s of reg.credits ?? []) { expect(credits).toContain(esc(s.heading)); for (const l of s.lines) expect(credits).toContain(esc(l)); }
+    // Static credits (Skip during the film, or reduced motion): the same block, keyboard-scrollable, no Pause, one smoke instance and nothing moving.
+    for (const u of [{ reducedMotion: true }, { creditsStatic: true }] as const) {
+      const html = render(store(null, { stage: 'credits', ...u }));
+      expect(html).toContain('op-scroll wall-credits static');
+      expect(html).toContain('data-credits="static"');
+      expect(html).not.toContain('data-testid="scroll-toggle"');
       expect(html).toContain('data-testid="stage-next"');
-      expect(html).toContain('data-testid="skip-to-menu"');
-      expect(html).not.toMatch(/class="notice|<h2/); // prose, not boxes
-      const reduced = render(store(null, { stage, reducedMotion: true }));
-      expect(reduced).toContain('op-scroll static');
-      expect(reduced).not.toContain('data-testid="scroll-toggle"');
     }
-    const dedication = render(store(null, { stage: 'dedication' }));
-    for (const p of content().bundle.registry.notices.dedication) expect(dedication).toContain(esc(p));
-    // Since M00c the dedication and the notices share one scroll; only the reduced-motion page keeps them apart.
-    expect(render(store(null, { stage: 'dedication', reducedMotion: true }))).not.toContain(esc(content().bundle.registry.notices.project_disclaimer));
-    const notices = render(store(null, { stage: 'notices' }));
-    for (const p of [content().bundle.registry.notices.project_disclaimer, content().bundle.registry.notices.ai_disclosure, content().bundle.registry.notices.dramatization]) expect(notices).toContain(esc(p));
-    expect(render(store(null, { stage: 'montage' }))).toContain('data-stage="montage"');
-    expect(STAGES.indexOf('montage')).toBe(STAGES.indexOf('title') - 1);
+    expect(render(store(null, { stage: 'credits', reducedMotion: true }))).not.toContain('data-testid="den-smoke-b"');
+    expect(STAGES).toEqual(['start', 'film', 'credits', 'title', 'menu']);
   });
 
   it('the hero title is live text at the study-A coordinates and Continue is keyboard-reachable', () => {

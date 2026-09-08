@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://finaogame.com/sitemap.txt

@@ -78,10 +78,55 @@ export async function shot(page: Page, vp: string, text: string, name: string): 
 
 /** A fresh browser: cleared storage; `seen` marks the opening as already viewed so the app opens on the menu. */
 export async function fresh(page: Page, seen: boolean): Promise<void> {
-  await page.goto('/');
+  await page.goto(DEMO);
   await page.evaluate((s) => { try { localStorage.clear(); if (s) localStorage.setItem('fno.openingSeen', '1'); } catch { /* ignore */ } }, seen);
   await page.reload();
   await expect(page.getByTestId('screen-opening')).toBeVisible();
+}
+
+/** The game's entry on the site (FNO-DEPLOY, doc 35 §6): the home page is at /, the game at /demo/. */
+export const DEMO = '/demo/';
+
+/**
+ * A fake media clock for the opening film (the deploy handoff, Part 5): installed before navigation, it makes every
+ * media element "play" at once without decoding, keeps a settable currentTime, and exposes window.__film to the test:
+ * seek(t) moves the clock and fires timeupdate (and ended at the film's length); fail() fires error. The app's own
+ * hand-over, fallback and volume code run unchanged; only the decoder is out of the loop.
+ */
+export async function fakeFilm(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const proto = HTMLMediaElement.prototype;
+    const times = new WeakMap<HTMLMediaElement, number>();
+    const playing = new WeakSet<HTMLMediaElement>();
+    Object.defineProperty(proto, 'currentTime', { configurable: true, get() { return times.get(this) ?? 0; }, set(v: number) { times.set(this, Number(v)); } });
+    Object.defineProperty(proto, 'duration', { configurable: true, get() { return 138; } });
+    Object.defineProperty(proto, 'readyState', { configurable: true, get() { return 4; } });
+    Object.defineProperty(proto, 'paused', { configurable: true, get() { return !playing.has(this); } });
+    proto.play = function () { playing.add(this); setTimeout(() => this.dispatchEvent(new Event('playing')), 0); return Promise.resolve(); };
+    proto.pause = function () { playing.delete(this); };
+    proto.load = function () { /* nothing to load */ };
+    (window as unknown as { __film: unknown }).__film = {
+      seek(t: number): boolean {
+        const v = document.getElementById('film') as HTMLMediaElement | null;
+        if (!v) return false;
+        times.set(v, t);
+        v.dispatchEvent(new Event('timeupdate'));
+        if (t >= 138) v.dispatchEvent(new Event('ended'));
+        return true;
+      },
+      fail(): boolean {
+        const v = document.getElementById('film') as HTMLMediaElement | null;
+        if (!v) return false;
+        v.dispatchEvent(new Event('error'));
+        return true;
+      },
+    };
+  });
+}
+
+/** Move the fake film to `t` seconds. */
+export async function seekFilm(page: Page, t: number): Promise<void> {
+  expect(await page.evaluate((s) => (window as unknown as { __film: { seek(t: number): boolean } }).__film.seek(s), t)).toBe(true);
 }
 
 export async function toMenu(page: Page): Promise<void> {

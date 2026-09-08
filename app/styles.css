@@ -246,7 +246,65 @@ html[data-text="large"] .op-prose { font-size: clamp(24px, 14px + 0.85vw, 30px);
   display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center; align-items: center;
   background: linear-gradient(transparent, rgba(5, 23, 27, 0.92) 35%);
 }
-.op-montage { background: var(--dark); }
+/* ---------- the opening film and the den (FNO-DEPLOY) ---------- */
+
+/* The film: the deployed 2:18 cut letterboxed in the viewport; the controls sit over its bottom edge like the prologue's. */
+.op-film { background: #000; }
+.film-frame { position: absolute; inset: 0; display: grid; place-items: center; background: #000; }
+.film { width: 100%; height: 100%; object-fit: contain; background: #000; }
+.film-controls { background: linear-gradient(transparent, rgba(0, 0, 0, 0.82) 45%); }
+
+/* The den: the plate in the design frame; the credits scroll inside the projection rectangle as ink on the lit field. */
+.op-credits { background: var(--dark); }
+.den-plate { object-fit: fill; }
+.wall-credits {
+  position: absolute;
+  overflow: auto;
+  scrollbar-width: none;
+  color: var(--paper-ink);
+  outline-offset: -3px;
+  text-align: center;
+}
+.wall-credits::-webkit-scrollbar { display: none; }
+.wall-prose {
+  margin: 0;
+  max-width: none;
+  padding: calc(522 * var(--unit)) calc(44 * var(--unit)) calc(522 * var(--unit));
+  font-size: calc(22 * var(--unit));
+  line-height: 1.5;
+  text-align: center;
+  text-shadow: none;
+}
+.wall-credits.static .wall-prose { padding: calc(28 * var(--unit)) calc(44 * var(--unit)) calc(60 * var(--unit)); }
+html[data-text="large"] .wall-prose { font-size: calc(26 * var(--unit)); }
+.wall-prose p { margin: 0 0 0.55em; }
+.wall-dedication p { font-weight: 600; font-size: 1.1em; line-height: 1.45; margin-bottom: 0.9em; }
+.wall-dedication { margin-bottom: 1.8em; }
+.wall-notices p { margin-bottom: 1.1em; }
+.wall-section { margin-top: 2.2em; }
+.wall-heading {
+  margin: 0 0 0.5em;
+  font: 700 0.95em/1.2 var(--font-control);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #1d3a30;
+}
+.wall-heading::after { content: ""; display: block; width: 4em; height: 2px; margin: 0.45em auto 0; background: #1d3a30; opacity: 0.6; }
+.wall-line { font-size: 0.92em; line-height: 1.4; margin-bottom: 0.4em; }
+.den-beam, .den-smoke { pointer-events: none; }
+/* The run-out: the den darkens over 1.5 s once the beam has died; the black holds before the 700 ms dissolve into the title. */
+.den-dark { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity 1.5s linear; }
+[data-runout="dark"] .den-dark, [data-runout="black"] .den-dark { opacity: 1; }
+[data-runout="black"] .den-dark { transition: none; }
+[data-runout="black"] .op-controls { visibility: hidden; }
+/* The wall keeps keyboard focus through the run-out; its ring must not sit on the darkening den. */
+[data-runout="beam"] .wall-credits, [data-runout="dark"] .wall-credits, [data-runout="black"] .wall-credits { outline: none; }
+.op-hero.fade-in.den { animation-duration: 0.7s; }
+@media (prefers-reduced-motion: reduce) { .den-dark { transition: none; } }
+
+/* The site: the DEMO tag under the menu title, and the HOME key in About (a key-styled link). */
+.menu-demo { margin: 0 0 0.2rem; font: 700 0.95rem/1.2 var(--font-control); letter-spacing: 0.22em; color: var(--amber); }
+.k-link { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 
 /* Hero title (Study A at 0.75 — Engineering block): live text over the room under a dark overlay. The room is the ground here. */
 .op-hero { background: transparent; }

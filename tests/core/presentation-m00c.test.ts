@@ -31,27 +31,32 @@ function upTo(node: string, route: 'earlier' | 'later' = 'earlier'): RunType {
   return play(newRun(), inputs.slice(0, cut));
 }
 
-describe('opening: one continuous scroll', () => {
-  it('the dedication stage carries both chapters with a gap; reduced motion splits them into two static pages', () => {
+describe('opening: the credits on the den wall (FNO-DEPLOY; the M00c scroll retired)', () => {
+  it('one column inside the projection rectangle: the dedication, the three notices, then every credit section in order', () => {
     const reg = content().bundle.registry;
-    const one = render(store(null, { stage: 'dedication' }));
-    expect(one.match(/class="op-chapter-text"/g)).toHaveLength(2);
-    expect(one.match(/class="op-chapter-gap"/g)).toHaveLength(1);
-    for (const t of [...reg.notices.dedication, reg.notices.project_disclaimer, reg.notices.ai_disclosure, reg.notices.dramatization]) expect(one).toContain(esc(t));
-    expect(one).toContain('aria-label="Dedication and notices"');
-    const page1 = render(store(null, { stage: 'dedication', reducedMotion: true }));
-    expect(page1.match(/class="op-chapter-text"/g)).toHaveLength(1);
-    expect(page1).not.toContain(esc(reg.notices.project_disclaimer));
-    const page2 = render(store(null, { stage: 'notices', reducedMotion: true }));
-    expect(page2).toContain(esc(reg.notices.dramatization));
-    expect(page2).not.toContain(esc(reg.notices.dedication[0]!));
+    const html = render(store(null, { stage: 'credits' }));
+    const texts = [...reg.notices.dedication, reg.notices.project_disclaimer, reg.notices.ai_disclosure, reg.notices.dramatization, ...(reg.credits ?? []).flatMap((s) => [s.heading, ...s.lines])];
+    let last = -1;
+    for (const t of texts) { const i = html.indexOf(esc(t)); expect(i, t).toBeGreaterThan(last); last = i; }
+    expect(html).toContain('aria-label="Credits"');
+    // The box is registry.opening_den.projection_rect (830, 115, 928×522) as percentages of the 1920×1080 design frame.
+    expect(html).toMatch(/id="op-scroll"[^>]*style="left:43\.229%;top:10\.648%;width:48\.333%;height:48\.333%"/);
+    // The den layers at their registry placements: the beam at (144, −101, 1920×1080) at 0.32, the smoke at (390, 315, 1152×648) at 0.16.
+    expect(html).toMatch(/class="pl-layer den-beam"[^>]*style="left:7\.5%;top:-9\.352%;width:100%;height:100%;opacity:0\.32"/);
+    expect(html).toMatch(/class="pl-layer den-smoke" data-smoke="a"[^>]*style="left:20\.313%;top:29\.167%;width:60%;height:60%;opacity:0\.16"[^>]*data-seconds="12"[^>]*data-rise="-55"[^>]*data-loop="12"[^>]*data-crossfade="3"/);
+    // Composite order: the plate, the credits, the beam, the smoke, the run-out darkening.
+    const order = ['den-plate', 'op-scroll', 'den-beam', 'den-smoke-a', 'den-smoke-b', 'den-dark'].map((id) => html.indexOf(`data-testid="${id}"`));
+    for (let i = 1; i < order.length; i++) expect(order[i]!).toBeGreaterThan(order[i - 1]!);
+    expect(html).toContain('data-runout="none"');
+    expect(render(store(null, { stage: 'credits', runout: 'dark' }))).toContain('data-runout="dark"');
   });
 
   it('fade states are classes and a data attribute on the stage', () => {
-    expect(render(store(null, { stage: 'dedication', fade: 'out' }))).toMatch(/class="screen-opening op-chapter fade-out" [^>]*data-fade="out"/);
-    expect(render(store(null, { stage: 'dedication', fade: 'out', fadeQuick: true }))).toContain('op-chapter fade-out quick"');
+    expect(render(store(null, { stage: 'credits', fade: 'out' }))).toMatch(/class="screen-opening screen-plate op-credits fade-out" [^>]*data-fade="out"/);
+    expect(render(store(null, { stage: 'credits', fade: 'out', fadeQuick: true }))).toContain('op-credits fade-out quick"');
     expect(render(store(null, { stage: 'title', fade: 'in' }))).toMatch(/class="screen-opening op-hero stage-title fade-in" [^>]*data-fade="in"/);
     expect(render(store(null, { stage: 'title', fade: 'in', fadeQuick: true }))).toContain('stage-title fade-in quick"');
+    expect(render(store(null, { stage: 'title', fade: 'in', fadeDen: true }))).toContain('stage-title fade-in den"'); // the 700 ms dissolve out of the black den
     expect(render(store(null, { stage: 'title' }))).not.toContain('data-fade');
   });
 });

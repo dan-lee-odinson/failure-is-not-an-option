@@ -48,7 +48,7 @@ describe('content 0.5.3: Jim Lovell as CAPCOM', () => {
     expect(manifest.content_version).toBe('0.5.4');
     expect(manifest.assets.some((a) => a.filename === 'fno_gemini_portrait_capcom_neutral_v001.png' || a.id === 'portrait-capcom')).toBe(false);
     expect(existsSync(resolve(ROOT, 'assets', 'fno_gemini_portrait_capcom_neutral_v001.png'))).toBe(false);
-    expect(manifest.assets).toHaveLength(69);
+    expect(manifest.assets).toHaveLength(70); // 69 in 0.5.3, plus the opening film (video-opening-film, FNO-DEPLOY)
     // The den plate and layers are manifest assets on disk, rendered nowhere yet.
     for (const id of ['opening-den', 'opening-den-smoke', 'opening-den-beam']) expect(existsSync(resolve(ROOT, 'assets', filename(id)))).toBe(true);
   });
@@ -99,7 +99,7 @@ describe('content 0.5.3: Jim Lovell as CAPCOM', () => {
     expect(brief.log.filter((e) => e.type === 'input' && e.input.kind === 'question' && e.input.question === 'g8-q-crew-return')).toHaveLength(1);
   });
 
-  it('the History panel carries the Lovell note; credits and the den are validated data that no screen renders', () => {
+  it('the History panel carries the Lovell note; credits and the den are validated data that only the opening credits stage renders (FNO-DEPLOY)', () => {
     const labels = content().bundle.registry.labels;
     expect(labels.capcom_history_note).toContain('Jim Lovell');
     const history = render(store(newRun(), { overlay: 'history' }));

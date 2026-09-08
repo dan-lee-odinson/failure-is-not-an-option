@@ -969,6 +969,23 @@
       "origin": "OpenAI built-in imagegen. Luminance/alpha export with warm-white RGB; black matte removed. Sources and exact prompts retained in art/.",
       "attribution": "Original game artwork under Dan’s direction, prepared by Codex. Glen retains his ageless identity; no agency marks, brands or dates.",
       "status": "final"
+    },
+    {
+      "id": "video-opening-film",
+      "filename": "opening-film.mp4",
+      "kind": "video",
+      "format": "mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration_s": 138.0,
+      "title": "Failure is Not an Option — opening film (deployed cut, 0:00–2:18)",
+      "credit": "Assembled from NASA archive footage and the project's own art; see credits",
+      "rights": "NASA content is generally not subject to copyright and is used under NASA's media usage guidelines; one National Archives film via Public.Resource.Org (CC0 1.0); the den, smoke and beam layers and the music (Orbit of Hope, Dan Lee-Odinson / Suno Pro) are the project's own. Not affiliated with, authorized, sponsored, or endorsed by NASA. Sources and terms per shot: docs/deploy-inputs/film-edl.json.",
+      "license": "Mixed: NASA media usage guidelines; CC0 1.0 (Apollo–Soyuz film); project-owned art and music (licence to be confirmed before publication)",
+      "sha256": "c684c8423804e7c14a9b01c3c03854d11b080bacd97003cac747fc4f7ddb384a",
+      "origin": "Trim of video/film-v002 (docs/deploy-inputs/38-Claude-Code-Opening-Film.md) from the assembly master: 0:00 to 2:18.000 (4140 frames), the last frame the wide den at rest; H.264 High 4.1 two-pass 1400 kb/s, AAC 144 kb/s, faststart; ffmpeg 7.1. The game plays it to 2:18 and continues with the live den layers and the live credits (doc 40 item 4).",
+      "attribution": "Cut by Claude Code from Codex's archive selects v003 (Dan's rulings, docs 37 §5–6 and 40); the den plate, smoke and beam layers by Codex (content 0.5.3); music by Dan Lee-Odinson.",
+      "status": "final"
     }
   ]
 }

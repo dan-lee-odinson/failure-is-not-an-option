@@ -282,6 +282,17 @@ export function validateContent(opts: ValidateOptions): ValidationReport {
   // 5. Manifest files -------------------------------------------------------
   if (!opts.skipFiles) {
     for (const a of (opts.manifest as { assets: { id: string; filename: string; kind?: string; format?: string; width: number; height: number; alpha: boolean; duration_s?: number }[] }).assets ?? []) {
+      if (a.kind === 'video') {
+        // The opening film lives under public/video/ and ships with the build: a missing or mis-typed file fails the build (the release check repeats this against dist/).
+        const vpath = resolve(opts.root, 'public', 'video', a.filename);
+        if (!existsSync(vpath)) { errors.push(`asset ${a.id}: public/video/${a.filename} is missing`); continue; }
+        const head = readFileSync(vpath).subarray(0, 12);
+        const isMp4 = head.subarray(4, 8).toString('latin1') === 'ftyp';
+        const isWebm = head[0] === 0x1a && head[1] === 0x45 && head[2] === 0xdf && head[3] === 0xa3;
+        if (a.format === 'mp4' && !isMp4) errors.push(`asset ${a.id}: ${a.filename} is not an MP4 (no ftyp box)`);
+        if (a.format === 'webm' && !isWebm) errors.push(`asset ${a.id}: ${a.filename} is not a WebM (no EBML header)`);
+        continue;
+      }
       if (a.kind === 'audio') {
         // Audio lives under public/audio/. A missing sound plays silence and is listed by npm run placeholders: a warning, never a failed build.
         const apath = resolve(opts.root, 'public', 'audio', a.filename);

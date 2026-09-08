@@ -1,0 +1,41 @@
+# The full check on pull requests and pushes: validator, unit tests, build, release check, and the Playwright suite
+# (display and access cases with screenshots). Kept off the deploy path (pages.yml) so a deploy never waits on a browser
+# install; a red run here is the signal to fix before merging.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run validate
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm run release-check
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots-and-contrast
+          path: |
+            artifacts/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
