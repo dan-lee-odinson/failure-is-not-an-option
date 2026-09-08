@@ -1,5 +1,5 @@
 {
-  "content_version": "0.5.1",
+  "content_version": "0.5.2",
   "id": "gemini-8",
   "title": "Gemini VIII",
   "subtitle": "The Weight of the Call",
@@ -469,7 +469,8 @@
               "attraction": "Bring the crew home under the mission's contingency rules."
             }
           ],
-          "historical_option": "g8-order-return"
+          "historical_option": "g8-order-return",
+          "hint": "Read the flight rule and the crew's stabilization report before confirming the return order."
         }
       ]
     },
@@ -639,7 +640,8 @@
               ]
             }
           ],
-          "historical_option": "g8-return-later"
+          "historical_option": "g8-return-later",
+          "hint": "Ask Glen's questions and read each card's risks before choosing a return opportunity."
         },
         {
           "type": "briefing",
@@ -1745,7 +1747,7 @@
           "options": [
             {
               "id": "g8-adopt-provenance",
-              "intent": "Require every report to separate confirmed observations from information still missing.",
+              "intent": "Make every report say what's been confirmed and what's still unknown.",
               "evidence": [
                 "g8-ev-contact-primer",
                 "g8-ev-crisis"
@@ -1798,7 +1800,8 @@
               ],
               "attraction": "Let the recovery desk check available help against the time the crew will spend at sea."
             }
-          ]
+          ],
+          "hint": "Read what each procedure changes, then choose the one you want to carry into the next mission."
         }
       ]
     },
@@ -1823,7 +1826,25 @@
           "continue": {
             "id": "g8-accountability-brief-continue",
             "label": "Take a position"
-          }
+          },
+          "participants": [
+            {
+              "id": "armstrong",
+              "label": "NEIL ARMSTRONG — COMMAND PILOT"
+            },
+            {
+              "id": "scott",
+              "label": "DAVID SCOTT — PILOT"
+            },
+            {
+              "id": "cunningham",
+              "label": "WALT CUNNINGHAM — ASTRONAUT OFFICE"
+            },
+            {
+              "id": "stafford",
+              "label": "TOM STAFFORD — ASTRONAUT OFFICE"
+            }
+          ]
         },
         {
           "type": "decision",
@@ -1936,7 +1957,26 @@
               ]
             }
           ],
-          "historical_option": "g8-own-ground-contingencies"
+          "historical_option": "g8-own-ground-contingencies",
+          "hint": "Read the post-flight findings and both positions, then choose the statement Glen will make.",
+          "participants": [
+            {
+              "id": "armstrong",
+              "label": "NEIL ARMSTRONG — COMMAND PILOT"
+            },
+            {
+              "id": "scott",
+              "label": "DAVID SCOTT — PILOT"
+            },
+            {
+              "id": "cunningham",
+              "label": "WALT CUNNINGHAM — ASTRONAUT OFFICE"
+            },
+            {
+              "id": "stafford",
+              "label": "TOM STAFFORD — ASTRONAUT OFFICE"
+            }
+          ]
         },
         {
           "type": "briefing",
@@ -2153,7 +2193,10 @@
             "fact": "g8-sea-exhaustion-severe"
           }
         ]
-      }
+      },
+      "tier": "COSTLY",
+      "result_line": "Both crew members are back aboard, badly exhausted after the sea wait. Delays in the pickup calls made an already hard recovery worse.",
+      "plate": "g8-resolution-costly"
     },
     {
       "id": "g8-out-earlier-1",
@@ -2183,7 +2226,10 @@
             "fact": "g8-sea-exhaustion-moderate"
           }
         ]
-      }
+      },
+      "tier": "MIXED",
+      "result_line": "Both crew members are back aboard after a difficult pickup. A call that needed clarification or repeating added to their exhaustion.",
+      "plate": "g8-resolution-mixed"
     },
     {
       "id": "g8-out-earlier-2",
@@ -2213,7 +2259,10 @@
             "fact": "g8-sea-exhaustion-limited"
           }
         ]
-      }
+      },
+      "tier": "SUCCESS",
+      "result_line": "The mission ended early, but the pickup was coordinated without an additional delay. Both crew members are aboard, worn down by the wait at sea.",
+      "plate": "g8-resolution-success"
     },
     {
       "id": "g8-out-later-0",
@@ -2243,7 +2292,10 @@
             "fact": "g8-entry-handoff-compressed"
           }
         ]
-      }
+      },
+      "tier": "COSTLY",
+      "result_line": "Both crew members are back after rushed entry preparations with little RCS propellant remaining. Repeated calls squeezed the time they had to get ready.",
+      "plate": "g8-resolution-costly"
     },
     {
       "id": "g8-out-later-1",
@@ -2273,7 +2325,10 @@
             "fact": "g8-entry-handoff-strained"
           }
         ]
-      }
+      },
+      "tier": "MIXED",
+      "result_line": "Both crew members are back after difficult entry preparations. A delayed warning or repeated instruction made the return harder.",
+      "plate": "g8-resolution-mixed"
     },
     {
       "id": "g8-out-later-2",
@@ -2303,7 +2358,10 @@
             "fact": "g8-entry-handoff-clean"
           }
         ]
-      }
+      },
+      "tier": "SUCCESS",
+      "result_line": "The mission ended early, but the warning and entry instruction reached the crew promptly. Both crew members are back after an orderly response with little RCS propellant remaining.",
+      "plate": "g8-resolution-success"
     }
   ],
   "debrief": [
@@ -2690,6 +2748,243 @@
     "constraint_facts": [
       "g9-recovery-drill-required",
       "g9-systems-drill-required"
+    ]
+  },
+  "prologue": {
+    "plates": [
+      {
+        "id": "g8-prologue-program",
+        "title": "LEARNING TO FLY TOGETHER",
+        "background": "g8-prologue-program",
+        "moving_element": {
+          "asset": "g8-layer-haze",
+          "placement": {
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1080,
+            "opacity": 0.09
+          },
+          "motion": {
+            "kind": "drift",
+            "direction": "right",
+            "seconds": 20,
+            "from": {
+              "x": 0,
+              "y": 0
+            },
+            "to": {
+              "x": 36,
+              "y": 0
+            }
+          }
+        },
+        "caption": "Gemini's two-person missions are teaching NASA how to work in orbit: stay longer, meet another spacecraft, and dock. Those are skills Apollo will need for the journey to the Moon.",
+        "sources": [
+          "H9"
+        ]
+      },
+      {
+        "id": "g8-prologue-crew",
+        "title": "THE CREW",
+        "background": "g8-prologue-crew",
+        "moving_element": {
+          "asset": "g8-layer-haze",
+          "placement": {
+            "x": 0,
+            "y": 0,
+            "width": 1920,
+            "height": 1080,
+            "opacity": 0.07
+          },
+          "motion": {
+            "kind": "drift",
+            "direction": "right",
+            "seconds": 20,
+            "from": {
+              "x": 0,
+              "y": 0
+            },
+            "to": {
+              "x": 22,
+              "y": 0
+            }
+          }
+        },
+        "caption": "Command pilot Neil Armstrong and pilot David Scott are flying Gemini VIII. Their mission calls for docking with an Agena target vehicle and a spacewalk by Scott.",
+        "sources": [
+          "H1",
+          "H2"
+        ]
+      },
+      {
+        "id": "g8-prologue-launch",
+        "title": "16 MARCH 1966",
+        "background": "g8-prologue-launch",
+        "moving_element": {
+          "asset": "g8-layer-haze",
+          "placement": {
+            "x": 0,
+            "y": 380,
+            "width": 1920,
+            "height": 1080,
+            "opacity": 0.25
+          },
+          "motion": {
+            "kind": "rise",
+            "direction": "up",
+            "seconds": 20,
+            "from": {
+              "x": 0,
+              "y": 0
+            },
+            "to": {
+              "x": 0,
+              "y": -48
+            }
+          }
+        },
+        "caption": "The Agena launches first. A Titan II then lifts Armstrong and Scott from Cape Kennedy, beginning the chase toward their target in orbit.",
+        "sources": [
+          "H1",
+          "H2"
+        ]
+      },
+      {
+        "id": "g8-prologue-docking",
+        "title": "RENDEZVOUS AND DOCKING",
+        "background": "g8-prologue-orbit",
+        "moving_element": {
+          "asset": "g8-layer-docked",
+          "placement": {
+            "x": 460,
+            "y": 90,
+            "width": 1380,
+            "height": 776,
+            "opacity": 1
+          },
+          "motion": {
+            "kind": "drift",
+            "direction": "right",
+            "seconds": 20,
+            "from": {
+              "x": 0,
+              "y": 0
+            },
+            "to": {
+              "x": 20,
+              "y": 0
+            }
+          }
+        },
+        "caption": "Gemini VIII reaches the Agena, and Armstrong brings the two vehicles together. It's the first docking of two spacecraft in Earth orbit.",
+        "sources": [
+          "H1",
+          "H2"
+        ]
+      },
+      {
+        "id": "g8-prologue-inflection",
+        "title": "BEYOND THE NEXT CONTACT",
+        "background": "g8-prologue-orbit",
+        "moving_element": {
+          "asset": "g8-layer-docked",
+          "placement": {
+            "x": 540,
+            "y": 120,
+            "width": 1320,
+            "height": 743,
+            "opacity": 1
+          },
+          "motion": {
+            "kind": "drift",
+            "direction": "left",
+            "seconds": 24,
+            "from": {
+              "x": 0,
+              "y": 0
+            },
+            "to": {
+              "x": -24,
+              "y": 0
+            }
+          }
+        },
+        "caption": "The spacecraft are joined, but Houston won't have continuous radio contact. The room will have to separate its last confirmed report from whatever happens beyond the next station's reach.",
+        "sources": [
+          "H1"
+        ]
+      }
+    ],
+    "scenario_card": {
+      "id": "g8-scenario-card",
+      "background": "g8-prologue-facility",
+      "facility": "Manned Spacecraft Center, Houston",
+      "date": "16 March 1966",
+      "mission": "Gemini VIII",
+      "scenario": "The Weight of the Call",
+      "context": "Earlier that day — mission preparation",
+      "sources": [
+        "H1",
+        "H2",
+        "H10"
+      ],
+      "moving_element": {
+        "asset": "g8-layer-haze",
+        "placement": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080,
+          "opacity": 0.06
+        },
+        "motion": {
+          "kind": "drift",
+          "direction": "right",
+          "seconds": 20,
+          "from": {
+            "x": 0,
+            "y": 0
+          },
+          "to": {
+            "x": 24,
+            "y": 0
+          }
+        }
+      }
+    },
+    "history_note": "The Manned Spacecraft Center was renamed the Lyndon B. Johnson Space Center in 1973.",
+    "history_sources": [
+      "H10"
+    ],
+    "interpretation": "The prologue is an illustrated mission overview, then an explicit return to earlier mission preparation. Staging, lighting and motion are artistic interpretations; the inflection caption is original scene-setting prose, not a transcript."
+  },
+  "resolution_presentation": {
+    "heading": "RECOVERY RESULT",
+    "relationships_heading": "THE ROOM REMEMBERS",
+    "trust_up": "Trust up",
+    "trust_down": "Trust down",
+    "tiers": [
+      {
+        "id": "SUCCESS",
+        "meaning": "Crew recovered with the best available coordination in this scenario; the mission still ended early."
+      },
+      {
+        "id": "MIXED",
+        "meaning": "Crew recovered, with a significant difficulty during return or pickup."
+      },
+      {
+        "id": "COSTLY",
+        "meaning": "Crew recovered, but severe exhaustion or compressed entry preparation made the recovery especially costly."
+      },
+      {
+        "id": "FAILURE",
+        "meaning": "Reserved for future scenarios: a failed objective or recovery without necessarily losing a crew."
+      },
+      {
+        "id": "LOSS",
+        "meaning": "Reserved for future scenarios with an explicit recorded loss of crew or vehicle."
+      }
     ]
   }
 }

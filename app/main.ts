@@ -7,7 +7,8 @@
  */
 import { Run, describeNode, indexContent, type Input } from '../core';
 import { bundle } from './content-bundle';
-import { render } from './render';
+import { DESIGN, render } from './render';
+import { describeResolution } from './resolution';
 import { exportFilename, exportText, hasBrowserSave, importFromText, loadFromBrowser, saveToBrowser } from './storage';
 import { layoutEmblem } from './plate';
 import { applyTheme } from './theme';
@@ -89,8 +90,15 @@ function applyInput(input: Input): void {
   }
   store.ui.message = null;
   if (run.state.mission.completed && store.ui.screen === 'console') {
-    store.ui.screen = 'debrief';
-    announce('Mission closed. Debrief.');
+    // The outcome and every relationship effect are recorded; the resolution cards read them and change nothing.
+    if (describeResolution(content, run)) {
+      store.ui.screen = 'resolution';
+      store.ui.resolution = 'result';
+      announce('Mission closed. Recovery result.');
+    } else {
+      store.ui.screen = 'debrief';
+      announce('Mission closed. Debrief.');
+    }
   }
   if (input.kind === 'confirm_plan') {
     store.ui.highlightPlan = null;
@@ -117,6 +125,99 @@ function activateRun(run: Run, viaLoad: boolean): void {
   } else {
     store.ui.screen = 'console';
   }
+}
+
+/** NEW CAMPAIGN (or the Save / Load panel's new campaign): the prologue runs once, between the menu and the first console screen. Continue and Load resume a run without it. */
+function startNewCampaign(): void {
+  activateRun(new Run(content, { seed: 1 }), false);
+  if (content.mission.prologue) {
+    store.ui.screen = 'prologue';
+    store.ui.prologue = { index: 0, prev: null, prevProgress: 0 };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Prologue and resolution stages (FNO-M01): player-paced plates; presentation only, never in the log
+// ---------------------------------------------------------------------------
+
+/** Crossfade between plates, and the dissolve of the scenario card into the room (treatment 28 §3). */
+const CROSSFADE_MS = 450;
+const DISSOLVE_MS = 700;
+/** Under reduced motion the room is a cut; a short guard still keeps a repeated press from reaching the console. */
+const CUT_GUARD_MS = 300;
+let plateTimer: ReturnType<typeof setTimeout> | null = null;
+let dissolveTimer: ReturnType<typeof setTimeout> | null = null;
+/** Until this time (Date.now()) input controls are ignored: the press that entered the room cannot also reach a console key. */
+let guardUntil = 0;
+
+/** The moving layer's animation on the plate now on screen: which plate, and how far its motion has played (ms). */
+function layerState(): { plate: string | null; time: number; seconds: number } {
+  const main = document.querySelector<HTMLElement>('.screen-prologue');
+  const el = main?.querySelector<HTMLElement>('.pl-current .pl-layer');
+  const anim = el?.getAnimations()[0];
+  const t = anim?.currentTime;
+  return { plate: main?.dataset.plate ?? null, time: typeof t === 'number' ? t : 0, seconds: Number(el?.dataset.seconds) || 0 };
+}
+
+function goToPlate(index: number): void {
+  const ui = store.ui;
+  const count = (content.mission.prologue?.plates.length ?? 0) + 1;
+  const next = Math.max(0, Math.min(count - 1, index));
+  const prev = ui.screen === 'prologue' && !ui.reducedMotion && next !== ui.prologue.index ? ui.prologue.index : null;
+  const s = layerState();
+  const progress = prev === null || s.seconds <= 0 ? 0 : Math.min(1, s.time / (s.seconds * 1000));
+  ui.screen = 'prologue';
+  ui.prologue = { index: next, prev, prevProgress: progress };
+  if (plateTimer) { clearTimeout(plateTimer); plateTimer = null; }
+  if (prev !== null) {
+    plateTimer = setTimeout(() => {
+      plateTimer = null;
+      if (store.ui.screen === 'prologue') { store.ui.prologue = { ...store.ui.prologue, prev: null, prevProgress: 0 }; paint(); }
+    }, CROSSFADE_MS);
+  }
+}
+
+/** The scenario card's Continue enters the console once: the room paints at once, the card dissolves over it, and inputs are guarded meanwhile. */
+function enterRoom(): void {
+  const ui = store.ui;
+  if (ui.screen !== 'prologue') return;
+  if (plateTimer) { clearTimeout(plateTimer); plateTimer = null; }
+  ui.prologue = { index: ui.prologue.index, prev: null, prevProgress: 0 };
+  ui.screen = 'console';
+  ui.dissolve = !ui.reducedMotion;
+  guardUntil = Date.now() + (ui.reducedMotion ? CUT_GUARD_MS : DISSOLVE_MS);
+  if (dissolveTimer) clearTimeout(dissolveTimer);
+  dissolveTimer = setTimeout(() => {
+    dissolveTimer = null;
+    if (store.ui.dissolve) { store.ui.dissolve = false; paint(); }
+  }, DISSOLVE_MS);
+  announce('Mission preparation.');
+}
+
+function toDebrief(): void {
+  store.ui.screen = 'debrief';
+  announce('Debrief.');
+}
+
+/**
+ * Move the plate's layer once, linearly, by (to − from) in frame pixels over its seconds, then hold (fill forwards).
+ * A repaint of the same plate resumes at the time the previous animation had reached; a new plate starts at zero;
+ * a resize rescales the remaining motion from the same point. Nothing here under reduced motion: the layer stays at
+ * its `from` composition, which the renderer placed.
+ */
+function driveLayer(before: { plate: string | null; time: number }): void {
+  if (store.ui.screen !== 'prologue' || store.ui.reducedMotion) return;
+  const main = document.querySelector<HTMLElement>('.screen-prologue');
+  const el = main?.querySelector<HTMLElement>('.pl-current .pl-layer[data-dx]');
+  if (!main || !el || typeof el.animate !== 'function') return;
+  for (const a of el.getAnimations()) a.cancel();
+  const frame = el.closest<HTMLElement>('.pl-frame');
+  const scale = (frame?.clientWidth || DESIGN.width) / DESIGN.width;
+  const dx = Number(el.dataset.dx) * scale;
+  const dy = Number(el.dataset.dy) * scale;
+  const duration = Math.max(1, Number(el.dataset.seconds) || 0) * 1000;
+  const anim = el.animate([{ transform: 'translate(0px, 0px)' }, { transform: `translate(${dx}px, ${dy}px)` }], { duration, easing: 'linear', fill: 'forwards' });
+  anim.currentTime = before.plate === main.dataset.plate ? Math.min(duration, before.time) : 0;
 }
 
 /** Whether CONTINUE on the menu can resume the browser slot, with the visible reason when it cannot. */
@@ -306,7 +407,42 @@ export function dispatch(action: string, arg?: string): void {
     case 'start-new': {
       director.signal('start-new');
       director.event('ui:menu-select');
-      activateRun(new Run(content, { seed: 1 }), false);
+      startNewCampaign();
+      break;
+    }
+    case 'prologue-next': {
+      director.event('ui:continue');
+      const plates = content.mission.prologue?.plates.length ?? 0;
+      if (ui.prologue.index >= plates) enterRoom();
+      else goToPlate(ui.prologue.index + 1);
+      break;
+    }
+    case 'prologue-skip': {
+      director.event('ui:continue');
+      goToPlate(content.mission.prologue?.plates.length ?? 0);
+      break;
+    }
+    case 'prologue-enter': {
+      director.event('ui:continue');
+      enterRoom();
+      break;
+    }
+    case 'resolution-next': {
+      if (ui.screen !== 'resolution' || !store.run) break;
+      director.event('ui:continue');
+      const v = describeResolution(content, store.run);
+      if (ui.resolution === 'result' && v && v.people.length) ui.resolution = 'relationships';
+      else toDebrief();
+      break;
+    }
+    case 'resolution-skip': {
+      if (ui.screen !== 'resolution' || !store.run) break;
+      director.event('ui:continue');
+      toDebrief();
+      break;
+    }
+    case 'to-resolution': {
+      if (store.run && describeResolution(content, store.run)) { ui.screen = 'resolution'; ui.resolution = 'result'; }
       break;
     }
     case 'start-load': {
@@ -408,8 +544,9 @@ export function dispatch(action: string, arg?: string): void {
       break;
     }
     case 'new-campaign': {
+      director.signal('start-new');
       director.event('ui:menu-select');
-      activateRun(new Run(content, { seed: 1 }), false);
+      startNewCampaign();
       ui.overlay = null;
       break;
     }
@@ -451,7 +588,8 @@ function syncAudio(): void {
   const ui = store.ui;
   const sid = screenId(ui);
   if (sid !== lastScreenId) { lastScreenId = sid; director.signal(sid); }
-  const consoleLike = ui.screen === 'console' || ui.screen === 'debrief' || ui.screen === 'planning';
+  // The room bed runs from the first console screen through the resolution cards, the debrief and planning; never under the prologue.
+  const consoleLike = ui.screen === 'console' || ui.screen === 'resolution' || ui.screen === 'debrief' || ui.screen === 'planning';
   const node = ui.screen === 'console' ? store.run?.currentNode() : null;
   const phaseId = node?.phase.id ?? (consoleLike ? store.content.mission.phases[store.content.mission.phases.length - 1]?.id ?? null : null);
   director.setRoom(consoleLike, phaseId);
@@ -515,11 +653,13 @@ function paint(): void {
   lastFocus = null;
   const scrollBox = document.getElementById('op-scroll');
   const keepScroll = scrollBox ? scrollBox.scrollTop : null;
+  const layerBefore = layerState();
   document.documentElement.setAttribute('data-text', store.ui.textSize);
   store.ui.fullscreen = fullscreenState();
   idleDirty = false;
   root.innerHTML = render(store);
   layoutEmblem();
+  driveLayer(layerBefore);
   const newScroll = document.getElementById('op-scroll');
   if (newScroll && keepScroll !== null) newScroll.scrollTop = keepScroll;
   if (store.ui.overlay) {
@@ -542,6 +682,8 @@ function wire(): void {
     const target = (ev.target as HTMLElement).closest<HTMLElement>('[data-action]');
     if (!target) { if (idleDirty) paint(); return; }
     if (target.hasAttribute('disabled') || target.getAttribute('aria-disabled') === 'true') return;
+    // While the scenario card dissolves into the room, no control takes a press: rapid clicks on Continue cannot reach a console key.
+    if (Date.now() < guardUntil) { ev.preventDefault(); return; }
     lastFocus = target.getAttribute('data-focus');
     const [action, arg] = splitAction(target.getAttribute('data-action')!);
     dispatch(action, arg);
@@ -612,13 +754,13 @@ function splitAction(s: string): [string, string | undefined] {
 
 declare global {
   interface Window {
-    __fno?: { store: Store; dispatch: typeof dispatch; fingerprint: string; audio: { enabled: () => boolean; unlocked: () => boolean }; idle: () => boolean };
+    __fno?: { store: Store; dispatch: typeof dispatch; fingerprint: string; audio: { enabled: () => boolean; unlocked: () => boolean }; idle: () => boolean; guarded: () => boolean };
   }
 }
 
 applyTheme(document.documentElement, store.ui.uiMode);
 wire();
-window.addEventListener('resize', layoutEmblem);
+window.addEventListener('resize', () => { layoutEmblem(); driveLayer(layerState()); });
 if (store.ui.stage === 'menu') refreshContinueSave();
 paint();
-window.__fno = { store, dispatch, fingerprint: content.fingerprint, audio: { enabled: () => director.enabled, unlocked: () => director.unlocked }, idle: () => store.ui.idle };
+window.__fno = { store, dispatch, fingerprint: content.fingerprint, audio: { enabled: () => director.enabled, unlocked: () => director.unlocked }, idle: () => store.ui.idle, guarded: () => Date.now() < guardUntil };

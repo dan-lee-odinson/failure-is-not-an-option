@@ -9,7 +9,8 @@
  */
 import type { ContentIndex, Run } from '../core';
 
-export type Screen = 'opening' | 'console' | 'debrief' | 'planning';
+/** `prologue` runs once after NEW CAMPAIGN; `resolution` sits between the outcome record and the debrief (FNO-M01). */
+export type Screen = 'opening' | 'prologue' | 'console' | 'resolution' | 'debrief' | 'planning';
 
 /** Stages of the opening screen, in order. `montage` is the named empty slot for the future archival montage (07). */
 export type Stage = 'start' | 'dedication' | 'notices' | 'montage' | 'title' | 'menu';
@@ -69,6 +70,16 @@ export interface UiState {
   hints: boolean;
   /** The Fullscreen API's state for the menu key. */
   fullscreen: 'available' | 'active' | 'unavailable';
+  /**
+   * Prologue position: `index` counts the plates in order, the last index being the scenario card; `prev` is the plate
+   * still showing beneath the incoming one during the crossfade (null otherwise), with the fraction of its layer motion
+   * already played so it holds still where it was. Presentation only.
+   */
+  prologue: { index: number; prev: number | null; prevProgress: number };
+  /** Which resolution card is up: the result, or the changed relationships. */
+  resolution: 'result' | 'relationships';
+  /** The scenario card dissolving into the room (700 ms) over the first console screen; never under reduced motion. */
+  dissolve: boolean;
 }
 
 export interface Store {
@@ -106,6 +117,9 @@ export function defaultUi(overrides: Partial<UiState> = {}): UiState {
     idle: false,
     hints: true,
     fullscreen: 'unavailable',
+    prologue: { index: 0, prev: null, prevProgress: 0 },
+    resolution: 'result',
+    dissolve: false,
     ...overrides,
   };
 }
@@ -119,7 +133,7 @@ export const PREF_KEYS = {
   hints: 'fno.hints',
 } as const;
 
-/** Screen id used by the cue maps for a UI state: `screen:menu`, `screen:opening-dedication`, `screen:console`, … */
+/** Screen id used by the cue maps for a UI state: `screen:menu`, `screen:opening-dedication`, `screen:prologue`, `screen:console`, `screen:resolution`, … */
 export function screenId(ui: Pick<UiState, 'screen' | 'stage'>): string {
   if (ui.screen !== 'opening') return `screen:${ui.screen}`;
   return ui.stage === 'menu' ? 'screen:menu' : `screen:opening-${ui.stage}`;

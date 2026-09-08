@@ -28,6 +28,8 @@ export interface MusicCue {
   loop: { from: number; to: number; crossfade: number } | null;
   extend_to_seam_if_still_reading?: number;
   stop_on: string[];
+  /** Fade-out seconds for particular stop signals (e.g. a quicker fade on New Campaign); absent = fade_out. */
+  stop_fade?: Record<string, number>;
   /** Per-cue level (0–1) on top of the music bus; absent = 1. */
   gain?: number;
   provisional?: boolean;
@@ -198,7 +200,7 @@ export class AudioDirector {
 
   /** A screen id (`screen:menu`), a node id (`node:g8-crisis-report`), or an input id (`start-new`, `choose:g8-return-earlier`). */
   signal(id: string): void {
-    for (const p of this.playing.values()) if (!p.stopped && p.cue.stop_on.includes(id)) this.stopCue(p, p.cue.fade_out);
+    for (const p of this.playing.values()) if (!p.stopped && p.cue.stop_on.includes(id)) this.stopCue(p, p.cue.stop_fade?.[id] ?? p.cue.fade_out);
     for (const cue of this.map.cues) if (cue.trigger === id) void this.startCue(cue);
   }
 

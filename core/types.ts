@@ -89,6 +89,15 @@ export interface Readout {
   not_ready: string;
 }
 
+/**
+ * A real person shown as a portrait with a name-and-role label and no line (content 0.5.2, direction 27 §1):
+ * presentation only; never a speaker, never read by the engine.
+ */
+export interface Participant {
+  id: string;
+  label: string;
+}
+
 export interface BriefingNode {
   type: 'briefing';
   id: string;
@@ -100,6 +109,8 @@ export interface BriefingNode {
   documents?: ConditionalDocument[];
   lines?: Line[];
   questions?: Question[];
+  /** Portraits with labels beside the conversation, the way the controllers appear, with nothing that reads as speech. */
+  participants?: Participant[];
   continue: ContinueInput;
 }
 
@@ -128,6 +139,8 @@ export interface DecisionNode {
   documents?: ConditionalDocument[];
   lines?: Line[];
   questions?: Question[];
+  /** Portraits with labels beside the conversation (see BriefingNode). */
+  participants?: Participant[];
   readout?: Readout[];
   options: Option[];
 }
@@ -172,11 +185,18 @@ export interface Phase {
   nodes: Node[];
 }
 
+/** Result tier shown on the resolution card (content 0.5.2, direction 27 §2): a label on the outcome, never a mechanic. FAILURE and LOSS are reserved for later scenarios. */
+export type ResultTier = 'SUCCESS' | 'MIXED' | 'COSTLY' | 'FAILURE' | 'LOSS';
+
 export interface Outcome {
   id: string;
   title: string;
   kind: 'success' | 'partial' | 'abort-safe' | 'loss';
   requires: Condition;
+  /** Presentation only (0.5.2): the tier word, the one- or two-sentence result line, and the plate shown on the resolution card. */
+  tier?: ResultTier;
+  result_line?: string;
+  plate?: string;
 }
 
 export interface DebriefRule {
@@ -185,6 +205,59 @@ export interface DebriefRule {
   id: string;
   when: Condition;
   text: string;
+}
+
+/**
+ * One moving layer on a prologue plate (content 0.5.2, treatment 28 §3): a transparent 1920×1080 manifest
+ * image placed in design pixels (with its opacity) and moved once, linearly, from `placement + motion.from`
+ * to `placement + motion.to` over `motion.seconds`, then held. Durations are animation lengths, never deadlines.
+ */
+export interface MovingElement {
+  asset: string;
+  placement: { x: number; y: number; width: number; height: number; opacity: number };
+  motion: { kind: 'drift' | 'rise' | 'pan'; direction: 'left' | 'right' | 'up' | 'down'; seconds: number; from: { x: number; y: number }; to: { x: number; y: number } };
+}
+
+/** A prologue beat: one background, one moving layer, a heading and a caption, with its sources. */
+export interface ProloguePlate {
+  id: string;
+  title: string;
+  background: string;
+  moving_element: MovingElement;
+  caption: string;
+  sources: string[];
+}
+
+/** The scenario card that closes the prologue: the facility, the date, the mission and scenario names, and the time transition back to preparation. */
+export interface ScenarioCard {
+  id: string;
+  background: string;
+  facility: string;
+  date: string;
+  mission: string;
+  scenario: string;
+  context: string;
+  sources: string[];
+  moving_element: MovingElement;
+}
+
+/** The illustrated mission overview played once after NEW CAMPAIGN (content 0.5.2). Presentation only; never read by the engine. */
+export interface Prologue {
+  plates: ProloguePlate[];
+  scenario_card: ScenarioCard;
+  /** Shown in the History panel once a run exists (the 1973 renaming of the facility). */
+  history_note: string;
+  history_sources: string[];
+  interpretation: string;
+}
+
+/** Headings and labels for the resolution cards (content 0.5.2). Presentation only. */
+export interface ResolutionPresentation {
+  heading: string;
+  relationships_heading: string;
+  trust_up: string;
+  trust_down: string;
+  tiers: { id: ResultTier; meaning: string }[];
 }
 
 export interface Mission {
@@ -210,6 +283,8 @@ export interface Mission {
     astronauts: string[];
     constraint_facts: string[];
   };
+  prologue?: Prologue;
+  resolution_presentation?: ResolutionPresentation;
 }
 
 export interface Character {
@@ -220,6 +295,8 @@ export interface Character {
   kind: 'player' | 'historical' | 'fictional-controller' | 'composite-controller';
   manner?: 'cautious' | 'direct' | 'challenging';
   portrait: string | null;
+  /** Matched expression pair (0.5.2): neutral for a trust increase, concerned for a decrease, on the resolution card only. */
+  portraits?: { neutral: string; concerned: string };
   portrayal: string;
   dramatization: true;
   sources?: string[];

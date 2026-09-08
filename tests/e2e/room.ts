@@ -120,14 +120,26 @@ export async function assertGlenUncovered(page: Page): Promise<void> {
 
 export interface ContrastResult { selector: string; ratio: number; worst: string }
 
-/** WCAG contrast of an element's text against its real backdrop (ancestor tints composited over the plate pixels behind it, or the page ground when there is no plate). */
+/**
+ * WCAG contrast of an element's text against its real backdrop: the page ground, then every backdrop image behind it
+ * (the room plate under object-fit: cover, or on a full-screen plate the background and the moving layers marked
+ * `data-backdrop`, each drawn at its rendered rectangle and opacity), then the ancestors' tints composited on top.
+ */
 export async function measureTextContrast(page: Page, selectors: string[]): Promise<ContrastResult[]> {
   return page.evaluate(({ selectors }) => {
+    interface Backdrop { img: HTMLImageElement; left: number; top: number; width: number; height: number; alpha: number }
+    const backdrops: Backdrop[] = [];
     const plate = document.getElementById('plate') as HTMLImageElement | null;
-    const box = plate?.getBoundingClientRect();
-    const scale = box ? Math.max(box.width / 1920, box.height / 1080) : 1;
-    const w = 1920 * scale, h = 1080 * scale;
-    const ox = box ? box.left + (box.width - w) / 2 : 0, oy = box ? box.top + (box.height - h) / 2 : 0;
+    if (plate) {
+      const box = plate.getBoundingClientRect();
+      const scale = Math.max(box.width / 1920, box.height / 1080);
+      const w = 1920 * scale, h = 1080 * scale;
+      backdrops.push({ img: plate, left: box.left + (box.width - w) / 2, top: box.top + (box.height - h) / 2, width: w, height: h, alpha: 1 });
+    }
+    for (const img of Array.from(document.querySelectorAll<HTMLImageElement>('img[data-backdrop]'))) {
+      const b = img.getBoundingClientRect();
+      if (b.width > 0 && b.height > 0) backdrops.push({ img, left: b.left, top: b.top, width: b.width, height: b.height, alpha: parseFloat(getComputedStyle(img).opacity || '1') });
+    }
     const parse = (color: string): [number, number, number, number] => {
       const m = /rgba?\(([^)]+)\)/.exec(color);
       if (!m) return [0, 0, 0, 0];
@@ -141,7 +153,7 @@ export async function measureTextContrast(page: Page, selectors: string[]): Prom
     const canvas = document.createElement('canvas');
     canvas.width = 48; canvas.height = 48;
     const ctx = canvas.getContext('2d')!;
-    const ground = parse(getComputedStyle(document.querySelector('.screen-opening') ?? document.body).backgroundColor);
+    const ground = parse(getComputedStyle(document.querySelector('.screen-opening, .screen-plate') ?? document.body).backgroundColor);
     const out: { selector: string; ratio: number; worst: string }[] = [];
     for (const selector of selectors) {
       const el = document.querySelector<HTMLElement>(selector);
@@ -152,13 +164,19 @@ export async function measureTextContrast(page: Page, selectors: string[]): Prom
       const x1 = Math.min(innerWidth, b.right), y1 = Math.min(innerHeight, b.bottom);
       if (x1 <= x0 || y1 <= y0) continue;
       ctx.clearRect(0, 0, 48, 48);
-      if (plate) {
-        const sx = (x0 - ox) / scale, sy = (y0 - oy) / scale, sw = (x1 - x0) / scale, sh = (y1 - y0) / scale;
-        ctx.drawImage(plate, sx, sy, sw, sh, 0, 0, 48, 48);
-      } else {
-        ctx.fillStyle = `rgb(${ground[0]},${ground[1]},${ground[2]})`;
-        ctx.fillRect(0, 0, 48, 48);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = `rgb(${ground[0]},${ground[1]},${ground[2]})`;
+      ctx.fillRect(0, 0, 48, 48);
+      for (const bd of backdrops) {
+        const ix0 = Math.max(x0, bd.left), iy0 = Math.max(y0, bd.top), ix1 = Math.min(x1, bd.left + bd.width), iy1 = Math.min(y1, bd.top + bd.height);
+        if (ix1 <= ix0 || iy1 <= iy0) continue;
+        const nw = bd.img.naturalWidth || 1920, nh = bd.img.naturalHeight || 1080;
+        const sx = (ix0 - bd.left) / bd.width * nw, sy = (iy0 - bd.top) / bd.height * nh, sw = (ix1 - ix0) / bd.width * nw, sh = (iy1 - iy0) / bd.height * nh;
+        const dx = (ix0 - x0) / (x1 - x0) * 48, dy = (iy0 - y0) / (y1 - y0) * 48, dw = (ix1 - ix0) / (x1 - x0) * 48, dh = (iy1 - iy0) / (y1 - y0) * 48;
+        ctx.globalAlpha = bd.alpha;
+        ctx.drawImage(bd.img, sx, sy, sw, sh, dx, dy, dw, dh);
       }
+      ctx.globalAlpha = 1;
       const data = ctx.getImageData(0, 0, 48, 48).data;
       const tints: [number, number, number, number][] = [];
       for (let node: HTMLElement | null = el; node && node !== document.body; node = node.parentElement) {
@@ -219,11 +237,61 @@ export const TEXT_SAMPLES = [
   '[data-testid="contact"]',
   '[data-testid="applied"] li',
   '[data-testid="event-text"]',
+  '[data-testid="participants"] .who',
+  '[data-testid="hint-strip"]',
+  '[data-testid="history-note"]',
   '.menu-reason',
   '.menu-subtitle',
   '.hero-continue',
   '.op-prose p',
 ];
+
+/** Text on the full-screen plates (M01): the prologue's heading and caption, the scenario card's fields, the resolution cards' text. */
+export const PLATE_TEXT_SAMPLES = [
+  '.pl-heading',
+  '.pl-caption',
+  '.pl-facility',
+  '.pl-date',
+  '.pl-mission',
+  '.pl-context',
+  '.res-heading',
+  '.res-tier',
+  '.res-title',
+  '.res-line',
+  '.res-name',
+  '.res-change.up',
+  '.res-change.down',
+];
+
+/**
+ * A full-screen plate (the prologue, the resolution cards): the design frame is 16:9, letterboxed and centred; every
+ * layer is clipped to it, non-interactive and out of the focus order; every image is a manifest file; every kit control
+ * and every text sample keeps 4.5:1 against the composited backdrop.
+ */
+export async function assertPlateScreen(page: Page): Promise<{ text: ContrastResult[]; kit: KitContrast[] }> {
+  const geometry = await page.evaluate(() => {
+    const frame = document.querySelector<HTMLElement>('.pl-frame')!;
+    const f = frame.getBoundingClientRect();
+    const layers = Array.from(document.querySelectorAll<HTMLElement>('.pl-layer')).map((el) => {
+      const cs = getComputedStyle(el);
+      return { pe: cs.pointerEvents, hidden: el.getAttribute('aria-hidden'), tab: el.getAttribute('tabindex'), inFrame: !!el.closest('.pl-frame') };
+    });
+    return { w: f.width, h: f.height, cx: f.left + f.width / 2, cy: f.top + f.height / 2, overflow: getComputedStyle(frame).overflow, layers, vw: innerWidth, vh: innerHeight };
+  });
+  expect(Math.abs(geometry.w / geometry.h - 16 / 9), 'frame aspect 16:9').toBeLessThan(0.01);
+  expect(Math.min(geometry.vw - geometry.w, geometry.vh - geometry.h), 'frame fills one dimension').toBeLessThan(2);
+  expect(Math.abs(geometry.cx - geometry.vw / 2)).toBeLessThan(2);
+  expect(Math.abs(geometry.cy - geometry.vh / 2)).toBeLessThan(2);
+  expect(geometry.overflow).toBe('hidden');
+  for (const l of geometry.layers) { expect(l.pe).toBe('none'); expect(l.hidden).toBe('true'); expect(l.tab).toBeNull(); expect(l.inFrame).toBe(true); }
+  const srcs = await page.locator('img').evaluateAll((imgs) => imgs.map((i) => (i as HTMLImageElement).getAttribute('src') ?? ''));
+  expect(srcs.length).toBeGreaterThan(0);
+  for (const s of srcs) expect(MANIFEST_FILES.has(unhash(decodeURIComponent(s.split('/').pop() ?? ''))), `image ${s} is not in assets/manifest.json`).toBe(true);
+  await page.evaluate(() => Promise.all(Array.from(document.images).map((i) => i.decode().catch(() => undefined))));
+  const text = await assertTextContrast(page, PLATE_TEXT_SAMPLES);
+  const kit = await assertKitContrast(page);
+  return { text, kit };
+}
 
 export interface KitContrast { element: string; text: string; ratio: number; worst: string }
 

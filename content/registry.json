@@ -1,5 +1,5 @@
 {
-  "content_version": "0.5.1",
+  "content_version": "0.5.2",
   "labels": {
     "start_notice": "A historical mission with fictional return decisions and alternate outcomes.",
     "alternate_history_badge": "ALTERNATE HISTORY",
@@ -74,6 +74,20 @@
       "author": "Gene Kranz / Simon & Schuster",
       "url": "https://www.simonandschuster.com/books/Failure-Is-Not-an-Option/Gene-Kranz/9781439148815",
       "note": "Read authorized Chapter One excerpt on Mercury-era training, communications checks and rehearsals. Used only for working-room cadence and practice context. This is not the Gemini VIII chapter; it does not independently corroborate H5’s postflight criticism. All game dialogue remains original."
+    },
+    {
+      "id": "H9",
+      "title": "Gemini: Bridge to the Moon",
+      "author": "NASA",
+      "url": "https://www.nasa.gov/specials/gemini_gallery/index.html",
+      "note": "Prologue context: two-person spacecraft, endurance, rendezvous and docking as preparation for lunar missions. Images are original illustrated interpretations."
+    },
+    {
+      "id": "H10",
+      "title": "50 Years Ago: The Manned Spacecraft Center Renamed NASA’s Johnson Space Center",
+      "author": "NASA",
+      "url": "https://www.nasa.gov/centers-and-facilities/johnson/50-years-ago-the-manned-spacecraft-center-renamed-nasas-johnson-space-center/",
+      "note": "Supports the period facility name and the 1973 renaming. Does not authenticate the generated exterior geometry, lighting or staging."
     }
   ],
   "fiction": [
@@ -126,6 +140,11 @@
       "id": "F10",
       "title": "Post-flight stance and social consequences",
       "text": "Glen's two statements; the compressed later discussion scene; blaming the crew versus accepting ground contingency responsibility; Armstrong/Scott trust -2 each and Cunningham/Stafford +1 each plus a deepened corps rift on the blame route; Armstrong/Scott +1 each and critics unchanged on the ground route; all associated narration, facts, notes and IX-A relationship displays; and the concrete commissioned docked-contingency task. These are fictional consequences of the player's choice. The ground-side criticism itself is sourced through H5, but its exact implementation and resulting relationship gains are not asserted as historical events. Choosing to blame the crew does not change their demonstrated actions or the source's reported exoneration. Choosing ground responsibility does not erase the existence of disagreement."
+    },
+    {
+      "id": "F11",
+      "title": "Illustrated prologue and recovery presentation",
+      "text": "Original staged illustrations, lighting, weather, visual motion, the overview-to-preparation transition, recovery tier labels and result-line summaries. The six underlying game outcomes remain the simplified model described in F7. Different plate lighting expresses tone, not a measured recovery time, storm, medical finding or new consequence. Portrait expressions represent the game relationship changes in F8 and F10; they do not document the real astronauts’ feelings or add their words."
     }
   ]
 }

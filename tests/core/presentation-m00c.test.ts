@@ -146,7 +146,8 @@ describe('idle help and hints', () => {
     const decision = upTo('g8-return-brief');
     const idle = render(store(decision, { idle: true }));
     expect(idle).not.toContain('idle-hint');
-    expect(idle).not.toContain('data-testid="hint-strip"'); // no content carries a hint yet
+    expect(idle).toContain('data-testid="hint-strip"'); // content 0.5.2 carries a hint on every decision (M01)
+    expect(render(store(decision, { idle: false }))).not.toContain('data-testid="hint-strip"');
     // A choice screen with a continuation (preparation's Finish, the plan screen's Commit) highlights nothing either.
     expect(render(store(play(newRun(), script({ upTo: 1 })), { idle: true }))).not.toContain('idle-hint');
     const done = play(newRun(), script({ prep: ['recovery'], route: 'earlier' }));

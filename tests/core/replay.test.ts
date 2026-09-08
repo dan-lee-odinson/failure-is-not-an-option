@@ -54,7 +54,7 @@ describe('deterministic replay', () => {
     expect(header.type).toBe('run');
     if (header.type === 'run') {
       expect(header.seed).toBe(42);
-      expect(header.content_version).toBe('0.5.1');
+      expect(header.content_version).toBe('0.5.2');
       expect(header.content_fingerprint).toBe(content().fingerprint);
     }
     expect(run.state.draws).toBe(0);

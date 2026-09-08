@@ -1,0 +1,176 @@
+[
+  {
+    "id": "portrait-armstrong-neutral",
+    "width": 768,
+    "height": 1024,
+    "channels": 4,
+    "transparent_pixels": 357071,
+    "opaque_pixels": 429361,
+    "partial_pixels": 0
+  },
+  {
+    "id": "portrait-armstrong-concerned",
+    "width": 768,
+    "height": 1024,
+    "channels": 4,
+    "transparent_pixels": 366949,
+    "opaque_pixels": 419483,
+    "partial_pixels": 0
+  },
+  {
+    "id": "portrait-scott-neutral",
+    "width": 768,
+    "height": 1024,
+    "channels": 4,
+    "transparent_pixels": 317293,
+    "opaque_pixels": 469139,
+    "partial_pixels": 0
+  },
+  {
+    "id": "portrait-scott-concerned",
+    "width": 768,
+    "height": 1024,
+    "channels": 4,
+    "transparent_pixels": 323738,
+    "opaque_pixels": 462694,
+    "partial_pixels": 0
+  },
+  {
+    "id": "portrait-cunningham-neutral",
+    "width": 768,
+    "height": 1024,
+    "channels": 4,
+    "transparent_pixels": 426966,
+    "opaque_pixels": 359466,
+    "partial_pixels": 0
+  },
+  {
+    "id": "portrait-cunningham-concerned",
+    "width": 768,
+    "height": 1024,
+    "channels": 4,
+    "transparent_pixels": 419367,
+    "opaque_pixels": 367065,
+    "partial_pixels": 0
+  },
+  {
+    "id": "portrait-stafford-neutral",
+    "width": 768,
+    "height": 1024,
+    "channels": 4,
+    "transparent_pixels": 415218,
+    "opaque_pixels": 371214,
+    "partial_pixels": 0
+  },
+  {
+    "id": "portrait-stafford-concerned",
+    "width": 768,
+    "height": 1024,
+    "channels": 4,
+    "transparent_pixels": 412866,
+    "opaque_pixels": 373566,
+    "partial_pixels": 0
+  },
+  {
+    "id": "g8-prologue-program",
+    "width": 1920,
+    "height": 1080,
+    "channels": 3
+  },
+  {
+    "id": "g8-prologue-crew",
+    "width": 1920,
+    "height": 1080,
+    "channels": 3
+  },
+  {
+    "id": "g8-prologue-launch",
+    "width": 1920,
+    "height": 1080,
+    "channels": 3
+  },
+  {
+    "id": "g8-prologue-orbit",
+    "width": 1920,
+    "height": 1080,
+    "channels": 3
+  },
+  {
+    "id": "g8-prologue-facility",
+    "width": 1920,
+    "height": 1080,
+    "channels": 3
+  },
+  {
+    "id": "g8-resolution-success",
+    "width": 1920,
+    "height": 1080,
+    "channels": 3
+  },
+  {
+    "id": "g8-resolution-mixed",
+    "width": 1920,
+    "height": 1080,
+    "channels": 3
+  },
+  {
+    "id": "g8-resolution-costly",
+    "width": 1920,
+    "height": 1080,
+    "channels": 3
+  },
+  {
+    "id": "portrait-systems-neutral",
+    "width": 768,
+    "height": 1024,
+    "channels": 4,
+    "transparent_pixels": 312348,
+    "opaque_pixels": 474084,
+    "partial_pixels": 0
+  },
+  {
+    "id": "portrait-systems-concerned",
+    "width": 768,
+    "height": 1024,
+    "channels": 4,
+    "transparent_pixels": 320513,
+    "opaque_pixels": 465919,
+    "partial_pixels": 0
+  },
+  {
+    "id": "portrait-recovery-neutral",
+    "width": 768,
+    "height": 1024,
+    "channels": 4,
+    "transparent_pixels": 476042,
+    "opaque_pixels": 310390,
+    "partial_pixels": 0
+  },
+  {
+    "id": "portrait-recovery-concerned",
+    "width": 768,
+    "height": 1024,
+    "channels": 4,
+    "transparent_pixels": 483466,
+    "opaque_pixels": 302966,
+    "partial_pixels": 0
+  },
+  {
+    "id": "g8-layer-docked",
+    "width": 1920,
+    "height": 1080,
+    "channels": 4,
+    "transparent_pixels": 1615230,
+    "opaque_pixels": 1292,
+    "partial_pixels": 457078
+  },
+  {
+    "id": "g8-layer-haze",
+    "width": 1920,
+    "height": 1080,
+    "channels": 4,
+    "transparent_pixels": 1089084,
+    "opaque_pixels": 0,
+    "partial_pixels": 984516
+  }
+]

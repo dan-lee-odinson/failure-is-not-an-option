@@ -103,7 +103,7 @@ describe('dialogue sheet', () => {
     const csv = readFileSync(resolve(ROOT, 'docs', 'dialogue-sheet.csv'), 'utf8').replace(/\r\n/g, '\n');
     expect(md).toBe(toMarkdown(s));
     expect(csv).toBe(toCsv(s));
-    expect(s.version).toBe('0.5.1');
+    expect(s.version).toBe('0.5.2');
     expect(s.fingerprint).toBe(content().fingerprint);
     expect(s.runs).toBe(56);
   });
@@ -117,6 +117,18 @@ describe('dialogue sheet', () => {
     const reg = content().bundle.registry;
     const m = content().mission;
     note([...reg.notices.dedication, reg.notices.project_disclaimer, reg.notices.ai_disclosure, reg.notices.dramatization, m.title, m.subtitle ?? '', m.start_notice].filter(Boolean), reachableView);
+    // Content 0.5.2 presentation text (M01): authored strings the new stages display; collected from the content and checked against the sheet both ways.
+    const authored = new Set<string>();
+    const prologue = m.prologue!;
+    for (const plate of prologue.plates) note([plate.title, plate.caption], authored);
+    const card = prologue.scenario_card;
+    note([card.facility, card.date, card.mission, card.scenario, card.context, prologue.history_note], authored);
+    // The prologue: every plate and the scenario card, both text sizes, mid-crossfade, reduced motion.
+    for (let i = 0; i <= prologue.plates.length; i++) for (const textSize of ['default', 'large'] as const) {
+      note(renderedStrings(null, ui({ screen: 'prologue', textSize, prologue: { index: i, prev: null, prevProgress: 0 } })), reachableRendered);
+      note(renderedStrings(null, ui({ screen: 'prologue', textSize, prologue: { index: i, prev: Math.max(0, i - 1), prevProgress: 0.5 } })), reachableRendered);
+      note(renderedStrings(null, ui({ screen: 'prologue', textSize, reducedMotion: true, prologue: { index: i, prev: null, prevProgress: 0 } })), reachableRendered);
+    }
 
     // The opening: every stage, both text sizes, paused and reduced-motion chapters, the menu with CONTINUE both ways.
     for (const stage of STAGES) for (const textSize of ['default', 'large'] as const) {
@@ -142,17 +154,31 @@ describe('dialogue sheet', () => {
       const run = newRun();
       const capture = (): void => {
         note(viewStrings(run), reachableView);
+        const n = run.currentNode()?.node;
+        if (n?.type === 'decision' && n.hint) note([n.hint], authored);
+        if (n?.type === 'briefing' || n?.type === 'decision') note((n.participants ?? []).map((p) => p.label), authored);
         if (run.currentNode()) {
           note(renderedStrings(run, ui()), reachableRendered);
           note(renderedStrings(run, ui({ open: Object.keys(run.state.mission.evidence), pinned: Object.keys(run.state.mission.evidence).slice(0, 1) })), reachableRendered);
           note(renderedStrings(run, ui({ pinHintOpen: true })), reachableRendered);
           note(renderedStrings(run, ui({ idle: true })), reachableRendered);
           note(renderedStrings(run, ui({ overlay: 'binder' })), reachableRendered);
+          note(renderedStrings(run, ui({ overlay: 'history' })), reachableRendered);
         }
         steps++;
       };
       capture();
       for (const inp of inputs) { play(run, [inp]); capture(); }
+      // The resolution cards: the outcome's tier, title and line; each changed relationship's name and label.
+      const o = m.outcomes.find((x) => x.id === run.state.mission.completed?.outcome)!;
+      const labels = m.resolution_presentation!;
+      note([o.tier!, o.title, o.result_line!, labels.heading, labels.relationships_heading], authored);
+      for (const c of content().characters.values()) {
+        const delta = (run.state.ledger.people[c.id]?.trust ?? 0) - (run.identity.initial_ledger.people[c.id]?.trust ?? 0);
+        if (delta) note([c.name, delta > 0 ? labels.trust_up : labels.trust_down], authored);
+      }
+      note(renderedStrings(run, ui({ screen: 'resolution', resolution: 'result' })), reachableRendered);
+      note(renderedStrings(run, ui({ screen: 'resolution', resolution: 'relationships' })), reachableRendered);
       note(renderedStrings(run, ui({ screen: 'debrief' })), reachableRendered);
       note(renderedStrings(run, ui({ screen: 'planning' })), reachableRendered);
       const fo = describeFollowOnForRun(run)!;
@@ -173,6 +199,9 @@ describe('dialogue sheet', () => {
     // 2. Everything the renderer shows is on the sheet.
     const missingRendered = [...reachableRendered].filter((k) => !onSheet.has(k));
     expect(missingRendered, 'rendered strings missing from the sheet').toEqual([]);
+    // 2b. Every authored 0.5.2 presentation string is on the sheet, and the renderer shows every one of them somewhere.
+    expect([...authored].filter((k) => !onSheet.has(k)), 'M01 authored strings missing from the sheet').toEqual([]);
+    expect([...authored].filter((k) => !reachableRendered.has(k)), 'M01 authored strings the renderer never shows').toEqual([]);
     // 3. Nothing on the sheet is unreachable.
     const messageSrc = MESSAGE_SOURCES.map((f) => readFileSync(resolve(ROOT, f), 'utf8')).join('\n').replace(/\\'/g, "'");
     const unreachable = s.rows.filter((r) => {
@@ -180,7 +209,7 @@ describe('dialogue sheet', () => {
       if (r.kind === 'history-hidden') return !hidden.has(k) && !reachableView.has(k);
       if (r.kind === 'ui.message') return !messageSrc.includes(r.text.split('…')[0]!.trim().slice(0, 24));
       if (r.source === 'app') return !reachableRendered.has(k);
-      return !reachableView.has(k) && !reachableRendered.has(k);
+      return !reachableView.has(k) && !reachableRendered.has(k) && !authored.has(k);
     });
     expect(unreachable.map((r) => `${r.node} ${r.kind} ${r.text}`), 'sheet rows no route reaches').toEqual([]);
   });
@@ -197,6 +226,21 @@ describe('dialogue sheet', () => {
     expect(firstIndex.get('opening-start')).toBe(0);
     for (const stage of STAGES) if (stage !== 'montage') expect(firstIndex.has('opening-' + stage), `opening stage ${stage} on the sheet`).toBe(true);
     expect(firstIndex.get('opening-menu')!).toBeLessThan(firstIndex.get(missionNodes[0]!)!);
+    // The prologue sits between the menu and the first console screen, in plate order; the resolution between the last node and the debrief.
+    const prologue = content().mission.prologue!;
+    const plateBuckets = [...prologue.plates.map((p) => 'prologue-' + p.id), 'prologue-' + prologue.scenario_card.id];
+    for (const b of plateBuckets) expect(firstIndex.has(b), `prologue bucket ${b}`).toBe(true);
+    for (let i = 1; i < plateBuckets.length; i++) expect(firstIndex.get(plateBuckets[i]!)!).toBeGreaterThan(firstIndex.get(plateBuckets[i - 1]!)!);
+    expect(firstIndex.get(plateBuckets[0]!)!).toBeGreaterThan(firstIndex.get('opening-menu')!);
+    expect(firstIndex.get(plateBuckets[plateBuckets.length - 1]!)!).toBeLessThan(firstIndex.get(missionNodes[0]!)!);
+    expect(firstIndex.get('resolution')!).toBeGreaterThan(firstIndex.get(missionNodes[missionNodes.length - 1]!)!);
+    expect(firstIndex.get('resolution')!).toBeLessThan(firstIndex.get('debrief')!);
+    expect(s.rows.filter((r) => r.kind === 'prologue.caption')).toHaveLength(prologue.plates.length);
+    expect(s.rows.filter((r) => r.kind === 'decision.hint')).toHaveLength(4);
+    expect(s.rows.filter((r) => r.kind === 'participant.label')).toHaveLength(4);
+    expect(s.rows.filter((r) => r.kind === 'outcome.result_line')).toHaveLength(6);
+    expect(s.rows.filter((r) => r.kind === 'outcome.tier').map((r) => r.text).sort()).toEqual(['COSTLY', 'MIXED', 'SUCCESS']);
+    expect(s.rows.filter((r) => r.kind === 'history.note')).toHaveLength(1);
     expect(firstIndex.get('debrief')!).toBeGreaterThan(firstIndex.get(missionNodes[missionNodes.length - 1]!)!);
     expect(firstIndex.get('g9-plan-decision')!).toBeGreaterThan(firstIndex.get('debrief')!);
     expect(firstIndex.has('overlay-settings')).toBe(true);

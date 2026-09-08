@@ -27,6 +27,7 @@ import {
 } from '../../core';
 import { loadBundle } from './load-content';
 import { provenanceLine, render } from '../../app/render';
+import { describeResolution } from '../../app/resolution';
 import { STAGES, defaultUi, type Stage, type Store, type UiState } from '../../app/ui-state';
 
 export type Source = 'content' | 'core' | 'app';
@@ -156,6 +157,8 @@ function uiKind(r: DomRun): string {
   if (r.tag === 'b' || r.tag === 'strong') return 'ui.label';
   if (/^h[1-3]$/.test(r.tag) || r.tag === 'summary' || r.tag === 'figcaption') return c.includes(' prompt ') ? 'ui.prompt' : 'ui.heading';
   if (r.tag === 'text' || c.includes(' hero-title ')) return 'ui.heading';
+  if (/ (res-tier|res-heading|pl-heading|pl-mission) /.test(c)) return 'ui.heading';
+  if (/ (res-name|res-change|pl-facility|pl-date|pl-context) /.test(c)) return 'ui.label';
   if (/ (stamp|lamp|lamp-op) /.test(c)) return 'ui.badge';
   if (/ (menu-reason|menu-subtitle|pin-hint) /.test(c)) return 'ui.hint';
   if (c.includes(' prompt ')) return 'ui.prompt';
@@ -376,6 +379,10 @@ function structuredNode(run: Run): Captured[] {
   if (v.node.title) out.push({ kind: 'label', speaker: '', id: v.node.id, text: v.node.title, source: 'content' });
   if (v.node.header_label) out.push({ kind: 'label', speaker: '', id: v.node.id, text: v.node.header_label, source: 'content' });
   if (v.node.text) out.push({ kind: 'briefing', speaker: '', id: v.node.id, text: v.node.text, source: 'content' });
+  // Content 0.5.2: the decision's hint (shown in the strip after 30 s idle) and the participants' labels (portrait captions, never speech).
+  const raw = content.nodes.get(v.node.id)?.node;
+  if (raw?.type === 'decision' && raw.hint) out.push({ kind: 'decision.hint', speaker: '', id: raw.id, text: raw.hint, source: 'content' });
+  if (raw && (raw.type === 'briefing' || raw.type === 'decision')) for (const p of raw.participants ?? []) out.push({ kind: 'participant.label', speaker: '', id: p.id, text: p.label, source: 'content' });
   const isReaction = v.node.id === content.mission.debrief_layout.relationship_node;
   for (const [i, l] of v.lines.entries()) out.push(...line(l, isReaction ? 'reaction' : 'line', `${v.resolution ?? v.node.id}#${i + 1}`));
   if (v.event_text) out.push({ kind: v.node.id === content.mission.debrief_layout.consequence_node ? 'consequence' : 'event.text', speaker: '', id: v.resolution ?? v.node.id, text: v.event_text, source: 'content' });
@@ -610,6 +617,63 @@ export class SheetBuilder {
     this.record(b, dims, overlay === 'history' ? historyHiddenStrings(this.content) : [], at >= 0 ? html.slice(at) : '');
   }
 
+  /** The prologue (FNO-M01): every plate and the scenario card, both text sizes, reduced motion, and mid-crossfade. Content strings are the titles, captions and the card's fields. */
+  capturePrologue(): void {
+    const p = this.content.mission.prologue;
+    if (!p) return;
+    const count = p.plates.length + 1;
+    for (let i = 0; i < count; i++) {
+      const plate = p.plates[i];
+      const card = p.scenario_card;
+      const id = plate ? plate.id : card.id;
+      const b = this.bucket('prologue-' + id, plate ? plate.title : 'Scenario card', 'prologue', 'Prologue', 100 + i);
+      const structured: Captured[] = plate
+        ? [
+          { kind: 'prologue.title', speaker: '', id: plate.id, text: plate.title, source: 'content' },
+          { kind: 'prologue.caption', speaker: '', id: plate.id, text: plate.caption, source: 'content' },
+        ]
+        : (['facility', 'date', 'mission', 'scenario', 'context'] as const).map((k) => ({ kind: 'scenario.' + k, speaker: '', id: card.id, text: card[k], source: 'content' as const }));
+      for (const textSize of ['default', 'large'] as const) {
+        const variants: Partial<UiState>[] = [
+          { screen: 'prologue', textSize, prologue: { index: i, prev: null, prevProgress: 0 } },
+          { screen: 'prologue', textSize, prologue: { index: i, prev: Math.max(0, i - 1), prevProgress: 0.5 } },
+          { screen: 'prologue', textSize, reducedMotion: true, prologue: { index: i, prev: null, prevProgress: 0 } },
+        ];
+        for (const v of variants) this.record(b, {}, structured, render(this.store(null, this.ui(v))));
+      }
+    }
+  }
+
+  /** The resolution cards (FNO-M01): the result and, when anyone's trust changed, the relationships, as rendered for this route. */
+  captureResolution(run: Run, dims: Dims): void {
+    const v = describeResolution(this.content, run);
+    if (!v) return;
+    const b = this.bucket('resolution', 'Scenario resolution', 'resolution', 'Scenario resolution', 4999);
+    const structured: Captured[] = [
+      { kind: 'resolution.heading', speaker: '', id: 'resolution_presentation', text: v.heading, source: 'content' },
+      { kind: 'outcome.tier', speaker: '', id: v.outcome.id, text: v.tier, source: 'content' },
+      { kind: 'outcome.title', speaker: '', id: v.outcome.id, text: v.outcome.title, source: 'content' },
+      { kind: 'outcome.result_line', speaker: '', id: v.outcome.id, text: v.result_line, source: 'content' },
+      { kind: 'resolution.heading', speaker: '', id: 'resolution_presentation', text: v.relationships_heading, source: 'content' },
+    ];
+    for (const p of v.people) {
+      structured.push({ kind: 'relationship.name', speaker: '', id: p.id, text: p.name, source: 'content' });
+      structured.push({ kind: 'relationship.change', speaker: '', id: 'resolution_presentation', text: p.label, source: 'content' });
+    }
+    this.record(b, dims, structured, render(this.store(run, this.ui({ screen: 'resolution', resolution: 'result' }))));
+    if (v.people.length) this.record(b, dims, structured, render(this.store(run, this.ui({ screen: 'resolution', resolution: 'relationships' }))));
+  }
+
+  /** The History panel once a run exists carries the prologue's facility note (FNO-M01); its own bucket so the note needs no branch. */
+  captureHistoryNote(run: Run): void {
+    const p = this.content.mission.prologue;
+    if (!p) return;
+    const b = this.bucket('history-note', 'History panel: facility note', UI_PHASE.id, UI_PHASE.title, 9002.5);
+    const html = render(this.store(run, this.ui({ overlay: 'history', screen: 'console' })));
+    const at = html.indexOf('<div class="overlay-backdrop"');
+    this.record(b, {}, [{ kind: 'history.note', speaker: '', id: p.scenario_card.id, text: p.history_note, source: 'content' }], at >= 0 ? html.slice(at) : '');
+  }
+
   captureDebrief(run: Run, dims: Dims): void {
     const b = this.bucket('debrief', 'Debrief', 'debrief', 'Debrief', 5000);
     this.record(b, dims, structuredDebrief(run), render(this.store(run, this.ui({ screen: 'debrief' }))));
@@ -640,11 +704,13 @@ export class SheetBuilder {
 
       const run = new Run(this.content, { seed: 0 });
       this.captureMissionNode(run, dims);
+      if (!this.buckets.has('history-note')) this.captureHistoryNote(run);
       for (const inp of route.inputs) {
         const r = run.apply(inp);
         if (!r.ok) throw new Error(`walk: ${r.message}`);
         if (run.currentNode()) this.captureMissionNode(run, dims);
       }
+      this.captureResolution(run, dims);
       this.captureDebrief(run, dims);
       this.capturePlanning(run, null, dims);
       const view = describeFollowOnForRun(run)!;
@@ -665,6 +731,7 @@ export class SheetBuilder {
 
   build(root: string): Sheet {
     this.captureOpening();
+    this.capturePrologue();
     const runs = this.walk();
     this.captureOverlay(null, {}, 'history');
     this.captureOverlay(null, {}, 'about');
@@ -724,7 +791,21 @@ function unreachableContent(content: ContentIndex, rows: SheetRow[]): { kind: st
   for (const e of content.evidence.values()) { check('evidence.title', e.id, e.title); check('evidence.body', e.id, e.body); }
   for (const p of content.procedures.values()) { check('procedure.title', p.id, p.title); check('procedure.text', p.id, p.text); }
   for (const r of content.mission.debrief) check('debrief', r.id, r.text);
-  for (const o of content.mission.outcomes) check('outcome.title', o.id, o.title);
+  for (const o of content.mission.outcomes) { check('outcome.title', o.id, o.title); check('outcome.tier', o.id, o.tier); check('outcome.result_line', o.id, o.result_line); }
+  // Content 0.5.2 presentation text: the prologue, the scenario card, the History note, the resolution labels, the hints and the participant labels.
+  const prologue = content.mission.prologue;
+  if (prologue) {
+    for (const p of prologue.plates) { check('prologue.title', p.id, p.title); check('prologue.caption', p.id, p.caption); }
+    const c = prologue.scenario_card;
+    for (const k of ['facility', 'date', 'mission', 'scenario', 'context'] as const) check('scenario.' + k, c.id, c[k]);
+    check('history.note', c.id, prologue.history_note);
+  }
+  const labels = content.mission.resolution_presentation;
+  if (labels) for (const [k, v] of Object.entries({ heading: labels.heading, relationships_heading: labels.relationships_heading, trust_up: labels.trust_up, trust_down: labels.trust_down })) check('resolution.' + k, 'resolution_presentation', v);
+  for (const { node } of content.nodes.values()) {
+    if (node.type === 'decision') check('decision.hint', node.id, node.hint);
+    if (node.type === 'decision' || node.type === 'briefing') for (const p of node.participants ?? []) check('participant.label', p.id, p.label);
+  }
   for (const p of content.followon.plans) { check('plan.label', p.id, p.label); for (const d of p.disabled_reasons) check('plan.disabled-reason', p.id, d.text); }
   for (const [k, v] of Object.entries(content.followon.trust_labels)) check('label', 'trust_labels[' + k + ']', v);
   return out;

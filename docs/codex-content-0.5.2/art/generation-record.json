@@ -1,0 +1,128 @@
+[
+  {
+    "id": "armstrong",
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-c1568705-5622-4d34-9571-e899abed5212.png",
+    "prompt": "Create a game-ready transparent portrait atlas from this approved character sheet. Preserve this exact character's face identity, age, hair, costume, face orientation, ink linework and muted comic-book-realism style. NO redesign, logos, text, letters, frames or paper. Output a true RGBA transparent background, NOT a checkerboard painted into the image. Landscape 1536x1024 canvas split into two equal invisible 768x1024 cells. LEFT cell: one head-and-upper-torso bust, relaxed NEUTRAL expression, calm brows and gently positive closed mouth. RIGHT cell: the identical bust at identical scale, pose, eye line and costume, with a distinctly CONCERNED expression: small downward frown, raised inner brows and visible worry lines. Concern must be readable at thumbnail size without anger or caricature. Both entire heads including hair and ears inside the cell. Head top around y100, eyes around y360, upper torso extends to bottom y1024. Each figure centered in its own cell, generous transparent margin, no crossing the x768 boundary. Remove all official insignia. These are two expressions of the same person, not two different people. Preserve clean antialiased alpha edges and opaque clothing."
+  },
+  {
+    "id": "scott",
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-fe70eb1e-e898-4b77-986e-d5e6b7f3db16.png",
+    "prompt": "Create a game-ready transparent portrait atlas from this approved character sheet. Preserve this exact character's face identity, age, hair, costume, face orientation, ink linework and muted comic-book-realism style. NO redesign, logos, text, letters, frames or paper. Output a true RGBA transparent background, NOT a checkerboard painted into the image. Landscape 1536x1024 canvas split into two equal invisible 768x1024 cells. LEFT cell: one head-and-upper-torso bust, relaxed NEUTRAL expression, calm brows and gently positive closed mouth. RIGHT cell: the identical bust at identical scale, pose, eye line and costume, with a distinctly CONCERNED expression: small downward frown, raised inner brows and visible worry lines. Concern must be readable at thumbnail size without anger or caricature. Both entire heads including hair and ears inside the cell. Head top around y100, eyes around y360, upper torso extends to bottom y1024. Each figure centered in its own cell, generous transparent margin, no crossing the x768 boundary. Remove all official insignia. These are two expressions of the same person, not two different people. Preserve clean antialiased alpha edges and opaque clothing."
+  },
+  {
+    "id": "cunningham",
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-1e6c7ca0-5550-46f5-98e0-dc5053072e99.png",
+    "prompt": "Create a game-ready transparent portrait atlas from this approved character sheet. Preserve this exact character's face identity, age, hair, costume, face orientation, ink linework and muted comic-book-realism style. NO redesign, logos, text, letters, frames or paper. Output a true RGBA transparent background, NOT a checkerboard painted into the image. Landscape 1536x1024 canvas split into two equal invisible 768x1024 cells. LEFT cell: one head-and-upper-torso bust, relaxed NEUTRAL expression, calm brows and gently positive closed mouth. RIGHT cell: the identical bust at identical scale, pose, eye line and costume, with a distinctly CONCERNED expression: small downward frown, raised inner brows and visible worry lines. Concern must be readable at thumbnail size without anger or caricature. Both entire heads including hair and ears inside the cell. Head top around y100, eyes around y360, upper torso extends to bottom y1024. Each figure centered in its own cell, generous transparent margin, no crossing the x768 boundary. Remove all official insignia. These are two expressions of the same person, not two different people. Preserve clean antialiased alpha edges and opaque clothing."
+  },
+  {
+    "id": "stafford",
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-451b5dc9-65dc-4fe7-b64b-00d8c48f3e9a.png",
+    "prompt": "Create a game-ready transparent portrait atlas from this approved character sheet. Preserve this exact character's face identity, age, hair, costume, face orientation, ink linework and muted comic-book-realism style. NO redesign, logos, text, letters, frames or paper. Output a true RGBA transparent background, NOT a checkerboard painted into the image. Landscape 1536x1024 canvas split into two equal invisible 768x1024 cells. LEFT cell: one head-and-upper-torso bust, relaxed NEUTRAL expression, calm brows and gently positive closed mouth. RIGHT cell: the identical bust at identical scale, pose, eye line and costume, with a distinctly CONCERNED expression: small downward frown, raised inner brows and visible worry lines. Concern must be readable at thumbnail size without anger or caricature. Both entire heads including hair and ears inside the cell. Head top around y100, eyes around y360, upper torso extends to bottom y1024. Each figure centered in its own cell, generous transparent margin, no crossing the x768 boundary. Remove all official insignia. These are two expressions of the same person, not two different people. Preserve clean antialiased alpha edges and opaque clothing."
+  },
+  {
+    "id": "prologue-program",
+    "prompt": "Create a finished 1920x1080 landscape 16:9 background plate for a 2D narrative spaceflight game. Match the room reference's hand-drawn comic-book realism, ink contours, deliberately low surface texture, strong deep blue/teal shadows, warm practical light and restrained color. Full bleed, one scene, no border, no labels, no UI, no text, no NASA insignia. Leave the bottom 22 percent visually quiet for live captions. Not a reference sheet or collage. 1960s Gemini spacecraft preparation hangar, a single white and black Gemini capsule with its white adapter on a work stand on the right, small anonymous technicians giving scale, overhead work lights, deep shadowed left side and foreground, a modest open hangar doorway allowing a ray of daylight. Match the equipment reference geometry, no Apollo spacecraft or rockets.",
+    "refs": [
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/title-hero-v003/assets/room.png",
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/equipment-sheets-v001/sheets/fno_equipment_gemini-viii_v001.png"
+    ],
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-585fb7ae-1fbc-42d9-b1b5-b0354eda9e49.png"
+  },
+  {
+    "id": "prologue-crew",
+    "prompt": "Create a finished 1920x1080 landscape 16:9 background plate for a 2D narrative spaceflight game. Match the room reference's hand-drawn comic-book realism, ink contours, deliberately low surface texture, strong deep blue/teal shadows, warm practical light and restrained color. Full bleed, one scene, no border, no labels, no UI, no text, no NASA insignia. Leave the bottom 22 percent visually quiet for live captions. Not a reference sheet or collage. Neil Armstrong and David Scott in March 1966 in a modest suit-up preparation room, standing side-by-side on the right half of the scene in their white Gemini pressure suits with exposed heads and blue metal neck rings. Preserve the identities in their approved sheets (Armstrong reference 2, Scott reference 3), calm relaxed expressions, no dialogue. Warm overhead practical lights, dark blue lockers, a shadowed table in lower foreground; left half is dark atmospheric negative space. No readable patches or branding.",
+    "refs": [
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/title-hero-v003/assets/room.png",
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/character-sheets-v003/sheets/fno_sheet_neil-armstrong_v001.png",
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/character-sheets-v003/sheets/fno_sheet_david-scott_v001.png"
+    ],
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-669e0cbf-1fd2-4382-9744-794554f4790f.png"
+  },
+  {
+    "id": "prologue-launch",
+    "prompt": "Create a finished 1920x1080 landscape 16:9 background plate for a 2D narrative spaceflight game. Match the room reference's hand-drawn comic-book realism, ink contours, deliberately low surface texture, strong deep blue/teal shadows, warm practical light and restrained color. Full bleed, one scene, no border, no labels, no UI, no text, no NASA insignia. Leave the bottom 22 percent visually quiet for live captions. Not a reference sheet or collage. Gemini VIII Titan II GLV launch from Cape Kennedy, March 16 1966. Tall slender black-and-white TWO-stage Titan II with tiny black Gemini capsule at tip and NO escape tower, NO strap-on boosters. Rocket is rising just clear of its pad in the right half. Match equipment sheet silhouette. Bright compact exhaust below, low white rolling exhaust clouds, blue Florida sky and distant low shoreline landscape. No Saturn rocket, no VAB. Dramatic sunlight and deep graphic shadow.",
+    "refs": [
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/title-hero-v003/assets/room.png",
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/equipment-sheets-v001/sheets/fno_equipment_titan-ii-glv_v001.png"
+    ],
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-bc6bea4b-cf3e-48f8-bbcd-baf7b3638522.png"
+  },
+  {
+    "id": "prologue-orbit",
+    "prompt": "Create a finished 1920x1080 landscape 16:9 background plate for a 2D narrative spaceflight game. Match the room reference's hand-drawn comic-book realism, ink contours, deliberately low surface texture, strong deep blue/teal shadows, warm practical light and restrained color. Full bleed, one scene, no border, no labels, no UI, no text, no NASA insignia. Leave the bottom 22 percent visually quiet for live captions. Not a reference sheet or collage. An unoccupied orbital backdrop over Earth, black upper half with extremely sparse tiny stars, curved blue atmospheric limb crossing diagonally through lower right, large muted white cloud bands and deep ocean. Sunlit upper-right rim, moody blue-black space. Absolutely NO spacecraft or satellites in this background: those are a separate alpha layer. Quiet dark left side for captions. Physically restrained Earth horizon, not a giant fantasy planet.",
+    "refs": [
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/title-hero-v003/assets/room.png"
+    ],
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-0d7a7f59-c2a2-4409-b65f-18a4e60b6e3b.png"
+  },
+  {
+    "id": "prologue-facility",
+    "prompt": "Create a finished 1920x1080 landscape 16:9 background plate for a 2D narrative spaceflight game. Match the room reference's hand-drawn comic-book realism, ink contours, deliberately low surface texture, strong deep blue/teal shadows, warm practical light and restrained color. Full bleed, one scene, no border, no labels, no UI, no text, no NASA insignia. Leave the bottom 22 percent visually quiet for live captions. Not a reference sheet or collage. Front of the Manned Spacecraft Center's Mission Control Center, Houston in March 1966, based on the provided location card. The original three connected masses only: windowless ribbed operations block at left, recessed central patterned concrete sunshade facade, lower horizontal three-story office wing at right. Wide shot from the parking area, period sedans at sides leaving lower foreground quiet and dark. Late-afternoon low light, architectural shadows, warm lobby windows. No words on building, no logos, no modern additions. Recreate a FULL SCREEN SCENE, do not copy card labels or insets.",
+    "refs": [
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/title-hero-v003/assets/room.png",
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/location-msc-v001/fno_location_manned-spacecraft-center_1966_v001.png"
+    ],
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-1cab34d9-d186-4498-8c66-8345bb6dd8e0.png"
+  },
+  {
+    "id": "resolution-success",
+    "prompt": "Create one finished 1920x1080 landscape 16:9 full-bleed illustrated resolution background for a serious 2D spaceflight narrative game, matching reference 1's crisp dark comic-book ink and flat controlled color, strong blue-teal shadow and warm light. NOT a sheet, no labels, no UI, no borders, no text, no NASA logos. Main subject confined to right two-thirds; top-left and bottom quarter dark and quiet for large live result text and portraits. Capsule uses reference 2's recovery configuration: black Gemini reentry cabin ONLY, two upper hatches, yellow flotation collar, NO white orbital adapter. Recovery ship is USS Leonard F. Mason DD-852 as reference 3, a 1966 US Navy destroyer, not an aircraft carrier. The image should express the result's emotional tone without asserting an exact historical recovery procedure or medical diagnosis. Crew survival and a coordinated recovery: the Gemini cabin safely secured in a low cradle on the destroyer's deck at right, empty open hatches after both crew have left; a few anonymous sailors working calmly, warm dawn light on capsule and rail, blue sea beyond. Mood relieved, professional and earned, no cheering crowd or pristine spacecraft. No astronauts in the capsule, no wreckage.",
+    "refs": [
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/title-hero-v003/assets/room.png",
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/equipment-sheets-v001/sheets/fno_equipment_gemini-capsule-recovery_v001.png",
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/equipment-sheets-v001/sheets/fno_equipment_uss-leonard-f-mason_v001.png"
+    ],
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-52e5dee0-b804-40d3-8c38-26dee11f30e1.png"
+  },
+  {
+    "id": "resolution-mixed",
+    "prompt": "Create one finished 1920x1080 landscape 16:9 full-bleed illustrated resolution background for a serious 2D spaceflight narrative game, matching reference 1's crisp dark comic-book ink and flat controlled color, strong blue-teal shadow and warm light. NOT a sheet, no labels, no UI, no borders, no text, no NASA logos. Main subject confined to right two-thirds; top-left and bottom quarter dark and quiet for large live result text and portraits. Capsule uses reference 2's recovery configuration: black Gemini reentry cabin ONLY, two upper hatches, yellow flotation collar, NO white orbital adapter. Recovery ship is USS Leonard F. Mason DD-852 as reference 3, a 1966 US Navy destroyer, not an aircraft carrier. The image should express the result's emotional tone without asserting an exact historical recovery procedure or medical diagnosis. A difficult recovery completed: foreground deck rail and bundled rescue lines in shadow, the Gemini cabin with yellow flotation collar secured on the right side of the deck, a few anonymous sailors tidying wet recovery gear, blue-gray overcast sea and restrained amber deck light. Mood tired and sober but everyone is safe. No injured or dead people, no storm disaster, no fires, no smoking cabin.",
+    "refs": [
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/title-hero-v003/assets/room.png",
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/equipment-sheets-v001/sheets/fno_equipment_gemini-capsule-recovery_v001.png",
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/equipment-sheets-v001/sheets/fno_equipment_uss-leonard-f-mason_v001.png"
+    ],
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-2718f466-9af6-4ea9-9a1f-ddbf9b312187.png"
+  },
+  {
+    "id": "resolution-costly",
+    "prompt": "Create one finished 1920x1080 landscape 16:9 full-bleed illustrated resolution background for a serious 2D spaceflight narrative game, matching reference 1's crisp dark comic-book ink and flat controlled color, strong blue-teal shadow and warm light. NOT a sheet, no labels, no UI, no borders, no text, no NASA logos. Main subject confined to right two-thirds; top-left and bottom quarter dark and quiet for large live result text and portraits. Capsule uses reference 2's recovery configuration: black Gemini reentry cabin ONLY, two upper hatches, yellow flotation collar, NO white orbital adapter. Recovery ship is USS Leonard F. Mason DD-852 as reference 3, a 1966 US Navy destroyer, not an aircraft carrier. The image should express the result's emotional tone without asserting an exact historical recovery procedure or medical diagnosis. The crew is back but the recovery has taken a toll: quiet after the retrieval, on the destroyer's deck at night, Gemini cabin secured at right under one hard amber work light with empty open hatches, two empty folding deck chairs with gray blankets folded over their backs near the cabin, coiled ropes, deep blue shadow and black sea. No people shown close enough for medical or emotional claims. Serious costly-survival mood, absolutely no death, drowning, wreckage or celebration.",
+    "refs": [
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/title-hero-v003/assets/room.png",
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/equipment-sheets-v001/sheets/fno_equipment_gemini-capsule-recovery_v001.png",
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/equipment-sheets-v001/sheets/fno_equipment_uss-leonard-f-mason_v001.png"
+    ],
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-09345fe0-a838-4b38-845b-dc0c7d0a23cc.png"
+  },
+  {
+    "id": "systems",
+    "prompt": "Create a game-ready transparent portrait atlas from this approved character sheet. Preserve this exact character's face identity, age, hair, costume, face orientation, ink linework and muted comic-book-realism style. NO redesign, logos, text, letters, frames or paper. Output a true RGBA transparent background, NOT a checkerboard painted into the image. Landscape 1536x1024 canvas split into two equal invisible 768x1024 cells. LEFT cell: one head-and-upper-torso bust, relaxed NEUTRAL expression, calm brows and gently positive closed mouth. RIGHT cell: the identical bust at identical scale, pose, eye line and costume, with a distinctly CONCERNED expression: small downward frown, raised inner brows and visible worry lines. Concern must be readable at thumbnail size without anger or caricature. Both entire heads including hair and ears inside the cell. Head top around y100, eyes around y360, upper torso extends to bottom y1024. Each figure centered in its own cell, generous transparent margin, no crossing the x768 boundary. Remove all official insignia. These are two expressions of the same person, not two different people. Preserve clean antialiased alpha edges and opaque clothing.",
+    "refs": [
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/character-sheets-v003/sheets/fno_sheet_mara-voss_v002.png"
+    ],
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-1db5f391-f3f3-4f0c-b951-d3eb6b7a210e.png"
+  },
+  {
+    "id": "recovery",
+    "prompt": "Create a game-ready transparent portrait atlas from this approved character sheet. Preserve this exact character's face identity, age, hair, costume, face orientation, ink linework and muted comic-book-realism style. NO redesign, logos, text, letters, frames or paper. Output a true RGBA transparent background, NOT a checkerboard painted into the image. Landscape 1536x1024 canvas split into two equal invisible 768x1024 cells. LEFT cell: one head-and-upper-torso bust, relaxed NEUTRAL expression, calm brows and gently positive closed mouth. RIGHT cell: the identical bust at identical scale, pose, eye line and costume, with a distinctly CONCERNED expression: small downward frown, raised inner brows and visible worry lines. Concern must be readable at thumbnail size without anger or caricature. Both entire heads including hair and ears inside the cell. Head top around y100, eyes around y360, upper torso extends to bottom y1024. Each figure centered in its own cell, generous transparent margin, no crossing the x768 boundary. Remove all official insignia. These are two expressions of the same person, not two different people. Preserve clean antialiased alpha edges and opaque clothing.",
+    "refs": [
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/character-sheets-v003/sheets/fno_sheet_elias-reed_v002.png"
+    ],
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-9b10ad53-ea49-457a-a6cb-550d5a5a24d9.png"
+  },
+  {
+    "id": "layer-docked",
+    "prompt": "Create an isolated game sprite of the DOCKED Gemini VIII and Agena target vehicle, matching the approved equipment sheet geometry and the control-room reference's comic-book ink / restrained color style. Landscape 1920x1080. Single connected assembly side-on, gently diagonally rising from lower left to upper right, fully inside canvas with generous margins. Gemini white adapter at left, black ribbed crew cabin tapering rightward to its nose, nose joined to Agena's docking collar, long narrow metallic Agena to right. Sunlight highlights top edges, deep cool undersides. No Earth, stars, floor, shadow on background, labels, NASA marks, frame, exhaust or debris. Render the background as perfectly uniform pure magenta #FF00FF for clean production alpha export; no magenta anywhere on the vehicle. The vehicle must be opaque and sharply silhouetted.",
+    "refs": [
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/equipment-sheets-v001/sheets/fno_equipment_gemini-agena-docked_v001.png",
+      "C:/Users/wolfe/Documents/Claude_GPT_Shared_Workflow/Failure-is-Not-an-Option/art/title-hero-v003/assets/room.png"
+    ],
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-f817b1d4-7ee1-4caf-baa1-e400da76a4b5.png"
+  },
+  {
+    "id": "layer-haze",
+    "prompt": "Create a standalone atmospheric overlay texture for a hand-illustrated 2D cinematic game. Landscape 1920x1080. A very subtle broad wispy soft white/gray mist ribbon, flowing diagonally from bottom left to middle right, entirely on pure black. Most pixels black, mist brightest softly in the middle but never a solid white mass. Fine soft edges, no gritty noise, no objects, no horizon, no letters, no frame. This grayscale image will be exported with luminance as alpha to become a transparent mist/light overlay. All four outer edges must fade to pure black.",
+    "refs": null,
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-1e9f7b28-abeb-401f-bb63-5962ee9256c9.png"
+  }
+]

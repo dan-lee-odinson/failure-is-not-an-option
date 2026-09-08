@@ -143,6 +143,95 @@
         }
       },
       "additionalProperties": false
+    },
+    "prologue": {
+      "type": "object",
+      "properties": {
+        "plates": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/prologue_plate"
+          }
+        },
+        "scenario_card": {
+          "$ref": "#/$defs/scenario_card"
+        },
+        "history_note": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "history_sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^H[0-9]+$"
+          }
+        },
+        "interpretation": {
+          "$ref": "defs.schema.json#/$defs/text"
+        }
+      },
+      "required": [
+        "plates",
+        "scenario_card",
+        "history_note",
+        "history_sources",
+        "interpretation"
+      ],
+      "additionalProperties": false
+    },
+    "resolution_presentation": {
+      "type": "object",
+      "properties": {
+        "heading": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "relationships_heading": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "trust_up": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "trust_down": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "tiers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "enum": [
+                  "SUCCESS",
+                  "MIXED",
+                  "COSTLY",
+                  "FAILURE",
+                  "LOSS"
+                ]
+              },
+              "meaning": {
+                "$ref": "defs.schema.json#/$defs/text"
+              }
+            },
+            "required": [
+              "id",
+              "meaning"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "heading",
+        "relationships_heading",
+        "trust_up",
+        "trust_down",
+        "tiers"
+      ],
+      "additionalProperties": false
     }
   },
   "additionalProperties": false,
@@ -273,6 +362,26 @@
         },
         "continue": {
           "$ref": "defs.schema.json#/$defs/continue"
+        },
+        "participants": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "defs.schema.json#/$defs/id"
+              },
+              "label": {
+                "$ref": "defs.schema.json#/$defs/text"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "additionalProperties": false
@@ -419,6 +528,26 @@
         },
         "historical_option": {
           "$ref": "defs.schema.json#/$defs/id"
+        },
+        "participants": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "defs.schema.json#/$defs/id"
+              },
+              "label": {
+                "$ref": "defs.schema.json#/$defs/text"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "additionalProperties": false
@@ -539,6 +668,21 @@
         },
         "requires": {
           "$ref": "defs.schema.json#/$defs/condition"
+        },
+        "tier": {
+          "enum": [
+            "SUCCESS",
+            "MIXED",
+            "COSTLY",
+            "FAILURE",
+            "LOSS"
+          ]
+        },
+        "result_line": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "plate": {
+          "$ref": "defs.schema.json#/$defs/id"
         }
       },
       "additionalProperties": false
@@ -569,6 +713,204 @@
           "$ref": "defs.schema.json#/$defs/provenance"
         }
       },
+      "additionalProperties": false
+    },
+    "moving_element": {
+      "type": "object",
+      "properties": {
+        "asset": {
+          "$ref": "defs.schema.json#/$defs/id"
+        },
+        "placement": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "width": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "height": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "opacity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "x",
+            "y",
+            "width",
+            "height",
+            "opacity"
+          ],
+          "additionalProperties": false
+        },
+        "motion": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "drift",
+                "rise",
+                "pan"
+              ]
+            },
+            "direction": {
+              "enum": [
+                "left",
+                "right",
+                "up",
+                "down"
+              ]
+            },
+            "seconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "from": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "x",
+                "y"
+              ],
+              "additionalProperties": false
+            },
+            "to": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "x",
+                "y"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "direction",
+            "seconds",
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "asset",
+        "placement",
+        "motion"
+      ],
+      "additionalProperties": false
+    },
+    "prologue_plate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "defs.schema.json#/$defs/id"
+        },
+        "title": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "background": {
+          "$ref": "defs.schema.json#/$defs/id"
+        },
+        "moving_element": {
+          "$ref": "#/$defs/moving_element"
+        },
+        "caption": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^H[0-9]+$"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "background",
+        "moving_element",
+        "caption",
+        "sources"
+      ],
+      "additionalProperties": false
+    },
+    "scenario_card": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "defs.schema.json#/$defs/id"
+        },
+        "background": {
+          "$ref": "defs.schema.json#/$defs/id"
+        },
+        "facility": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "date": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "mission": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "scenario": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "context": {
+          "$ref": "defs.schema.json#/$defs/text"
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^H[0-9]+$"
+          }
+        },
+        "moving_element": {
+          "$ref": "#/$defs/moving_element"
+        }
+      },
+      "required": [
+        "id",
+        "background",
+        "facility",
+        "date",
+        "mission",
+        "scenario",
+        "context",
+        "sources",
+        "moving_element"
+      ],
       "additionalProperties": false
     }
   }

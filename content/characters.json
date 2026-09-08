@@ -1,5 +1,5 @@
 {
-  "content_version": "0.5.1",
+  "content_version": "0.5.2",
   "characters": [
     {
       "id": "glen-kurtz",
@@ -17,15 +17,19 @@
       "role": "Command Pilot",
       "display": "Neil Armstrong — Command Pilot",
       "kind": "historical",
-      "portrait": null,
-      "portrayal": "Historical person; fictional relationship toward Glen. Text only. No dialogue is attributed to him in this content.",
+      "portrait": "portrait-armstrong-neutral",
+      "portrayal": "Historical person; fictional relationship toward Glen. No dialogue is attributed to him in this content. Portrait expressions represent authored relationship feedback, not documentary evidence of an emotion.",
       "dramatization": true,
       "sources": [
         "H1",
         "H2",
         "H4",
         "H5"
-      ]
+      ],
+      "portraits": {
+        "neutral": "portrait-armstrong-neutral",
+        "concerned": "portrait-armstrong-concerned"
+      }
     },
     {
       "id": "scott",
@@ -33,15 +37,19 @@
       "role": "Pilot",
       "display": "David Scott — Pilot",
       "kind": "historical",
-      "portrait": null,
-      "portrayal": "Historical person; fictional relationship toward Glen. Text only. No dialogue is attributed to him in this content.",
+      "portrait": "portrait-scott-neutral",
+      "portrayal": "Historical person; fictional relationship toward Glen. No dialogue is attributed to him in this content. Portrait expressions represent authored relationship feedback, not documentary evidence of an emotion.",
       "dramatization": true,
       "sources": [
         "H1",
         "H2",
         "H4",
         "H5"
-      ]
+      ],
+      "portraits": {
+        "neutral": "portrait-scott-neutral",
+        "concerned": "portrait-scott-concerned"
+      }
     },
     {
       "id": "cunningham",
@@ -49,12 +57,16 @@
       "role": "Astronaut",
       "display": "Walt Cunningham — Astronaut",
       "kind": "historical",
-      "portrait": null,
-      "portrayal": "Historical criticism attributed to H5; fictional relationship toward Glen. Text only. His reported position is summarized in the context card, never quoted verbatim.",
+      "portrait": "portrait-cunningham-neutral",
+      "portrayal": "Historical criticism attributed to H5; fictional relationship toward Glen. His reported position is summarized in the context card, never quoted verbatim. Portrait expressions represent authored relationship feedback, not documentary evidence of an emotion.",
       "dramatization": true,
       "sources": [
         "H5"
-      ]
+      ],
+      "portraits": {
+        "neutral": "portrait-cunningham-neutral",
+        "concerned": "portrait-cunningham-concerned"
+      }
     },
     {
       "id": "stafford",
@@ -62,12 +74,16 @@
       "role": "Astronaut",
       "display": "Tom Stafford — Astronaut",
       "kind": "historical",
-      "portrait": null,
-      "portrayal": "Historical criticism attributed to H5; fictional relationship toward Glen. Text only. His reported position is summarized in the context card, never quoted verbatim.",
+      "portrait": "portrait-stafford-neutral",
+      "portrayal": "Historical criticism attributed to H5; fictional relationship toward Glen. His reported position is summarized in the context card, never quoted verbatim. Portrait expressions represent authored relationship feedback, not documentary evidence of an emotion.",
       "dramatization": true,
       "sources": [
         "H5"
-      ]
+      ],
+      "portraits": {
+        "neutral": "portrait-stafford-neutral",
+        "concerned": "portrait-stafford-concerned"
+      }
     },
     {
       "id": "g8-capcom",
@@ -89,7 +105,11 @@
       "manner": "cautious",
       "portrait": "portrait-systems",
       "portrayal": "Original fictional controller; cautious. Reuses the SYSTEMS portrait slot. Neither represents an actual historical console operator (F8).",
-      "dramatization": true
+      "dramatization": true,
+      "portraits": {
+        "neutral": "portrait-systems-neutral",
+        "concerned": "portrait-systems-concerned"
+      }
     },
     {
       "id": "g8-flight-dynamics",
@@ -111,7 +131,11 @@
       "manner": "challenging",
       "portrait": "portrait-recovery",
       "portrayal": "Original fictional controller; challenging. Reuses the RECOVERY portrait slot. Neither represents an actual historical console operator (F8).",
-      "dramatization": true
+      "dramatization": true,
+      "portraits": {
+        "neutral": "portrait-recovery-neutral",
+        "concerned": "portrait-recovery-concerned"
+      }
     }
   ]
 }

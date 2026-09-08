@@ -1,5 +1,6 @@
 /**
- * AC-12 — Presentation and access, plus the M00b screenshot set (handoff §7.1):
+ * AC-12 — Presentation and access, plus the M00b screenshot set (handoff §7.1) as carried through M00c and M01
+ * (a new campaign now passes through the prologue; the outcome record leads to the resolution cards):
  * the opening (each chapter), the hero title, the menu with CONTINUE disabled
  * and enabled, prep cards at rest / chosen / unavailable, loss of contact,
  * crisis, the return decision (Details open, both lamp states), an execution
@@ -10,101 +11,11 @@
  * artifacts/contrast.json. Drives the real UI by clicking; nothing here
  * reaches into the engine.
  */
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { assertGlenUncovered, assertKitContrast, assertManifestImagesOnly, assertRoomVisible, assertTextContrast, kitFaceTable, TEXT_SAMPLES, type ContrastResult, type KitContrast } from './room';
-
-const HERE = fileURLToPath(new URL('.', import.meta.url));
-// Outside Playwright's outputDir, which is cleaned on every run.
-const ARTIFACTS = resolve(HERE, '..', '..', 'artifacts');
-const SHOTS = resolve(ARTIFACTS, 'screenshots');
-const VIEWPORTS = [{ name: '1920x1080', width: 1920, height: 1080 }, { name: '1366x768', width: 1366, height: 768 }];
-const TEXT = ['default', 'large'] as const;
-type TextSize = (typeof TEXT)[number];
-
-const contrastLog: Record<string, { text: ContrastResult[]; kit: KitContrast[] }> = {};
-function flushContrast(): void {
-  mkdirSync(ARTIFACTS, { recursive: true });
-  writeFileSync(resolve(ARTIFACTS, 'contrast.json'), JSON.stringify(contrastLog, null, 1));
-}
-
-async function click(page: Page, testId: string): Promise<void> {
-  await page.getByTestId(testId).click();
-}
-
-async function node(page: Page): Promise<string> {
-  return (await page.getByTestId('screen-console').getAttribute('data-node')) ?? '';
-}
-
-async function stage(page: Page): Promise<string> {
-  return (await page.getByTestId('screen-opening').getAttribute('data-stage')) ?? '';
-}
-
-async function assertNoHorizontalOverflow(page: Page): Promise<void> {
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
-  expect(overflow, 'page must not scroll horizontally').toBe(false);
-}
-
-async function assertVisibleWithinViewport(page: Page, testId: string): Promise<void> {
-  const el = page.getByTestId(testId);
-  await expect(el).toBeVisible();
-  const box = await el.boundingBox();
-  const vw = page.viewportSize()!.width;
-  expect(box, testId).not.toBeNull();
-  expect(box!.x).toBeGreaterThanOrEqual(0);
-  expect(box!.x + box!.width).toBeLessThanOrEqual(vw + 1);
-}
-
-function shotPath(vp: string, text: string, name: string): string {
-  const dir = resolve(SHOTS, `${vp}-${text}`);
-  mkdirSync(dir, { recursive: true });
-  return resolve(dir, `${name}.png`);
-}
-
-/** Screenshot plus, wherever the room is on screen, the M00a/M00b room checks; kit contrast is checked on every screen. */
-async function shot(page: Page, vp: string, text: string, name: string): Promise<void> {
-  const key = `${vp}-${text}/${name}`;
-  if (await page.getByTestId('plate').count()) {
-    contrastLog[key] = await assertRoomVisible(page);
-  } else {
-    const kit = await assertKitContrast(page);
-    const measured = await assertTextContrast(page, TEXT_SAMPLES).catch(() => [] as ContrastResult[]);
-    contrastLog[key] = { text: measured, kit };
-  }
-  await assertNoHorizontalOverflow(page);
-  await page.screenshot({ path: shotPath(vp, text, name), fullPage: false });
-  flushContrast();
-}
-
-/** A fresh browser: cleared storage; `seen` marks the opening as already viewed so the app opens on the menu. */
-async function fresh(page: Page, seen: boolean): Promise<void> {
-  await page.goto('/');
-  await page.evaluate((s) => { try { localStorage.clear(); if (s) localStorage.setItem('fno.openingSeen', '1'); } catch { /* ignore */ } }, seen);
-  await page.reload();
-  await expect(page.getByTestId('screen-opening')).toBeVisible();
-}
-
-async function toMenu(page: Page): Promise<void> {
-  if ((await stage(page)) !== 'menu') await click(page, 'skip-to-menu');
-  await expect(page.getByTestId('menu')).toBeVisible();
-}
-
-async function setText(page: Page, text: TextSize): Promise<void> {
-  const current = await page.getByTestId('text-size').textContent();
-  if (text === 'large' && !/ENLARGED/.test(current ?? '')) await click(page, 'text-size');
-  if (text === 'default' && /ENLARGED/.test(current ?? '')) await click(page, 'text-size');
-}
-
-/** Menu → new campaign at the requested text size. */
-async function start(page: Page, text: TextSize): Promise<void> {
-  await fresh(page, true);
-  await toMenu(page);
-  await setText(page, text);
-  await click(page, 'start-new');
-  await expect(page.getByTestId('screen-console')).toBeVisible();
-}
+import { assertGlenUncovered, assertManifestImagesOnly, kitFaceTable } from './room';
+import { ARTIFACTS, TEXT, VIEWPORTS, assertNoHorizontalOverflow, assertParticipants, assertVisibleWithinViewport, awaitRoom, click, fresh, node, setText, shot, skipPrologue, stage, start, toMenu } from './helpers';
 
 // ---------------------------------------------------------------------------
 // Opening, menu, About
@@ -183,9 +94,9 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     await shot(page, vp.name, text, '05-about-credits');
     await click(page, 'close-overlay');
 
-    // A valid save enables CONTINUE on the next launch.
+    // A valid save enables CONTINUE on the next launch. NEW CAMPAIGN runs the prologue first (M01); CONTINUE resumes a run without it.
     await click(page, 'start-new');
-    await expect(page.getByTestId('screen-console')).toBeVisible();
+    await skipPrologue(page);
     await click(page, 'continue-g8-brief-continue');
     await click(page, 'open-saveload');
     await click(page, 'save-browser');
@@ -197,6 +108,7 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     await shot(page, vp.name, text, '06-menu-continue-enabled');
     await click(page, 'start-load');
     await expect(page.getByTestId('screen-console')).toBeVisible();
+    await expect(page.getByTestId('screen-prologue')).toHaveCount(0);
     expect(await node(page)).toBe('g8-prep-select');
   });
 }
@@ -337,11 +249,14 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     await expect(page.getByTestId('applied')).toContainText('trust');
     await click(page, 'continue-g8-relationship-response-continue');
     await click(page, 'option-g8-adopt-provenance');
-    // Post-flight: the earlier route keeps ALTERNATE HISTORY over the historical stance.
+    // Post-flight: the earlier route keeps ALTERNATE HISTORY over the historical stance; the four astronauts are present as portrait and label (M01).
     expect(await node(page)).toBe('g8-accountability-brief');
     await expect(page.getByTestId('evidence-g8-ev-postflight-context')).toBeVisible();
+    await assertParticipants(page);
+    await shot(page, v, text, '19a-accountability-brief-participants');
     await click(page, 'continue-g8-accountability-brief-continue');
     expect(await node(page)).toBe('g8-accountability-decision');
+    await assertParticipants(page);
     await expect(page.getByTestId('badge-alt-history')).toBeVisible();
     await expect(page.getByTestId('badge-historical-choice')).toHaveCount(0);
     await shot(page, v, text, '19-postflight-decision');
@@ -351,8 +266,12 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     await click(page, 'continue-g8-resolve-accountability');
     await expect(page.getByTestId('event-text')).toBeVisible();
     await click(page, 'continue-g8-finish');
+    // The resolution cards come first (M01); their own cases cover them. Skip to the debrief here.
+    await expect(page.getByTestId('screen-resolution')).toHaveAttribute('data-card', 'result');
+    await click(page, 'resolution-skip');
     // Debrief
     await expect(page.getByTestId('screen-debrief')).toBeVisible();
+    await expect(page.getByTestId('to-resolution')).toBeVisible();
     await expect(page.getByTestId('outcome-title')).toContainText('Crew recovered');
     await expect(page.getByTestId('badge-alt-history')).toBeVisible();
     await expect(page.getByTestId('departures-from-record')).toBeVisible();
@@ -425,6 +344,9 @@ for (const vp of VIEWPORTS) {
     await click(page, 'option-g8-back-crew-criticism');
     await click(page, 'continue-g8-resolve-accountability');
     await click(page, 'continue-g8-finish');
+    await expect(page.getByTestId('screen-resolution')).toBeVisible();
+    await expect(page.getByTestId('badge-alt-history')).toHaveCount(0); // the card keeps the lamp's state: none on the later route
+    await click(page, 'resolution-skip');
     await expect(page.getByTestId('screen-debrief')).toBeVisible();
     await expect(page.getByTestId('badge-alt-history')).toHaveCount(0);
     await expect(page.getByTestId('departures-from-record')).toContainText('as history did');
@@ -459,7 +381,19 @@ test('keyboard reaches every stage of the opening, the menu, every card and lamp
   await expect(page.getByTestId('menu-about')).toBeFocused();
   await page.getByTestId('start-new').focus();
   await page.keyboard.press('Enter');
-  await expect(page.getByTestId('screen-console')).toBeVisible();
+  // The prologue from the keyboard (M01): Continue is focused on every plate; Enter walks the five beats and the scenario card into the room.
+  await expect(page.getByTestId('screen-prologue')).toBeVisible();
+  await expect(page.getByTestId('prologue-next')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.getByTestId('prologue-skip')).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
+  for (let i = 1; i <= 5; i++) {
+    await page.keyboard.press('Enter');
+    await expect(page.getByTestId('screen-prologue')).toHaveAttribute('data-index', String(i));
+  }
+  await expect(page.getByTestId('prologue-enter')).toBeFocused();
+  await page.keyboard.press('Enter');
+  await awaitRoom(page);
   // Tab from the top reaches the Continue key and reveals focus.
   let reached = false;
   for (let i = 0; i < 40; i++) {
@@ -536,7 +470,20 @@ test('reduced motion: static chapters with Continue, immediate cuts, no animatio
   expect(await stage(page)).toBe('menu');
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
   await click(page, 'start-new');
+  // The prologue under reduced motion (M01): the static from composition, no animation, cuts between plates; Skip → the card → a cut into the room.
+  await expect(page.getByTestId('screen-prologue')).toHaveAttribute('data-index', '0');
+  expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+  expect(await page.getByTestId('prologue-layer').evaluate((el) => getComputedStyle(el).transform)).toBe('none');
+  await click(page, 'prologue-next');
+  await expect(page.getByTestId('screen-prologue')).toHaveAttribute('data-index', '1');
+  await expect(page.locator('.pl-prev')).toHaveCount(0);
+  expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+  await click(page, 'prologue-skip');
+  await expect(page.getByTestId('screen-prologue')).toHaveAttribute('data-card', 'scenario');
+  await click(page, 'prologue-enter');
   await expect(page.getByTestId('screen-console')).toBeVisible();
+  await expect(page.getByTestId('room-dissolve')).toHaveCount(0); // a cut, never a dissolve
+  await awaitRoom(page);
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
 });
 
@@ -638,6 +585,7 @@ test('idle help: after 30 s the continuation key is highlighted; any input clear
   await page.clock.pauseAt(Date.now() + 1000);
   await toMenu(page);
   await click(page, 'start-new');
+  await skipPrologue(page, true);
   expect(await node(page)).toBe('g8-brief');
   const key = page.getByTestId('continue-g8-brief-continue');
   await page.clock.runFor(29_000);
@@ -684,6 +632,7 @@ test('idle help is absent under reduced motion', async ({ page }) => {
   await page.clock.pauseAt(Date.now() + 1000);
   await toMenu(page);
   await click(page, 'start-new');
+  await skipPrologue(page, true);
   await page.clock.runFor(31_000);
   await expect(page.locator('.idle-hint')).toHaveCount(0);
   expect(await page.evaluate(() => window.__fno!.idle())).toBe(false);
@@ -700,6 +649,8 @@ test('audio is silent until Begin, on after Begin, a persisted off stays off, an
   await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'true');
   await click(page, 'skip-to-menu');
   await click(page, 'start-new');
+  expect(await page.locator('audio, video').count()).toBe(0); // the prologue's music is Web Audio too
+  await skipPrologue(page);
   await click(page, 'continue-g8-brief-continue');
   await click(page, 'option-g8-prep-recovery');
   const before = await page.evaluate(() => JSON.stringify(window.__fno!.store.run!.log));

@@ -301,6 +301,113 @@ html[data-text="large"] .op-prose { font-size: clamp(24px, 14px + 0.85vw, 30px);
   .stage-menu .hero-title { transform: translate(-50%, -62%) scale(0.75); transform-origin: 50% 50%; }
 }
 
+/* ---------- full-screen plates (M01): the prologue and the resolution cards ---------- */
+
+/* A 1920×1080 design frame, letterboxed and centred; --unit is one design pixel, so layer offsets scale with the frame. */
+.screen-plate {
+  position: fixed;
+  inset: 0;
+  background: var(--dark);
+  color: var(--hero-ink);
+  overflow: hidden;
+}
+.pl-frame {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: min(100vw, 177.7778vh);
+  height: min(100vh, 56.25vw);
+  transform: translate(-50%, -50%);
+  --unit: calc(min(100vw, 177.7778vh) / 1920);
+  overflow: hidden; /* layers are clipped to the frame */
+}
+.pl-scene { position: absolute; inset: 0; }
+.pl-bg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pl-layer { position: absolute; display: block; pointer-events: none; user-select: none; will-change: transform; }
+.pl-current.pl-fade-in, .pl-text.pl-fade-in { animation: op-fade-in 0.45s ease both; } /* the previous plate stays beneath: a crossfade; the caption comes with the new plate */
+/* The left text area (design x 96–780, y 170–780): live text over a dark backdrop that feathers into the plate; the artwork's highlights stay to the right. */
+.pl-text {
+  position: absolute;
+  left: 5%; top: 15.74%;
+  width: 35.6%; height: 56.5%;
+  display: flex; flex-direction: column; justify-content: flex-start;
+  pointer-events: none;
+}
+.pl-copy {
+  pointer-events: auto;
+  max-height: 100%;
+  overflow: auto;
+  scrollbar-width: thin;
+  padding: 1.1rem 1.35rem 1.25rem;
+  background-color: rgba(3, 12, 16, 0.84);
+  box-shadow: 0 0 56px 36px rgba(3, 12, 16, 0.84);
+  border-radius: 2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.pl-heading {
+  margin: 0 0 0.45em;
+  font: 700 clamp(1.5rem, calc(60 * var(--unit)), 4rem)/1.08 var(--font-hero);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--hero-ink);
+}
+.pl-caption { margin: 0; font-size: 1.1rem; line-height: 1.5; max-width: 42ch; }
+.pl-facility { font: 700 1rem/1.2 var(--font-control); letter-spacing: 0.14em; text-transform: uppercase; color: #cdd9d4; }
+.pl-date { margin: 0.35rem 0 0.9rem; font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0.08em; color: var(--green); }
+.pl-mission { margin: 0 0 0.5em; font: 700 clamp(1.5rem, calc(64 * var(--unit)), 4.2rem)/1.08 var(--font-hero); letter-spacing: 0.03em; text-transform: uppercase; color: var(--hero-ink); }
+.pl-context { margin: 0; font-size: 1.1rem; font-style: italic; color: #cdd9d4; }
+.pl-controls { z-index: 3; }
+
+/* Resolution cards: the plate under the hero-style overlay (stronger on the relationships card). */
+.res-overlay { position: absolute; inset: 0; background: rgba(4, 21, 26, 0.7); }
+.res-overlay.strong { background: rgba(4, 21, 26, 0.82); }
+.res-head { position: absolute; left: 5%; top: 3.5%; }
+.res-copy {
+  position: absolute;
+  left: 5%; top: 12%;
+  width: 60%;
+  max-height: 72%;
+  overflow: auto;
+  scrollbar-width: thin;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.res-copy.relationships { width: 90%; }
+.res-heading { font: 700 1.1rem/1.2 var(--font-control); letter-spacing: 0.16em; text-transform: uppercase; color: #cdd9d4; }
+.res-tier { margin: 0.05em 0 0.1em -0.03em; font: 700 calc(240.594 * var(--unit))/1 var(--font-hero); letter-spacing: calc(4 * var(--unit)); color: var(--hero-ink); }
+.res-title { font-size: 1.45rem; font-weight: 600; margin: 0 0 0.35em; max-width: 44ch; }
+.res-line { margin: 0; font-size: 1.15rem; line-height: 1.5; max-width: 62ch; }
+.res-people { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 1rem; }
+.res-person {
+  flex: 0 1 calc((100% - 5rem) / 6);
+  min-width: 9rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+  padding: 0.7rem 0.6rem 0.8rem;
+  background-color: rgba(3, 12, 16, 0.7);
+  border-radius: 2px;
+  text-align: center;
+}
+.res-person img { height: clamp(120px, 22vh, 240px); width: auto; aspect-ratio: 3 / 4; object-fit: contain; filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6)); }
+.res-person .portrait.empty { height: clamp(120px, 22vh, 240px); aspect-ratio: 3 / 4; display: grid; place-items: center; color: var(--muted); font-size: 0.75rem; background: var(--charcoal-3); }
+.res-name { font-weight: 600; font-size: 1.05rem; }
+.res-change { font-family: var(--font-mono); font-size: 0.9rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--hero-ink); }
+.res-change.up { color: var(--green); }
+@media (max-width: 1500px) {
+  .res-person { flex-basis: calc((100% - 2rem) / 3); } /* two rows of three */
+  .res-person img, .res-person .portrait.empty { height: clamp(110px, 18vh, 180px); }
+}
+html[data-text="large"] .res-person { flex-basis: calc((100% - 2rem) / 3); }
+html[data-text="large"] .res-copy.relationships { top: 10%; }
+
+/* The scenario card dissolving into the room: a non-interactive copy of its plate fading out over the first console screen. */
+@keyframes op-fade-out { from { opacity: 1; } to { opacity: 0; } }
+.room-dissolve {
+  position: fixed; inset: 0;
+  z-index: 9;
+  background: var(--dark);
+  pointer-events: none;
+  animation: op-fade-out 0.7s ease both;
+}
+.room-dissolve img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+
 /* ---------- console layout ---------- */
 
 /* The room layer: the plate and the emblem, one composite beneath every panel, card region and status bar. */
@@ -467,6 +574,26 @@ html[data-text="large"] .op-prose { font-size: clamp(24px, 14px + 0.85vw, 30px);
 .line.no-speaker { grid-template-columns: minmax(0, 1fr); border-left: 3px solid var(--green-dim); }
 .line .who { font-family: var(--font-control); font-weight: 700; font-size: 0.9rem; color: var(--green); letter-spacing: 0.08em; text-transform: uppercase; }
 .line .what { margin-top: 0.15rem; }
+/* Real people present at a scene: portrait and label, the way the controllers appear, and nothing that reads as speech. */
+.participants { display: flex; flex-wrap: wrap; gap: 0.8rem; max-width: 100%; }
+.participant {
+  margin: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+  width: 8.5rem;
+  padding: 0.6rem 0.5rem;
+  background: rgba(5, 23, 27, 0.45);
+}
+.participant .portrait { width: 96px; height: 128px; object-fit: cover; background: var(--charcoal-3); }
+@media (max-width: 1500px) {
+  .participant { width: 7.5rem; padding: 0.5rem 0.4rem; }
+  .participant .portrait { width: 84px; height: 112px; }
+  /* Enlarged text on the narrow panel: four tiles still fit one row, so all four faces are in view at once. */
+  html[data-text="large"] .participants { gap: 0.5rem; }
+  html[data-text="large"] .participant { width: 6.3rem; padding: 0.4rem 0.25rem; }
+  html[data-text="large"] .participant .who { font-size: 0.72rem; }
+}
+.participant .portrait.empty { display: grid; place-items: center; color: var(--muted); font-size: 0.7rem; text-align: center; }
+.participant .who { font-family: var(--font-control); font-weight: 700; font-size: 0.8rem; color: var(--green); letter-spacing: 0.06em; text-transform: uppercase; text-align: center; }
 .questions { display: flex; flex-direction: column; gap: 0.5rem; max-width: min(62ch, 100%); }
 .questions .answer { margin-left: 1rem; }
 .report {

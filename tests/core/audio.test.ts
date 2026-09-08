@@ -29,7 +29,7 @@ const sfx = soundscapeMap as SoundscapeMap & { crisis_cards: string[]; generated
 /** Every id a cue may trigger on or stop on. */
 function knownSignals(): Set<string> {
   const out = new Set<string>(['start-new', 'start-load', 'skip-to-menu']);
-  for (const screen of ['console', 'debrief', 'planning'] as Screen[]) out.add(screenId({ screen, stage: 'start' }));
+  for (const screen of ['prologue', 'console', 'resolution', 'debrief', 'planning'] as Screen[]) out.add(screenId({ screen, stage: 'start' }));
   for (const stage of STAGES) out.add(screenId({ screen: 'opening', stage: stage as Stage }));
   for (const id of content().nodes.keys()) out.add(`node:${id}`);
   for (const id of content().options.keys()) out.add(`choose:${id}`);
@@ -87,6 +87,28 @@ describe('music map', () => {
     const opening = music.cues.find((c) => c.id === 'opening')!;
     expect(opening.end).toBe(42);
     expect(opening.extend_to_seam_if_still_reading).toBe(124);
+  });
+
+  it('M01: Orbit of Hope runs under the prologue from 0:00 once, the menu loop fades over 1 s on New Campaign, and the room stops the cue', () => {
+    const prologue = music.cues.find((c) => c.id === 'prologue')!;
+    expect(prologue.asset).toBe('audio-orbit-of-hope');
+    expect(prologue.trigger).toBe(screenId({ screen: 'prologue', stage: 'start' }));
+    expect(prologue.start).toBe(0);
+    expect(prologue.end).toBeNull();
+    expect(prologue.loop).toBeNull();
+    expect(prologue.fade_in).toBe(1);
+    expect(prologue.stop_on).toEqual(expect.arrayContaining(['screen:console', 'screen:menu', 'screen:opening-start']));
+    expect(prologue.stop_on).not.toContain('screen:prologue');
+    const menu = music.cues.find((c) => c.id === 'menu-loop')!;
+    expect(menu.stop_on).toContain('start-new');
+    expect(menu.stop_fade).toEqual({ 'start-new': 1.0 });
+    expect(menu.fade_out).toBe(2); // Dan's 2 s stands for Continue
+    for (const c of music.cues) for (const [sig, fade] of Object.entries(c.stop_fade ?? {})) { expect(c.stop_on).toContain(sig); expect(fade).toBeGreaterThan(0); }
+    // No cue triggers on the resolution cards: Per Aspera keeps running from the post-flight brief (treatment 28 §6).
+    expect(music.cues.some((c) => c.trigger === 'screen:resolution')).toBe(false);
+    const post = music.cues.find((c) => c.id === 'postflight')!;
+    expect(post.stop_on).not.toContain('screen:resolution');
+    expect(post.stop_on).not.toContain('screen:debrief');
   });
 });
 

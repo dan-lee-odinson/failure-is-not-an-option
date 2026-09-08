@@ -1,0 +1,190 @@
+[
+  {
+    "id": "portrait-armstrong-neutral",
+    "filename": "fno_gemini_portrait_armstrong_neutral_v001.png",
+    "width": 768,
+    "height": 1024,
+    "alpha": true,
+    "source": "armstrong",
+    "cleared": 357071
+  },
+  {
+    "id": "portrait-armstrong-concerned",
+    "filename": "fno_gemini_portrait_armstrong_concerned_v001.png",
+    "width": 768,
+    "height": 1024,
+    "alpha": true,
+    "source": "armstrong",
+    "cleared": 366949
+  },
+  {
+    "id": "portrait-scott-neutral",
+    "filename": "fno_gemini_portrait_scott_neutral_v001.png",
+    "width": 768,
+    "height": 1024,
+    "alpha": true,
+    "source": "scott",
+    "cleared": 317293
+  },
+  {
+    "id": "portrait-scott-concerned",
+    "filename": "fno_gemini_portrait_scott_concerned_v001.png",
+    "width": 768,
+    "height": 1024,
+    "alpha": true,
+    "source": "scott",
+    "cleared": 323738
+  },
+  {
+    "id": "portrait-cunningham-neutral",
+    "filename": "fno_gemini_portrait_cunningham_neutral_v001.png",
+    "width": 768,
+    "height": 1024,
+    "alpha": true,
+    "source": "cunningham",
+    "cleared": 426966
+  },
+  {
+    "id": "portrait-cunningham-concerned",
+    "filename": "fno_gemini_portrait_cunningham_concerned_v001.png",
+    "width": 768,
+    "height": 1024,
+    "alpha": true,
+    "source": "cunningham",
+    "cleared": 419367
+  },
+  {
+    "id": "portrait-stafford-neutral",
+    "filename": "fno_gemini_portrait_stafford_neutral_v001.png",
+    "width": 768,
+    "height": 1024,
+    "alpha": true,
+    "source": "stafford",
+    "cleared": 415218
+  },
+  {
+    "id": "portrait-stafford-concerned",
+    "filename": "fno_gemini_portrait_stafford_concerned_v001.png",
+    "width": 768,
+    "height": 1024,
+    "alpha": true,
+    "source": "stafford",
+    "cleared": 412866
+  },
+  {
+    "id": "g8-prologue-program",
+    "filename": "fno_gemini_prologue_program_plate_v001.png",
+    "width": 1920,
+    "height": 1080,
+    "alpha": false,
+    "source": "prologue-program"
+  },
+  {
+    "id": "g8-prologue-crew",
+    "filename": "fno_gemini_prologue_crew_plate_v001.png",
+    "width": 1920,
+    "height": 1080,
+    "alpha": false,
+    "source": "prologue-crew"
+  },
+  {
+    "id": "g8-prologue-launch",
+    "filename": "fno_gemini_prologue_launch_plate_v001.png",
+    "width": 1920,
+    "height": 1080,
+    "alpha": false,
+    "source": "prologue-launch"
+  },
+  {
+    "id": "g8-prologue-orbit",
+    "filename": "fno_gemini_prologue_orbit_plate_v001.png",
+    "width": 1920,
+    "height": 1080,
+    "alpha": false,
+    "source": "prologue-orbit"
+  },
+  {
+    "id": "g8-prologue-facility",
+    "filename": "fno_gemini_prologue_facility_plate_v001.png",
+    "width": 1920,
+    "height": 1080,
+    "alpha": false,
+    "source": "prologue-facility"
+  },
+  {
+    "id": "g8-resolution-success",
+    "filename": "fno_gemini_resolution_success_plate_v001.png",
+    "width": 1920,
+    "height": 1080,
+    "alpha": false,
+    "source": "resolution-success"
+  },
+  {
+    "id": "g8-resolution-mixed",
+    "filename": "fno_gemini_resolution_mixed_plate_v001.png",
+    "width": 1920,
+    "height": 1080,
+    "alpha": false,
+    "source": "resolution-mixed"
+  },
+  {
+    "id": "g8-resolution-costly",
+    "filename": "fno_gemini_resolution_costly_plate_v001.png",
+    "width": 1920,
+    "height": 1080,
+    "alpha": false,
+    "source": "resolution-costly"
+  },
+  {
+    "id": "portrait-systems-neutral",
+    "filename": "fno_gemini_portrait_systems_neutral_v001.png",
+    "width": 768,
+    "height": 1024,
+    "alpha": true,
+    "source": "systems",
+    "cleared": 312348
+  },
+  {
+    "id": "portrait-systems-concerned",
+    "filename": "fno_gemini_portrait_systems_concerned_v001.png",
+    "width": 768,
+    "height": 1024,
+    "alpha": true,
+    "source": "systems",
+    "cleared": 320513
+  },
+  {
+    "id": "portrait-recovery-neutral",
+    "filename": "fno_gemini_portrait_recovery_neutral_v001.png",
+    "width": 768,
+    "height": 1024,
+    "alpha": true,
+    "source": "recovery",
+    "cleared": 476042
+  },
+  {
+    "id": "portrait-recovery-concerned",
+    "filename": "fno_gemini_portrait_recovery_concerned_v001.png",
+    "width": 768,
+    "height": 1024,
+    "alpha": true,
+    "source": "recovery",
+    "cleared": 483466
+  },
+  {
+    "id": "g8-layer-docked",
+    "filename": "fno_gemini_layer_docked_plate_v001.png",
+    "width": 1920,
+    "height": 1080,
+    "alpha": true,
+    "source": "layer-docked"
+  },
+  {
+    "id": "g8-layer-haze",
+    "filename": "fno_gemini_layer_haze_plate_v001.png",
+    "width": 1920,
+    "height": 1080,
+    "alpha": true,
+    "source": "layer-haze"
+  }
+]

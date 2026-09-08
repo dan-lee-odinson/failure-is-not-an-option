@@ -14,9 +14,10 @@
  */
 import {
   alternateHistoryActive, describeCommittedDecision, describeDebrief, describeEvidence, describeFollowOnForRun, describeNode,
-  type EvidenceView, type LineView, type NodeView, type Option, type OptionView,
+  type EvidenceView, type LineView, type MovingElement, type NodeView, type Option, type OptionView, type Participant,
 } from '../core';
 import { assetEntry, assetUrl } from './assets';
+import { describeResolution } from './resolution';
 import { MODERN_UI_AVAILABLE } from './theme';
 import type { Store } from './ui-state';
 import musicMap from './music-map.json';
@@ -105,7 +106,9 @@ export function render(store: Store): string {
   let body: string;
   switch (ui.screen) {
     case 'opening': body = renderOpening(store); break;
+    case 'prologue': body = renderPrologue(store); break;
     case 'console': body = renderConsole(store); break;
+    case 'resolution': body = renderResolution(store); break;
     case 'debrief': body = renderDebrief(store); break;
     case 'planning': body = renderPlanning(store); break;
   }
@@ -225,7 +228,15 @@ function renderConsole(store: Store): string {
     </div>
     ${renderEvidencePanel(store, evidence)}
     ${renderStrip(store, view)}
+    ${store.ui.dissolve ? roomDissolve(store) : ''}
   </div>`;
+}
+
+/** The scenario card dissolving into the room (700 ms, presentation only): a non-interactive copy of its plate fading out over the first console screen. */
+function roomDissolve(store: Store): string {
+  const card = store.content.mission.prologue?.scenario_card;
+  const url = card ? assetUrl(card.background) : null;
+  return `<div class="room-dissolve" data-testid="room-dissolve" aria-hidden="true">${url ? `<img src="${url}" alt="" />` : ''}</div>`;
 }
 
 function lamps(store: Store, historical: boolean, alternate: boolean): string {
@@ -292,6 +303,10 @@ function renderConversation(store: Store, view: NodeView): string {
   if (view.node.header_label) head.push(`<div class="header-label" data-testid="header-label">${esc(view.node.header_label)}</div>`);
   if (view.node.text) parts.push(`<div class="narration" data-testid="narration">${esc(view.node.text)}</div>`);
   view.lines.forEach((l, i) => parts.push(renderLine(store, l, `${view.node.id}#${i + 1}`)));
+  // Real people present at the scene (content 0.5.2): portrait and name-and-role label, the way the controllers appear, with no line under them.
+  const current = store.content.nodes.get(view.node.id)?.node;
+  const participants = current && (current.type === 'briefing' || current.type === 'decision') ? current.participants ?? [] : [];
+  if (participants.length) parts.push(renderParticipants(store, participants));
   if (view.event_text) parts.push(`<div class="report" data-testid="event-text"><div class="label">${esc(view.node.header_label ?? 'Report')}</div>${esc(view.event_text)}</div>`);
   if (view.applied.length) {
     parts.push(`<div class="applied" data-testid="applied"><div class="label">Logged at this event</div><ul>${view.applied.map((a) => `<li>${esc(a.label)}</li>`).join('')}</ul></div>`);
@@ -312,6 +327,19 @@ function renderConversation(store: Store, view: NodeView): string {
     <div class="conv-body ${portrait ? 'with-portrait' : ''}">${portrait}<div class="conv-lines">${parts.join('')}</div></div>
     ${questions}
   </section>`;
+}
+
+/**
+ * Participants (direction 27 §1): headshot and name, yes; words only when citable. A figure per person with the
+ * character's console portrait (neutral) and the content's label as the caption; nothing that reads as speech.
+ */
+function renderParticipants(store: Store, list: Participant[]): string {
+  return `<div class="participants" data-testid="participants" role="group" aria-label="Present at this discussion">${list.map((p) => {
+    const c = store.content.characters.get(p.id);
+    const url = c ? assetUrl(c.portrait) : null;
+    const img = url ? `<img class="portrait" src="${url}" alt="Portrait: ${esc(c?.name ?? p.id)}" />` : '<div class="portrait empty" aria-hidden="true">text only</div>';
+    return `<figure class="participant" data-testid="participant-${esc(p.id)}" data-character="${esc(p.id)}">${img}<figcaption class="who">${esc(p.label)}</figcaption></figure>`;
+  }).join('')}</div>`;
 }
 
 function renderEvidencePanel(store: Store, evidence: EvidenceView[]): string {
@@ -469,9 +497,15 @@ function renderBinder(store: Store): string {
 function renderHistory(store: Store): string {
   const reg = store.content.bundle.registry;
   const labels = reg.labels;
+  // The prologue's facility note (the 1973 renaming) appears once a run exists; its sources resolve through the registry list beneath.
+  const prologue = store.content.mission.prologue;
+  const note = store.run && prologue
+    ? `<p class="history-note" data-testid="history-note">${esc(prologue.history_note)} <span class="muted">Sources: ${esc(prologue.history_sources.join(', '))}.</span></p>`
+    : '';
   return `
     <p data-testid="alt-history-explanation">${esc(labels.alternate_history_explanation)}</p>
     <p class="muted" data-testid="lamp-explanation">The status bar shows ${esc(labels.historical_choice_badge ?? 'HISTORICAL CHOICE')} on a decision where one option matches the record, and ${esc(labels.alternate_history_badge)} once play has left it. Neither lamp is a recommendation.</p>
+    ${note}
     <h3>Historical sources</h3>
     <ul class="plain">${reg.sources.map((s) => `<li><b>${esc(s.id)}</b> — <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>${s.author ? ` (${esc(s.author)})` : ''}. <span class="muted">${esc(s.note)}</span></li>`).join('')}</ul>`;
 }
@@ -537,6 +571,137 @@ function renderAbout(store: Store): string {
 }
 
 // ---------------------------------------------------------------------------
+// Full-screen plates (FNO-M01): the prologue after NEW CAMPAIGN, and the resolution cards after the outcome record.
+// A 1920×1080 design frame, letterboxed; every layer coordinate is a percentage of it, so the whole surface
+// scales together. Captions and controls are live text and native buttons over the plates, never baked in.
+// ---------------------------------------------------------------------------
+
+/** The design frame of the plates and the unit the app's layer motion is scaled in. */
+export const DESIGN = { width: 1920, height: 1080 } as const;
+
+function pct(v: number, of: number): string {
+  return `${Math.round((v / of) * 100000) / 1000}%`;
+}
+
+/**
+ * A moving layer at its `from` composition as a percentage box of the frame (so the static picture under reduced
+ * motion is the `from` composition by construction). The app moves it once, linearly, by (to − from) frame pixels
+ * over `seconds`, then holds; a layer still showing beneath a crossfade carries the fraction it had already played.
+ */
+function layerImg(m: MovingElement, progress: number | null, testid: string): string {
+  const url = assetUrl(m.asset);
+  if (!url) return '';
+  const p = m.placement;
+  const dx = m.motion.to.x - m.motion.from.x;
+  const dy = m.motion.to.y - m.motion.from.y;
+  const held = progress === null ? '' : `;transform:translate(calc(${dx * progress} * var(--unit)), calc(${dy * progress} * var(--unit)))`;
+  const style = `left:${pct(p.x + m.motion.from.x, DESIGN.width)};top:${pct(p.y + m.motion.from.y, DESIGN.height)};width:${pct(p.width, DESIGN.width)};height:${pct(p.height, DESIGN.height)};opacity:${p.opacity}${held}`;
+  return `<img class="pl-layer" src="${url}" alt="" aria-hidden="true" data-backdrop data-layer="${esc(m.asset)}" data-testid="${esc(testid)}" data-dx="${dx}" data-dy="${dy}" data-seconds="${m.motion.seconds}" style="${style}" />`;
+}
+
+function plateScene(background: string, moving: MovingElement, cls: string, progress: number | null, prefix: string): string {
+  const bg = assetUrl(background);
+  return `<div class="pl-scene ${cls}" data-testid="${prefix}-scene">${bg ? `<img class="pl-bg" src="${bg}" alt="" data-backdrop data-testid="${prefix}-plate" />` : ''}${layerImg(moving, progress, `${prefix}-layer`)}</div>`;
+}
+
+/**
+ * Prologue (treatment 28 §2–3): five plates then the scenario card; a background under one moving layer, the plate
+ * heading in the hero face and the caption in the body face in the left text area over a dark backdrop; CONTINUE
+ * always available, SKIP PROLOGUE to the scenario card; ~450 ms crossfade between plates (the previous plate stays
+ * beneath while the next fades in); reduced motion = the static `from` composition and cuts.
+ */
+function renderPrologue(store: Store): string {
+  const { ui } = store;
+  const p = store.content.mission.prologue;
+  if (!p) return '<main class="screen-plate screen-prologue" data-testid="screen-prologue"></main>';
+  const plates = p.plates;
+  const count = plates.length + 1;
+  const i = Math.min(Math.max(0, ui.prologue.index), count - 1);
+  const card = p.scenario_card;
+  const isCard = i === plates.length;
+  const plate = isCard ? null : plates[i]!;
+  const background = isCard ? card.background : plate!.background;
+  const moving = isCard ? card.moving_element : plate!.moving_element;
+  const id = isCard ? card.id : plate!.id;
+  const prevIndex = ui.reducedMotion ? null : ui.prologue.prev;
+  let prevHtml = '';
+  if (prevIndex !== null && prevIndex !== i && prevIndex >= 0 && prevIndex < count) {
+    const pp = prevIndex === plates.length ? card : plates[prevIndex]!;
+    prevHtml = plateScene(pp.background, pp.moving_element, 'pl-prev', ui.prologue.prevProgress, 'prologue-prev');
+  }
+  const copy = isCard
+    ? `<div class="pl-facility" data-testid="scenario-facility">${esc(card.facility)}</div>
+        <div class="pl-date" data-testid="scenario-date">${esc(card.date)}</div>
+        <h1 class="pl-mission" data-testid="scenario-mission"><span class="pl-mission-name">${esc(card.mission)}</span> — <span class="pl-scenario-name">${esc(card.scenario)}</span></h1>
+        <p class="pl-context" data-testid="scenario-context">${esc(card.context)}</p>`
+    : `<h1 class="pl-heading" data-testid="plate-heading">${esc(plate!.title)}</h1>
+        <p class="pl-caption" data-testid="plate-caption">${esc(plate!.caption)}</p>`;
+  const message = ui.message ? `<p class="message" role="alert" data-testid="message">${esc(ui.message)}</p>` : '';
+  return `
+  <main class="screen-plate screen-prologue" data-testid="screen-prologue" data-plate="${esc(id)}" data-index="${i}" data-count="${count}"${isCard ? ' data-card="scenario"' : ''}>
+    <div class="pl-frame" data-testid="plate-frame">
+      ${prevHtml}
+      ${plateScene(background, moving, prevHtml ? 'pl-current pl-fade-in' : 'pl-current', null, 'prologue')}
+      <div class="pl-text${prevHtml ? ' pl-fade-in' : ''}"><div class="pl-copy" data-testid="plate-copy">${copy}</div></div>
+    </div>
+    <div class="op-controls pl-controls" data-testid="prologue-controls">
+      ${key({ family: 'key', action: isCard ? 'prologue-enter' : 'prologue-next', focus: 'prologue-continue', testid: isCard ? 'prologue-enter' : 'prologue-next', focusDefault: true, label: 'CONTINUE' })}
+      ${isCard ? '' : key({ family: 'selector', action: 'prologue-skip', focus: 'prologue-skip', testid: 'prologue-skip', label: 'SKIP PROLOGUE' })}
+      ${soundControl(store, 'prologue')}
+      ${message}
+    </div>
+  </main>`;
+}
+
+/**
+ * Resolution cards (treatment 28 §5): card 1 is the outcome's plate under the hero-style dark overlay with the
+ * content's heading, the tier in the hero face at the title scale, the outcome title and the result line; card 2
+ * is the same plate under a stronger overlay with the relationships heading and the row of characters whose trust
+ * changed (neutral for up, concerned for down, the change in words). Read-only; the alternate-history lamp keeps
+ * its state; Continue: result → relationships → debrief; Skip: straight to the debrief.
+ */
+function renderResolution(store: Store): string {
+  const run = store.run!;
+  const v = describeResolution(store.content, run);
+  if (!v) return renderDebrief(store);
+  const card = store.ui.resolution === 'relationships' && v.people.length ? 'relationships' : 'result';
+  const bg = assetUrl(v.plate);
+  const people = v.people.map((p) => {
+    const url = assetUrl(p.portrait);
+    return `
+        <li class="res-person" data-testid="res-person-${esc(p.id)}" data-delta="${p.delta > 0 ? '+' : ''}${p.delta}" data-expression="${p.expression}">
+          ${url ? `<img src="${url}" alt="Portrait: ${esc(p.name)}" />` : '<div class="portrait empty" aria-hidden="true">text only</div>'}
+          <div class="res-name">${esc(p.name)}</div>
+          <div class="res-change ${p.delta > 0 ? 'up' : 'down'}">${esc(p.label)}</div>
+        </li>`;
+  }).join('');
+  const copy = card === 'result'
+    ? `<div class="res-heading" data-testid="resolution-heading">${esc(v.heading)}</div>
+        <div class="res-tier" data-testid="resolution-tier">${esc(v.tier)}</div>
+        <div class="res-title" data-testid="resolution-title">${esc(v.outcome.title)}</div>
+        <p class="res-line" data-testid="resolution-line">${esc(v.result_line)}</p>`
+    : `<div class="res-heading" data-testid="resolution-heading">${esc(v.relationships_heading)}</div>
+        <ul class="res-people" data-testid="resolution-people">${people}</ul>`;
+  const message = store.ui.message ? `<p class="message" role="alert" data-testid="message">${esc(store.ui.message)}</p>` : '';
+  return `
+  <main class="screen-plate screen-resolution" data-testid="screen-resolution" data-card="${card}" data-tier="${esc(v.tier)}" data-outcome="${esc(v.outcome.id)}">
+    <div class="pl-frame" data-testid="plate-frame">
+      <div class="pl-scene" data-testid="resolution-scene">${bg ? `<img class="pl-bg" src="${bg}" alt="" data-backdrop data-testid="resolution-plate" />` : ''}</div>
+      <div class="res-overlay${card === 'relationships' ? ' strong' : ''}" data-testid="resolution-overlay">
+        <div class="res-head">${lamps(store, false, alternateHistoryActive(run))}</div>
+        <div class="res-copy ${card}" data-testid="resolution-copy">${copy}</div>
+      </div>
+    </div>
+    <div class="op-controls pl-controls" data-testid="resolution-controls">
+      ${key({ family: 'key', action: 'resolution-next', focus: 'resolution-continue', testid: 'resolution-next', focusDefault: true, label: 'CONTINUE' })}
+      ${card === 'result' && v.people.length ? key({ family: 'selector', action: 'resolution-skip', focus: 'resolution-skip', testid: 'resolution-skip', label: 'SKIP TO DEBRIEF' }) : ''}
+      ${soundControl(store, 'resolution')}
+      ${message}
+    </div>
+  </main>`;
+}
+
+// ---------------------------------------------------------------------------
 // Debrief
 // ---------------------------------------------------------------------------
 
@@ -576,6 +741,7 @@ function renderDebrief(store: Store): string {
     ${store.ui.debug ? `<details class="panel"><summary data-focus="event-record" data-testid="event-record-toggle">Event record (${d.events.length} entries)</summary><div class="event-record" data-testid="event-record">${events}</div></details>` : ''}
     <div class="actions">
       ${key({ family: 'key', action: 'to-planning', testid: 'to-planning', focusDefault: true, label: 'CONTINUE TO GEMINI IX-A' })}
+      ${describeResolution(store.content, run) ? key({ family: 'selector', action: 'to-resolution', testid: 'to-resolution', label: 'REVIEW THE RESULT' }) : ''}
       ${key({ family: 'selector', action: 'open:saveload', testid: 'open-saveload', label: 'SAVE / LOAD' })}
       ${key({ family: 'selector', action: 'open:history', testid: 'open-history', label: 'HISTORY' })}
       ${key({ family: 'selector', action: 'open:settings', testid: 'open-settings', label: 'SETTINGS' })}

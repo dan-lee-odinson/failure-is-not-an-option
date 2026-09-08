@@ -1,5 +1,5 @@
 {
-  "$comment": "FNO music map — starting values from 20-Music-Scene-Entries.md §2/§5 as ruled by Dan. Seconds. trigger = a screen id (screen:menu, screen:opening-dedication, screen:console, …) or a node id (node:<id>) entered; stop_on = input ids (start-new, start-load, skip-to-menu, choose:<option id>) or screen ids that fade the cue out. No loops on any screen where the player reads and decides. A cue may carry a gain (0-1) applied to that cue only. All numbers are tunable without a rebuild; cues marked provisional are expected to move after playtest 2. Nothing here enters the ledger, the log, or the replay.",
+  "$comment": "FNO music map — starting values from 20-Music-Scene-Entries.md §2/§5 as ruled by Dan. Seconds. trigger = a screen id (screen:menu, screen:opening-dedication, screen:console, …) or a node id (node:<id>) entered; stop_on = input ids (start-new, start-load, skip-to-menu, choose:<option id>) or screen ids that fade the cue out. No loops on any screen where the player reads and decides. A cue may carry a gain (0-1) applied to that cue only, and stop_fade: per-signal fade-out seconds that override fade_out for that stop signal. All numbers are tunable without a rebuild; cues marked provisional are expected to move after playtest 2. Nothing here enters the ledger, the log, or the replay.",
   "version": 1,
   "defaults": {
     "music_gain": 0.8
@@ -43,7 +43,27 @@
         "screen:debrief",
         "screen:planning"
       ],
-      "note": "Dan: the refrain loop 1:00 → 1:52 stands. Fades over 2 s on New Campaign or Continue."
+      "note": "Dan: the refrain loop 1:00 → 1:52 stands. Fades over 2 s on Continue; over 1 s on New Campaign (M01), under the prologue cue's 1 s fade-in.",
+      "stop_fade": {
+        "start-new": 1.0
+      }
+    },
+    {
+      "id": "prologue",
+      "asset": "audio-orbit-of-hope",
+      "trigger": "screen:prologue",
+      "start": 0.0,
+      "end": null,
+      "fade_in": 1.0,
+      "fade_out": 1.5,
+      "loop": null,
+      "stop_on": [
+        "screen:console",
+        "screen:menu",
+        "screen:opening-start",
+        "start-load"
+      ],
+      "note": "M01 (treatment 28 §6, M01 handoff Part 2): Orbit of Hope under the prologue. The prologue always follows the menu, so the menu loop is what is playing at New Campaign: it fades over 1 s (its stop_fade) while this cue starts the track from 0:00 with a 1 s fade-in. One screen id for every plate, so the cue carries across Continue without restarting; it runs out naturally if the player reads longer than the track. Stops with a 1.5 s fade as the scenario card dissolves into the room; the room bed and effects start with the room."
     },
     {
       "id": "crisis",

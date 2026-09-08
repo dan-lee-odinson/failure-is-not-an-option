@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "baseline_commit": "223a6cb8606b64abd11968b0f454ede12a8760fc",
+  "checks": [
+    {
+      "file": "content/characters.json",
+      "baseline_sha256": "f3777c9a776d9c8581eefa808ce15a77cee5f4ea7d449a3e5754403656c5d922",
+      "package_sha256": "f1e71ac19a9150bf8cd57737e198006abff7ebb9ceef5156cf1f7f4192915fc6",
+      "comparison": "equal after removing explicitly authorized presentation/version fields"
+    },
+    {
+      "file": "content/evidence.json",
+      "baseline_sha256": "afa05ef12f5ccd2007915c7fcfdaa3fcd6ea9076473b552d5f5a3890ee832e9b",
+      "package_sha256": "b58b408a5792d90b9bbf1461b067565615d68c2287dbf9b64d4842ca2def40f1",
+      "comparison": "equal after removing explicitly authorized presentation/version fields"
+    },
+    {
+      "file": "content/followon-gemini-9a.json",
+      "baseline_sha256": "2f3294c8329ab53f663a8f7c05f2d42cca9865dec476125781202b1f9970d719",
+      "package_sha256": "4bb2f9fef95e7c08262b27a09849d95cd775abaa4b4327cb2417111931765983",
+      "comparison": "equal after removing explicitly authorized presentation/version fields"
+    },
+    {
+      "file": "content/mission-gemini-8.json",
+      "baseline_sha256": "d22c30214933768c494a425339954e98c0f4e98bb807acc786253e04cbf90e23",
+      "package_sha256": "25b5e388c1737d5d944e4aa8224ccabc1d735c1f9b75119ca173cc47ec280b50",
+      "comparison": "equal after removing explicitly authorized presentation/version fields"
+    },
+    {
+      "file": "content/procedures.json",
+      "baseline_sha256": "19e82fe4ac9e8b8abdb2861368145e2212e79e27a2a033c44d2e281a22205407",
+      "package_sha256": "0e859c40648a1c7debcde0599b3a0a0c3301b51762b958e1d5f0b23d33dbf483",
+      "comparison": "equal after removing explicitly authorized presentation/version fields"
+    },
+    {
+      "file": "content/registry.json",
+      "baseline_sha256": "c3b918d64ac681e189c92085dd6d47838069c7052a3a4aecd84da5102f8e7ce4",
+      "package_sha256": "15dcc42139b2c86e31780f61a1d8624e30476a454a09c4e15d1798ee32ddad99",
+      "comparison": "equal after removing explicitly authorized presentation/version fields"
+    }
+  ],
+  "unchanged": "All gameplay phases, IDs, options except the requested lesson intent, conditions, effects, outcomes except presentation fields, trust deltas, constraints, historic criticism and prior fiction/source entries."
+}

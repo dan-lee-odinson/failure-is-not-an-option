@@ -3,6 +3,7 @@
  * deliberately broken content (the "fail on purpose" evidence).
  */
 import Ajv2020 from 'ajv/dist/2020';
+import { validatePresentation } from './presentation-contract';
 import addFormats from 'ajv-formats';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -123,6 +124,7 @@ export function validateContent(opts: ValidateOptions): ValidationReport {
   for (const p of bundle.followon.plans) collectEffects(p.effects, p.id);
 
   const sourceIds = new Set(bundle.registry.sources.map((s) => s.id));
+  errors.push(...validatePresentation(bundle, (opts.manifest as { assets: { id: string; width?: number; height?: number; alpha?: boolean }[] }).assets ?? []));
   const fictionIds = new Set(bundle.registry.fiction.map((f) => f.id));
   const manifestIds = new Set(((opts.manifest as { assets: { id: string }[] }).assets ?? []).map((a) => a.id));
 
