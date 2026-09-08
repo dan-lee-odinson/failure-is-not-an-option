@@ -1,0 +1,121 @@
+{
+  "commit": "d679b2b198c4f4e933229138355b679e1e314524",
+  "content_version": "0.5.2",
+  "files": [
+    {
+      "path": "content/characters.json",
+      "baseline_sha256": "10c43bb29f45ce43ff36864390ff3c507abf583e847ade1d89f42fd46261e059",
+      "package_sha256": "995732f720de0111e2b1b6c9ebb74e8f7eba9336f5d8b593094d2a41bccb698e"
+    },
+    {
+      "path": "content/evidence.json",
+      "baseline_sha256": "7d18d0049e788545a2fc3c0b8cc4d411aecd501f44f87b5bd22674b58d0ca2b1",
+      "package_sha256": "6767f9491f413d19e0e6922bd727f735eeaad6d9725c41bcf4d82c3c919914f7"
+    },
+    {
+      "path": "content/followon-gemini-9a.json",
+      "baseline_sha256": "fb1fb0ccf4a4a4535d7eabcdfadc56d779208e09f7b373694ae8e3e2808cd465",
+      "package_sha256": "ad0cfd9c7ac589e3703e7473b38b01bb056236770a010bd8f9188ba16e1c223e"
+    },
+    {
+      "path": "content/mission-gemini-8.json",
+      "baseline_sha256": "8368baa87bd9c8d3f029a092d7b9de86fea6ff9ec2ecb9c8de4a516c7e8305b2",
+      "package_sha256": "70b526ad8c0d72627935ceae48cc36251658cf5735bf2ed833794e249f245ede"
+    },
+    {
+      "path": "content/procedures.json",
+      "baseline_sha256": "591bf11fe0ad39df45494c93f3cd42ca34693683504e082ed5c6bf33e1195056",
+      "package_sha256": "543ed5056b64d22097672080bb66905e7c09f99b87a14827f53e69bd27b97864"
+    },
+    {
+      "path": "content/registry.json",
+      "baseline_sha256": "cda22276ef1d7929a4db17b767af8618d28a6990c180871f65c4b833ea25f1be",
+      "package_sha256": "adab42156ccc747257e2110f2456f18b99c59c5c58ef5dbe5b34480f245c93f3"
+    },
+    {
+      "path": "assets/manifest.json",
+      "baseline_sha256": "97777889237f341f03f45900edaa2fdd5373c34a6f292f0e5d84fbda400b6cfe",
+      "package_sha256": "84107c00006798d6570e2195669135a7ddf767dd07f8e4cd04b4132e53510aef"
+    },
+    {
+      "path": "schema/defs.schema.json",
+      "baseline_sha256": "0b02ca5a13973615e40f2e46937fadb64a2818fe6ebc60af1dec45ecc9948aa9",
+      "package_sha256": "9382c49246bb9dea3069c90d9a6eb6482ed334735b233f604451a122f0b3d5ff"
+    },
+    {
+      "path": "schema/registry.schema.json",
+      "baseline_sha256": "a06eb5d145d593b47f1b34293dff6a2f1b116adc016690c06e4312a655124bd1",
+      "package_sha256": "38f26e7aa1916e1225524c9e6bf31abc728328e4b38c9ab0a0623dd334412b11"
+    },
+    {
+      "path": "core/types.ts",
+      "baseline_sha256": "4598f16608f1023ee1c773d2ab30fdbb9d7a9892ad7c6f2a6b539b6a950b52e5",
+      "package_sha256": "ec70395392cf85ceaf9508049311e437f42e341f17c213187dd24ec95fb14458"
+    },
+    {
+      "path": "app/render.ts",
+      "baseline_sha256": "261aecbba40dcbe1826d094b1d991ee1b78245c85595b0b823148209324a86b3",
+      "package_sha256": "a19622fac667565dcd44f5f3ebab8b0fcfd6a403d63450060685324eeb7e1411"
+    },
+    {
+      "path": "scripts/lib/dialogue-sheet.ts",
+      "baseline_sha256": "0d93dea48521f550bc271ed1ab8d0f31f365c979c1f0c3d0d508021823e0fdc0",
+      "package_sha256": "51db81f9c9abbc2300d892acfff58cbfda46d222587ba1451a7ba7c706dcf97d"
+    },
+    {
+      "path": "scripts/lib/presentation-contract.ts",
+      "baseline_sha256": "6b18c40bc044659d5f5e6bd5709ed1054eb36584f34b4d854548f1c38ac8f0bb",
+      "package_sha256": "02a4859a89cdddcd03102eca0d1d665fe38992cae010cf9cb4b474c72cf16bf5"
+    },
+    {
+      "path": "scripts/lib/validator.ts",
+      "baseline_sha256": "1ff21bd4ff24072cd4e486db69c6bc3bd97325b544dfb06f8b9d1af4b157a726",
+      "package_sha256": "a809c3fb0faba05686bb962c8bd8d560d49fb679978d4d000cbf63cc9e5dbb47"
+    },
+    {
+      "path": "tests/core/ac-05-09.test.ts",
+      "baseline_sha256": "0a3d8605546e58ef7405770f40a30da9650eba266d9d1b0cd033a566b63d77aa",
+      "package_sha256": "56798065b675df7b781fafb4fa6fe42adbdb810093737743959302c68e31b9a1"
+    },
+    {
+      "path": "tests/core/content-053-relay.test.ts",
+      "baseline_sha256": null,
+      "package_sha256": "4f521551506a086fd1eb7821bf3c0fa0cc3557c3e6a5408444801cc0d9160129"
+    },
+    {
+      "path": "tests/core/dialogue-sheet.test.ts",
+      "baseline_sha256": "9c3871c0aa79efe3fc5abaf136dfea7020423e0d580f255bed68f29c0c1d5940",
+      "package_sha256": "098f163c8c22de48d1ed3dafbda651eff00392136057fe3878b0c5b079c10b53"
+    },
+    {
+      "path": "tests/core/helpers.ts",
+      "baseline_sha256": "871284864a0ad8ad2fcd3ed37c0b56d381807481b9aed17a5a36c04548809b3a",
+      "package_sha256": "b5571150068fdfe3c66753956224aa39f80e5cc76aae9262e491ed00a968fc52"
+    },
+    {
+      "path": "tests/core/presentation.test.ts",
+      "baseline_sha256": "20e5aef534e14aa1d6bfd8a21fb2374ecd1f390083bb232536617e3f7ef57271",
+      "package_sha256": "8d4d9a46e8c3b95814f27ade8af19c037fbe05451438a2dcb97c1c9faff6959b"
+    },
+    {
+      "path": "tests/core/replay.test.ts",
+      "baseline_sha256": "cadd3feee0d9ea2942c40cf89226431b0d4f2953ef57971c2b4e119cefac642e",
+      "package_sha256": "62dd533be35cfa713dcaf20dc26d5679f7eeb44e99453d0bad78cf1c720a1c2d"
+    },
+    {
+      "path": "tests/core/validator.test.ts",
+      "baseline_sha256": "aa90503166c1c23d354ac6bde83eb4d7c87d4c7db66f9d93e8cda2bb232e0e28",
+      "package_sha256": "37c69e02012670a0ee1db11a52d0be4ae058bfb9eb60d9dab1cdc83902be60cc"
+    },
+    {
+      "path": "docs/dialogue-sheet.md",
+      "baseline_sha256": "7c12ed3c09f23ba7bc8e31eef526502f52b1132058b8d5d689ff3a624854e402",
+      "package_sha256": "e4e8279a130aa0c446957e0fb704e2eaa41b4b86b95685f8e99669565b4f9ab5"
+    },
+    {
+      "path": "docs/dialogue-sheet.csv",
+      "baseline_sha256": "27ec65cb9cf651bbd7871bc38d382b229c8da055e13eb241f380c13be836ae11",
+      "package_sha256": "965cd18da74c0d58cf5d1580824aedd450ddae62a58c0b05adcca820632f1203"
+    }
+  ]
+}

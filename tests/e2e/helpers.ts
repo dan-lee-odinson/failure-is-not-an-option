@@ -139,6 +139,58 @@ export async function assertParticipants(page: Page): Promise<void> {
   expect(new Set(tops).size, `participants on one row (tops ${tops.join(', ')})`).toBe(1);
 }
 
+/** Whether the console is in the stacked layout (M02). */
+export async function isStacked(page: Page): Promise<boolean> {
+  return (await page.getByTestId('screen-console').getAttribute('data-layout')) === 'stacked';
+}
+
+/** Run `fn` with the evidence list on screen: the column in the column layout, or the overlay opened from the status bar in the stacked layout (closed again afterwards). */
+export async function withEvidence(page: Page, fn: () => Promise<void>): Promise<void> {
+  const stacked = await isStacked(page);
+  if (stacked) {
+    await click(page, 'open-evidence');
+    await expect(page.getByTestId('overlay-evidence')).toBeVisible();
+  }
+  await fn();
+  if (stacked) {
+    await click(page, 'close-overlay');
+    await expect(page.getByTestId('overlay-evidence')).toHaveCount(0);
+  }
+}
+
+export type Prep = 'contact' | 'recovery' | 'systems';
+export interface RouteSpec { prep: Prep[]; route: 'earlier' | 'later'; stance: 'blame' | 'ground'; questions?: boolean }
+
+/** From the mission briefing to the outcome record, by clicking; with `questions`, every one of Glen's questions is asked on the way. */
+export async function playRoute(page: Page, r: RouteSpec): Promise<void> {
+  expect(await node(page)).toBe('g8-brief');
+  await click(page, 'continue-g8-brief-continue');
+  for (const p of r.prep) await click(page, `option-g8-prep-${p}`);
+  await click(page, 'continue-g8-prep-finish');
+  await click(page, 'continue-g8-docking-report-continue');
+  await click(page, 'continue-g8-loss-of-contact-continue');
+  if (r.questions) await click(page, 'question-g8-q-gap');
+  await click(page, 'continue-g8-gap-note-continue');
+  if (r.questions) await click(page, 'question-g8-q-crew-crisis');
+  await click(page, 'continue-g8-crisis-report-continue');
+  await click(page, 'continue-g8-stabilization-report-continue');
+  await click(page, 'option-g8-order-return');
+  if (r.questions) for (const q of ['g8-q-recovery-risk', 'g8-q-reserve-risk', 'g8-q-crew-return']) await click(page, `question-${q}`);
+  await click(page, `option-g8-return-${r.route}`);
+  await click(page, 'continue-g8-execute-return');
+  await click(page, 'continue-g8-ground-execution-continue');
+  await click(page, 'continue-g8-return-beat-1-continue');
+  await click(page, 'continue-g8-return-beat-2-continue');
+  await click(page, 'continue-g8-pickup-report-continue');
+  await click(page, 'continue-g8-relationship-response-continue');
+  await click(page, 'option-g8-adopt-provenance');
+  await click(page, 'continue-g8-accountability-brief-continue');
+  await click(page, r.stance === 'blame' ? 'option-g8-back-crew-criticism' : 'option-g8-own-ground-contingencies');
+  await click(page, 'continue-g8-resolve-accountability');
+  await click(page, 'continue-g8-finish');
+  await expect(page.getByTestId('screen-resolution')).toBeVisible();
+}
+
 /** Menu → new campaign at the requested text size, past the prologue. */
 export async function start(page: Page, text: TextSize, fake = false): Promise<void> {
   await fresh(page, true);

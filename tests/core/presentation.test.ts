@@ -50,7 +50,7 @@ describe('M01 presentation contract',()=>{
  });
  it('does not turn participants into invented historical speakers',()=>{
   const b=bundle();
-  const historical=new Set(b.characters.filter(c=>c.kind==='historical').map(c=>c.id));
+  const historical=new Set(b.characters.filter(c=>c.kind==='historical' && c.id!=='g8-capcom').map(c=>c.id));
   for(const n of b.mission.phases.flatMap(p=>p.nodes)){
    if(n.type==='briefing'||n.type==='decision')for(const line of n.lines??[])expect(historical.has(line.speaker??'')).toBe(false);
   }

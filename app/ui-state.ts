@@ -16,7 +16,8 @@ export type Screen = 'opening' | 'prologue' | 'console' | 'resolution' | 'debrie
 export type Stage = 'start' | 'dedication' | 'notices' | 'montage' | 'title' | 'menu';
 export const STAGES: readonly Stage[] = ['start', 'dedication', 'notices', 'montage', 'title', 'menu'];
 
-export type Overlay = null | 'binder' | 'history' | 'saveload' | 'about' | 'settings';
+/** `evidence` is the evidence list as an overlay panel in the stacked layout (M02). */
+export type Overlay = null | 'binder' | 'history' | 'saveload' | 'about' | 'settings' | 'evidence';
 
 export type UiMode = 'apollo';
 
@@ -80,6 +81,14 @@ export interface UiState {
   resolution: 'result' | 'relationships';
   /** The scenario card dissolving into the room (700 ms) over the first console screen; never under reduced motion. */
   dissolve: boolean;
+  /**
+   * Stacked play layout (M02): the conversation panel takes the content width and the evidence column collapses to a
+   * status-bar key, chosen when the dialogue area would be shorter than four lines of body text. Presentation only,
+   * never persisted; re-evaluated on resize, text size and node change.
+   */
+  stacked: boolean;
+  /** The tier's meaning strip on the resolution result card is open (M02). */
+  tierInfo: boolean;
 }
 
 export interface Store {
@@ -120,6 +129,8 @@ export function defaultUi(overrides: Partial<UiState> = {}): UiState {
     prologue: { index: 0, prev: null, prevProgress: 0 },
     resolution: 'result',
     dissolve: false,
+    stacked: false,
+    tierInfo: false,
     ...overrides,
   };
 }

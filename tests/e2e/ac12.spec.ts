@@ -15,7 +15,7 @@ import { expect, test } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { assertGlenUncovered, assertManifestImagesOnly, kitFaceTable } from './room';
-import { ARTIFACTS, TEXT, VIEWPORTS, assertNoHorizontalOverflow, assertParticipants, assertVisibleWithinViewport, awaitRoom, click, fresh, node, setText, shot, skipPrologue, stage, start, toMenu } from './helpers';
+import { ARTIFACTS, TEXT, VIEWPORTS, assertNoHorizontalOverflow, assertParticipants, assertVisibleWithinViewport, awaitRoom, click, fresh, isStacked, node, setText, shot, skipPrologue, stage, start, toMenu, withEvidence } from './helpers';
 
 // ---------------------------------------------------------------------------
 // Opening, menu, About
@@ -149,14 +149,16 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     await expect(page.getByTestId('contact')).toHaveText('CONTACT: NONE');
     await shot(page, v, text, '13-loss-of-contact');
     await click(page, 'continue-g8-loss-of-contact-continue');
-    await expect(page.getByTestId('evidence-g8-ev-docked')).toHaveAttribute('data-badge', 'PREVIOUS CONTACT');
+    await withEvidence(page, async () => { await expect(page.getByTestId('evidence-g8-ev-docked')).toHaveAttribute('data-badge', 'PREVIOUS CONTACT'); });
     await click(page, 'question-g8-q-gap');
     await expect(page.getByTestId('conversation')).toContainText("We'll have to wait for contact");
+    await expect(page.getByTestId('conversation').locator('.conv-lines [data-testid="answer-g8-q-gap"]')).toBeVisible(); // answers are dialogue: in the body, not the footer (M02)
+    await expect(page.getByTestId('conversation').locator('.conv-questions .answer')).toHaveCount(0);
     await expect(page.getByTestId('badge-alt-history')).toHaveCount(0);
     await click(page, 'continue-g8-gap-note-continue');
     // Crisis
     expect(await node(page)).toBe('g8-crisis-report');
-    await expect(page.getByTestId('evidence-g8-ev-crisis')).toBeVisible();
+    await withEvidence(page, async () => { await expect(page.getByTestId('evidence-g8-ev-crisis')).toBeVisible(); });
     await shot(page, v, text, '14-crisis-report');
     await click(page, 'continue-g8-crisis-report-continue');
     await click(page, 'continue-g8-stabilization-report-continue');
@@ -208,16 +210,17 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     }
     expect(await page.locator('[data-testid="strip"] [data-action^="pin:"]').count()).toBe(0);
     expect(await page.locator('[data-testid="conversation"] [data-action^="pin:"]').count()).toBe(0);
-    // The once-only pin hint appears on first hover, dismisses, and stays dismissed.
-    await page.getByTestId('pin-g8-ev-reserve').hover();
-    await expect(page.getByTestId('pin-hint')).toBeVisible();
-    await click(page, 'pin-hint-dismiss');
-    await expect(page.getByTestId('pin-hint')).toHaveCount(0);
-    await page.getByTestId('pin-g8-ev-reserve').hover();
-    await expect(page.getByTestId('pin-hint')).toHaveCount(0);
-    // Pinning is UI-only: pin a report, verify the node does not change.
-    await click(page, 'pin-g8-ev-reserve');
-    await expect(page.getByTestId('pin-g8-ev-reserve')).toHaveAttribute('aria-pressed', 'true');
+    // The once-only pin hint appears on first hover, dismisses, and stays dismissed; pinning is UI-only (in the column, or in the stacked layout's overlay).
+    await withEvidence(page, async () => {
+      await page.getByTestId('pin-g8-ev-reserve').hover();
+      await expect(page.getByTestId('pin-hint')).toBeVisible();
+      await click(page, 'pin-hint-dismiss');
+      await expect(page.getByTestId('pin-hint')).toHaveCount(0);
+      await page.getByTestId('pin-g8-ev-reserve').hover();
+      await expect(page.getByTestId('pin-hint')).toHaveCount(0);
+      await click(page, 'pin-g8-ev-reserve');
+      await expect(page.getByTestId('pin-g8-ev-reserve')).toHaveAttribute('aria-pressed', 'true');
+    });
     expect(await node(page)).toBe('g8-return-brief');
     await shot(page, v, text, '15-return-decision');
     await click(page, 'option-g8-return-earlier');
@@ -251,7 +254,7 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     await click(page, 'option-g8-adopt-provenance');
     // Post-flight: the earlier route keeps ALTERNATE HISTORY over the historical stance; the four astronauts are present as portrait and label (M01).
     expect(await node(page)).toBe('g8-accountability-brief');
-    await expect(page.getByTestId('evidence-g8-ev-postflight-context')).toBeVisible();
+    await withEvidence(page, async () => { await expect(page.getByTestId('evidence-g8-ev-postflight-context')).toBeVisible(); });
     await assertParticipants(page);
     await shot(page, v, text, '19a-accountability-brief-participants');
     await click(page, 'continue-g8-accountability-brief-continue');
@@ -425,10 +428,12 @@ test('keyboard reaches every stage of the opening, the menu, every card and lamp
   expect(await page.getByTestId('card-g8-prep-recovery').locator('details').evaluate((d) => (d as HTMLDetailsElement).open)).toBe(false);
   await page.keyboard.press('Enter');
   expect(await page.getByTestId('card-g8-prep-recovery').locator('details').evaluate((d) => (d as HTMLDetailsElement).open)).toBe(true);
-  await page.getByTestId('pin-g8-ev-contact-worksheet').focus();
-  await expect(page.getByTestId('pin-hint')).toBeVisible();
-  await page.keyboard.press('Enter');
-  await expect(page.getByTestId('pin-g8-ev-contact-worksheet')).toHaveAttribute('aria-pressed', 'true');
+  await withEvidence(page, async () => {
+    await page.getByTestId('pin-g8-ev-contact-worksheet').focus();
+    await expect(page.getByTestId('pin-hint')).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(page.getByTestId('pin-g8-ev-contact-worksheet')).toHaveAttribute('aria-pressed', 'true');
+  });
   // The lamp is a button that opens History.
   await click(page, 'continue-g8-prep-finish');
   await click(page, 'continue-g8-docking-report-continue');
@@ -436,9 +441,13 @@ test('keyboard reaches every stage of the opening, the menu, every card and lamp
   await click(page, 'continue-g8-gap-note-continue');
   await click(page, 'continue-g8-crisis-report-continue');
   await click(page, 'continue-g8-stabilization-report-continue');
-  // Keyboard focus (Shift+Tab from the first key after the lamp) shows the focus outline on the lamp.
+  // Keyboard focus (Shift+Tab from the first key after the lamp) shows the focus outline on the lamp; in the stacked layout the EVIDENCE key sits between.
   await page.getByTestId('open-binder').focus();
   await page.keyboard.press('Shift+Tab');
+  if (await isStacked(page)) {
+    await expect(page.getByTestId('open-evidence')).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+  }
   await expect(page.getByTestId('badge-historical-choice')).toBeFocused();
   expect(await page.evaluate(() => getComputedStyle(document.activeElement as Element).outlineStyle)).not.toBe('none');
   await page.keyboard.press('Enter');

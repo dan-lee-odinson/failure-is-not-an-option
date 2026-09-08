@@ -86,6 +86,8 @@ function key(o: KeyOpts): string {
 }
 
 const PIN_GLYPH = '<svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 3h6l-1 6 3 3v2h-4v7l-1 1-1-1v-7H7v-2l3-3z" fill="currentColor"/></svg>';
+/** An "i" in a ring: the key that opens the tier's meaning on the result card (M02). */
+const INFO_GLYPH = '<svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 10.5v6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="7.2" r="1.4" fill="currentColor"/></svg>';
 
 function soundControl(store: Store, id: string): string {
   const a = store.ui.audio;
@@ -219,14 +221,16 @@ function renderConsole(store: Store): string {
   if (!view) return renderDebrief(store);
   const evidence = describeEvidence(store.content, run.state);
   if (view.options) IDLE = false; // a choice screen highlights nothing; a hint, when the content carries one, appears instead
+  // Stacked layout (M02): the conversation panel takes the content width and the evidence column becomes a status-bar key that opens the list as an overlay.
+  const stacked = store.ui.stacked;
   return `
-  <div class="console-shell" data-testid="screen-console" data-node="${esc(view.node.id)}" data-phase="${esc(view.phase.id)}">
+  <div class="console-shell${stacked ? ' stacked' : ''}" data-testid="screen-console" data-node="${esc(view.node.id)}" data-phase="${esc(view.phase.id)}" data-layout="${stacked ? 'stacked' : 'columns'}">
     ${roomLayer()}
-    ${renderStatusBar(store, view)}
+    ${renderStatusBar(store, view, evidence.length)}
     <div class="stage">
       ${renderConversation(store, view)}
     </div>
-    ${renderEvidencePanel(store, evidence)}
+    ${stacked ? '' : renderEvidencePanel(store, evidence)}
     ${renderStrip(store, view)}
     ${store.ui.dissolve ? roomDissolve(store) : ''}
   </div>`;
@@ -246,7 +250,12 @@ function lamps(store: Store, historical: boolean, alternate: boolean): string {
   return '';
 }
 
-function renderStatusBar(store: Store, view: NodeView): string {
+/**
+ * The status bar: the mission, phase, stage and contact on the left; the keys on the right. In the stacked layout the
+ * keys keep one row by shortening their labels, an EVIDENCE · n key opens the evidence list as an overlay, and the
+ * mission line wraps inside its own group only if it must.
+ */
+function renderStatusBar(store: Store, view: NodeView, evidenceCount: number): string {
   const m = store.content.mission;
   const current = store.content.nodes.get(view.node.id)?.node;
   const historical = !view.phase.alternate_history && current?.type === 'decision' && !!current.historical_option;
@@ -254,8 +263,10 @@ function renderStatusBar(store: Store, view: NodeView): string {
   const attention = view.attention
     ? `<span class="attention" data-testid="attention" aria-label="Preparation opportunities: ${view.attention.remaining} of ${view.attention.declared} remaining">${'●'.repeat(view.attention.remaining)}${'○'.repeat(Math.max(0, view.attention.declared - view.attention.remaining))}</span>`
     : '';
+  const stacked = store.ui.stacked;
   return `
   <header class="status-bar" data-testid="status-bar">
+    <div class="status-left">
     <span class="mission">${esc(m.title.toUpperCase())}</span>
     <span class="sep">·</span>
     <span class="phase" data-testid="phase-title">${esc(view.phase.title)}</span>
@@ -265,11 +276,14 @@ function renderStatusBar(store: Store, view: NodeView): string {
     <span class="badge contact ${view.phase.contact === 'none' ? 'none' : ''}" data-testid="contact">CONTACT: ${contactLabel[view.phase.contact] ?? view.phase.contact}</span>
     ${attention}
     ${lamps(store, historical, view.phase.alternate_history)}
-    <span class="spacer"></span>
+    </div>
+    <div class="status-keys" data-testid="status-keys">
+    ${stacked ? key({ family: 'selector', action: 'open:evidence', testid: 'open-evidence', label: `EVIDENCE · ${evidenceCount}`, ariaLabel: `Evidence: ${evidenceCount} items — open the evidence list` }) : ''}
     ${key({ family: 'selector', action: 'open:binder', testid: 'open-binder', label: 'BINDER' })}
     ${key({ family: 'selector', action: 'open:history', testid: 'open-history', label: 'HISTORY' })}
-    ${key({ family: 'selector', action: 'open:saveload', testid: 'open-saveload', label: 'SAVE / LOAD' })}
-    ${key({ family: 'selector', action: 'open:settings', testid: 'open-settings', label: 'SETTINGS' })}
+    ${key({ family: 'selector', action: 'open:saveload', testid: 'open-saveload', label: stacked ? 'SAVE' : 'SAVE / LOAD', ariaLabel: stacked ? 'Save / Load' : undefined })}
+    ${key({ family: 'selector', action: 'open:settings', testid: 'open-settings', label: stacked ? 'SET' : 'SETTINGS', ariaLabel: stacked ? 'Settings' : undefined })}
+    </div>
   </header>`;
 }
 
@@ -303,6 +317,10 @@ function renderConversation(store: Store, view: NodeView): string {
   if (view.node.header_label) head.push(`<div class="header-label" data-testid="header-label">${esc(view.node.header_label)}</div>`);
   if (view.node.text) parts.push(`<div class="narration" data-testid="narration">${esc(view.node.text)}</div>`);
   view.lines.forEach((l, i) => parts.push(renderLine(store, l, `${view.node.id}#${i + 1}`)));
+  // Asked answers are dialogue (M02): they join the body in the order asked, so the pinned footer holds the question keys alone.
+  const askedOrder = store.run?.state.mission.questions_asked ?? [];
+  const answered = view.questions.filter((q) => q.asked).sort((a, b) => askedOrder.indexOf(a.id) - askedOrder.indexOf(b.id));
+  for (const q of answered) parts.push(`<div class="answer" data-testid="answer-${esc(q.id)}">${renderLine(store, q.answer, `${q.id}#answer`)}</div>`);
   // Real people present at the scene (content 0.5.2): portrait and name-and-role label, the way the controllers appear, with no line under them.
   const current = store.content.nodes.get(view.node.id)?.node;
   const participants = current && (current.type === 'briefing' || current.type === 'decision') ? current.participants ?? [] : [];
@@ -311,11 +329,10 @@ function renderConversation(store: Store, view: NodeView): string {
   if (view.applied.length) {
     parts.push(`<div class="applied" data-testid="applied"><div class="label">Logged at this event</div><ul>${view.applied.map((a) => `<li>${esc(a.label)}</li>`).join('')}</ul></div>`);
   }
-  // Glen's questions sit in the panel's footer, outside the scrolling body, so they are always in view.
+  // Glen's question keys sit in the panel's footer, outside the scrolling body, so they are always in view; an asked one shows as such.
   const questions = view.questions.length
     ? `<div class="conv-questions"><div class="questions" data-testid="questions">${view.questions.map((q) => `
-      <button type="button" class="question paper" data-action="question:${esc(q.id)}" data-focus="question:${esc(q.id)}" data-testid="question-${esc(q.id)}" aria-expanded="${q.asked}">${esc(q.text)}</button>
-      ${q.asked ? `<div class="answer">${renderLine(store, q.answer, `${q.id}#answer`)}</div>` : ''}`).join('')}</div></div>`
+      <button type="button" class="question paper" data-action="question:${esc(q.id)}" data-focus="question:${esc(q.id)}" data-testid="question-${esc(q.id)}" aria-expanded="${q.asked}"${q.asked ? ' data-asked' : ''}>${esc(q.text)}</button>`).join('')}</div></div>`
     : '';
   const active = activeSpeaker(view);
   const activeUrl = active ? assetUrl(active.portrait) : null;
@@ -342,7 +359,8 @@ function renderParticipants(store: Store, list: Participant[]): string {
   }).join('')}</div>`;
 }
 
-function renderEvidencePanel(store: Store, evidence: EvidenceView[]): string {
+/** The evidence items (pinned first) with the once-only pin hint: the same list in the column and in the stacked layout's overlay. */
+function evidenceItems(store: Store, evidence: EvidenceView[]): string {
   const pinnedSet = new Set(store.ui.pinned);
   const ordered = [...evidence.filter((e) => pinnedSet.has(e.id)), ...evidence.filter((e) => !pinnedSet.has(e.id))];
   const items = ordered.map((e) => {
@@ -366,7 +384,18 @@ function renderEvidencePanel(store: Store, evidence: EvidenceView[]): string {
   const hint = store.ui.pinHintOpen && !store.ui.pinHintSeen
     ? `<div class="pin-hint" role="status" data-testid="pin-hint"><span>${esc(PIN_HINT)}</span>${key({ family: 'selector', action: 'pin-hint-dismiss', focus: 'pin-hint-dismiss', testid: 'pin-hint-dismiss', label: 'GOT IT' })}</div>`
     : '';
-  return `<aside class="evidence panel" aria-label="Evidence" data-testid="evidence-panel"><h2>Evidence · ${evidence.length}</h2>${hint}${items.length ? items.join('') : '<p class="empty">No evidence acquired yet.</p>'}</aside>`;
+  return `${hint}${items.length ? items.join('') : '<p class="empty">No evidence acquired yet.</p>'}`;
+}
+
+function renderEvidencePanel(store: Store, evidence: EvidenceView[]): string {
+  return `<aside class="evidence panel" aria-label="Evidence" data-testid="evidence-panel"><h2>Evidence · ${evidence.length}</h2>${evidenceItems(store, evidence)}</aside>`;
+}
+
+/** The stacked layout's evidence list (M02): the same items and pins in an overlay panel, opened from the status bar's EVIDENCE key. */
+function renderEvidenceOverlay(store: Store): string {
+  const run = store.run;
+  const evidence = run ? describeEvidence(store.content, run.state) : [];
+  return `<div class="evidence-list" data-testid="evidence-panel">${evidenceItems(store, evidence)}</div>`;
 }
 
 type CardState = 'rest' | 'chosen' | 'unavailable' | 'closed';
@@ -462,10 +491,11 @@ function renderOverlay(store: Store): string {
     case 'saveload': { title = 'Save / Load'; body = renderSaveLoad(store); break; }
     case 'about': { title = 'About / Credits'; body = renderAbout(store); break; }
     case 'settings': { title = 'Settings'; body = renderSettings(store); break; }
+    case 'evidence': { title = `Evidence · ${store.run ? describeEvidence(store.content, store.run.state).length : 0}`; body = renderEvidenceOverlay(store); break; }
   }
   return `
   <div class="overlay-backdrop" data-testid="overlay-${o}">
-    <div class="overlay ${o === 'binder' ? 'paper-overlay' : ''}" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+    <div class="overlay ${o === 'binder' ? 'paper-overlay' : ''}${o === 'evidence' ? 'evidence-overlay panel' : ''}" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
       <div class="close-row">${key({ family: 'selector', action: 'close-overlay', focus: 'close-overlay', testid: 'close-overlay', label: 'CLOSE (ESC)' })}</div>
       <h2 id="overlay-title">${esc(title)}</h2>
       ${body}
@@ -506,6 +536,7 @@ function renderHistory(store: Store): string {
     <p data-testid="alt-history-explanation">${esc(labels.alternate_history_explanation)}</p>
     <p class="muted" data-testid="lamp-explanation">The status bar shows ${esc(labels.historical_choice_badge ?? 'HISTORICAL CHOICE')} on a decision where one option matches the record, and ${esc(labels.alternate_history_badge)} once play has left it. Neither lamp is a recommendation.</p>
     ${note}
+    ${labels.capcom_history_note ? `<p class="history-note" data-testid="capcom-history-note">${esc(labels.capcom_history_note)}</p>` : ''}
     <h3>Historical sources</h3>
     <ul class="plain">${reg.sources.map((s) => `<li><b>${esc(s.id)}</b> — <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>${s.author ? ` (${esc(s.author)})` : ''}. <span class="muted">${esc(s.note)}</span></li>`).join('')}</ul>`;
 }
@@ -519,7 +550,7 @@ function renderSaveLoad(store: Store): string {
       ${key({ family: 'selector', action: 'load-browser', testid: 'load-browser', disabled: !store.ui.hasBrowserSave, label: 'LOAD FROM THIS BROWSER' })}
       ${key({ family: 'selector', action: 'export', testid: 'export', disabled: !has, label: 'EXPORT JSON FILE' })}
       <label class="file">Import JSON file <input type="file" accept="application/json,.json" data-import-file data-focus="import-file" data-testid="import-file" /></label>
-      ${key({ family: 'selector', action: 'new-campaign', testid: 'new-campaign', label: 'START A NEW CAMPAIGN' })}
+      <div class="key-with-hint">${key({ family: 'selector', action: 'new-campaign', testid: 'new-campaign', describedBy: 'new-campaign-hint', label: 'START A NEW CAMPAIGN' })}<span class="muted key-hint" id="new-campaign-hint" data-testid="new-campaign-hint">(plays the mission briefing)</span></div>
     </div>
     ${store.ui.saveMessage ? `<p class="message" role="status" data-testid="save-message">${esc(store.ui.saveMessage)}</p>` : ''}`;
 }
@@ -677,7 +708,11 @@ function renderResolution(store: Store): string {
   }).join('');
   const copy = card === 'result'
     ? `<div class="res-heading" data-testid="resolution-heading">${esc(v.heading)}</div>
-        <div class="res-tier" data-testid="resolution-tier">${esc(v.tier)}</div>
+        <div class="res-tier-row">
+          <div class="res-tier" data-testid="resolution-tier"${v.meaning ? ` title="${esc(v.meaning)}"` : ''}>${esc(v.tier)}</div>
+          ${v.meaning ? key({ family: 'arrow', action: 'tier-info-toggle', focus: 'tier-info-toggle', testid: 'tier-info-toggle', cls: 'tier-info', expanded: store.ui.tierInfo, ariaLabel: `What ${v.tier} means`, describedBy: store.ui.tierInfo ? 'tier-meaning' : undefined, html: true, label: INFO_GLYPH }) : ''}
+        </div>
+        ${v.meaning && store.ui.tierInfo ? `<div class="tier-meaning paper" id="tier-meaning" role="status" data-testid="tier-meaning">${esc(v.meaning)}</div>` : ''}
         <div class="res-title" data-testid="resolution-title">${esc(v.outcome.title)}</div>
         <p class="res-line" data-testid="resolution-line">${esc(v.result_line)}</p>`
     : `<div class="res-heading" data-testid="resolution-heading">${esc(v.relationships_heading)}</div>

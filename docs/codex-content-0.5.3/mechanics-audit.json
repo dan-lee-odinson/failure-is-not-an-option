@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "baseline_commit": "d679b2b198c4f4e933229138355b679e1e314524",
+  "checks": [
+    {
+      "file": "content/characters.json",
+      "baseline_sha256": "10c43bb29f45ce43ff36864390ff3c507abf583e847ade1d89f42fd46261e059",
+      "package_sha256": "995732f720de0111e2b1b6c9ebb74e8f7eba9336f5d8b593094d2a41bccb698e",
+      "allowed_field_comparison": "PASS"
+    },
+    {
+      "file": "content/evidence.json",
+      "baseline_sha256": "7d18d0049e788545a2fc3c0b8cc4d411aecd501f44f87b5bd22674b58d0ca2b1",
+      "package_sha256": "6767f9491f413d19e0e6922bd727f735eeaad6d9725c41bcf4d82c3c919914f7",
+      "allowed_field_comparison": "PASS"
+    },
+    {
+      "file": "content/followon-gemini-9a.json",
+      "baseline_sha256": "fb1fb0ccf4a4a4535d7eabcdfadc56d779208e09f7b373694ae8e3e2808cd465",
+      "package_sha256": "ad0cfd9c7ac589e3703e7473b38b01bb056236770a010bd8f9188ba16e1c223e",
+      "allowed_field_comparison": "PASS"
+    },
+    {
+      "file": "content/mission-gemini-8.json",
+      "baseline_sha256": "8368baa87bd9c8d3f029a092d7b9de86fea6ff9ec2ecb9c8de4a516c7e8305b2",
+      "package_sha256": "70b526ad8c0d72627935ceae48cc36251658cf5735bf2ed833794e249f245ede",
+      "allowed_field_comparison": "PASS"
+    },
+    {
+      "file": "content/procedures.json",
+      "baseline_sha256": "591bf11fe0ad39df45494c93f3cd42ca34693683504e082ed5c6bf33e1195056",
+      "package_sha256": "543ed5056b64d22097672080bb66905e7c09f99b87a14827f53e69bd27b97864",
+      "allowed_field_comparison": "PASS"
+    },
+    {
+      "file": "content/registry.json",
+      "baseline_sha256": "cda22276ef1d7929a4db17b767af8618d28a6990c180871f65c4b833ea25f1be",
+      "package_sha256": "adab42156ccc747257e2110f2456f18b99c59c5c58ef5dbe5b34480f245c93f3",
+      "allowed_field_comparison": "PASS"
+    }
+  ],
+  "manifest_preserved_entries": 64,
+  "unchanged": "All original node/question/option IDs, conditions, effects, trust values, outcomes, evidence, procedures, follow-on content and accountability participants. Two optional questions added; existing CAPCOM text/provenance, named identity, Glen portrayal, registry credits/den/history and version fields are the explicit exceptions. All original manifest entries except retired composite CAPCOM are identical. Core except types and app except History renderer are byte-identical.",
+  "question_semantics": "Questions produce their normal asked/answered log entries. New questions do not apply effects, reveal evidence, alter the cursor or choose a return. Consequently later at_event indices shift if they are asked; the tested resulting semantic ledger and outcome do not."
+}

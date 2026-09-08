@@ -1,0 +1,22 @@
+[
+  {
+    "id": "den",
+    "prompt": "Create a cinematic 2D illustrated game background, 1920x1080 landscape, for Failure is Not an Option. Match the attached accepted console plate's inked comic book realism, restrained painted texture, dramatic low-key night lighting and warm ivory/deep petrol palette; use the attached Glen sheet for his EXACT same ageless identity and short dark crew-cut, horn-rim glasses, white shirt, tie and mandatory pale vest. Glen is seated in a mid-century modern walnut-and-dark-leather lounge chair, seen FROM BEHIND over his shoulder at lower left, partly silhouetted, head around x300 y590; no older or greyer reinterpretation, no headset at home. He sits naturally looking at the wall, never toward camera. A compact period 8mm/16mm HOME FILM PROJECTOR with two film reels, no brand, rests on a low side table around x640 y700, lens aimed toward the wall. Ashtray with one small lit cigar beside him. Mid-century home den, simple wood paneling at far left, restrained furniture, night, intimate and quiet. Crucial compositing space: upper/right wall has a LARGE PERFECTLY FLAT FRONT-FACING BLANK RECTANGULAR pale warm gray projection area, roughly x820 y140 width1024 height576, parallel horizontal/vertical edges, 16:9, all four corners visible and unobstructed; this area has NO images, text, grain, art, objects, decor, gradients or cast shadows. It is where live video and credits will go. NO visible projector beam, NO smoke (these will be separate layers); minimal ambient bounce illuminates vest edge. No logos, NASA marks, labels, dates, lettering or UI anywhere. Keep composition spacious and physically coherent. Reference1 style/camera; reference2 Glen identity only.",
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-6f29b531-fa9a-44c8-9764-bd03f07619bf.png"
+  },
+  {
+    "id": "smoke",
+    "prompt": "Generate a production VFX sprite, 1920x1080 wide PNG with true transparent RGBA background. A single delicate curling wisp of cigar smoke centered around x630 y760, rising to x620 y300, with fine soft turbulent filaments. Very low-density warm ivory-white smoke fading completely to alpha at top and sides, bottom narrow source at x630 y800. NO cigar or ashtray or people or props, NO room, NO text, NO glowing blob, NO black or checkerboard background; actual transparent alpha. Smoke RGB should be white/ivory and alpha carries its density, to composite naturally onto a very dark inked comic-book den illustration. Keep rest of entire canvas fully transparent. A quiet realistic small cigar wisp, not a fire plume.",
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-53d5d3f1-b41b-4978-8ebc-e2601e9b4c95.png"
+  },
+  {
+    "id": "beam",
+    "prompt": "Create ONLY the separate transparent projector-light VFX overlay for the attached den background. 1920x1080 canvas, true RGBA transparent. Do NOT redraw or include any part of the room, screen, projector, man or furniture. Alignment in a 1920x1080 frame: the light originates at the projector lens around x1190 y895 in the lower-middle foreground and widens upward toward the projection wall rectangle x830 y115 width928 height522. A very subtle warm-white triangular cone in perspective with sparse tiny dust motes, soft feathered edges, mostly transparent; no solid white fill and no white screen rectangle. Dark room should remain visible through it. Entire canvas outside cone fully transparent. This is a light-only compositing layer. No text, insignia, stars, props or checkerboard baked in. Match the attached inked 2D den lighting, but output light only, no background.",
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-689eae14-0f71-4219-b48e-1c3b1b1f842e.png"
+  },
+  {
+    "id": "beam-final",
+    "prompt": "Edit this light-only VFX layer. Remove the entire baked checkerboard. Put the SAME projector cone and dust on a perfectly uniform PURE BLACK #000000 background with ZERO checkerboard, ZERO paper texture and ZERO gray rectangle. Preserve the warm cone and its fine rays. Nothing else, no objects. This is a luminance matte export: every pixel outside the cone must be pure black, cone fades smoothly to black. Keep the same canvas and light geometry. Do not draw transparency squares.",
+    "path": "C:\\Users\\wolfe\\.codex\\generated_images\\01a0796b-cc32-7fc1-834b-520d57cf528c\\exec-d283a3dc-b056-4ea2-bbcb-39907fd428ff.png"
+  }
+]

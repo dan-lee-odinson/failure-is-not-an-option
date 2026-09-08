@@ -603,12 +603,16 @@ export class SheetBuilder {
     this.record(b, dims, structured, render(this.store(run, this.ui({ open: allEvidence, pinned: allEvidence.slice(0, 1) }))));
     if (allEvidence.length) this.record(b, dims, structured, render(this.store(run, this.ui({ pinHintOpen: true }))));
     this.record(b, dims, structured, render(this.store(run, this.ui({ idle: true }))));
+    // The stacked layout (M02): the status bar's short labels and EVIDENCE key, and the evidence list as an overlay.
+    this.record(b, dims, structured, render(this.store(run, this.ui({ stacked: true }))));
     this.captureOverlay(run, dims, 'binder');
+    this.captureOverlay(run, dims, 'evidence', { stacked: true, open: allEvidence, pinned: allEvidence.slice(0, 1) });
+    if (allEvidence.length) this.captureOverlay(run, dims, 'evidence', { stacked: true, pinHintOpen: true });
   }
 
-  captureOverlay(run: Run | null, dims: Dims, overlay: 'binder' | 'history' | 'saveload' | 'about' | 'settings', extra: Partial<UiState> = {}): void {
-    const rank = { binder: 9001, history: 9002, saveload: 9003, about: 9004, settings: 9005 }[overlay];
-    const title = overlay === 'saveload' ? 'Save / Load' : overlay === 'about' ? 'About / Credits' : overlay[0]!.toUpperCase() + overlay.slice(1);
+  captureOverlay(run: Run | null, dims: Dims, overlay: 'binder' | 'history' | 'saveload' | 'about' | 'settings' | 'evidence', extra: Partial<UiState> = {}): void {
+    const rank = { binder: 9001, history: 9002, saveload: 9003, about: 9004, settings: 9005, evidence: 9000.5 }[overlay];
+    const title = overlay === 'saveload' ? 'Save / Load' : overlay === 'about' ? 'About / Credits' : overlay === 'evidence' ? 'Evidence list (stacked layout)' : overlay[0]!.toUpperCase() + overlay.slice(1);
     const b = this.bucket('overlay-' + overlay, `Overlay: ${title}`, UI_PHASE.id, UI_PHASE.title, rank);
     const screen: UiState['screen'] = run ? (run.state.mission.completed ? 'planning' : 'console') : 'opening';
     const html = render(this.store(run, this.ui({ overlay, screen, stage: 'menu', ...extra })));
@@ -660,7 +664,9 @@ export class SheetBuilder {
       structured.push({ kind: 'relationship.name', speaker: '', id: p.id, text: p.name, source: 'content' });
       structured.push({ kind: 'relationship.change', speaker: '', id: 'resolution_presentation', text: p.label, source: 'content' });
     }
+    if (v.meaning) structured.push({ kind: 'tier.meaning', speaker: '', id: 'resolution_presentation.tiers[' + v.tier + ']', text: v.meaning, source: 'content' });
     this.record(b, dims, structured, render(this.store(run, this.ui({ screen: 'resolution', resolution: 'result' }))));
+    this.record(b, dims, structured, render(this.store(run, this.ui({ screen: 'resolution', resolution: 'result', tierInfo: true }))));
     if (v.people.length) this.record(b, dims, structured, render(this.store(run, this.ui({ screen: 'resolution', resolution: 'relationships' }))));
   }
 
@@ -731,6 +737,14 @@ export class SheetBuilder {
 
   build(root: string): Sheet {
     this.captureOpening();
+    const credits = this.content.bundle.registry.credits;
+    if (credits) {
+      const b = this.bucket('future-credits', 'Credits for montage assembly (authored content)', 'credits', 'Credits awaiting montage assembly', 3.5);
+      for (const [i, section] of credits.entries()) this.record(b, {}, [
+        { kind: 'credits.heading', speaker: '', id: 'registry.credits.' + i, text: section.heading, source: 'content' },
+        ...section.lines.map(text => ({ kind: 'credits.line', speaker: '', id: 'registry.credits.' + i, text, source: 'content' as const })),
+      ], '');
+    }
     this.capturePrologue();
     const runs = this.walk();
     this.captureOverlay(null, {}, 'history');
@@ -801,7 +815,11 @@ function unreachableContent(content: ContentIndex, rows: SheetRow[]): { kind: st
     check('history.note', c.id, prologue.history_note);
   }
   const labels = content.mission.resolution_presentation;
-  if (labels) for (const [k, v] of Object.entries({ heading: labels.heading, relationships_heading: labels.relationships_heading, trust_up: labels.trust_up, trust_down: labels.trust_down })) check('resolution.' + k, 'resolution_presentation', v);
+  if (labels) {
+    for (const [k, v] of Object.entries({ heading: labels.heading, relationships_heading: labels.relationships_heading, trust_up: labels.trust_up, trust_down: labels.trust_down })) check('resolution.' + k, 'resolution_presentation', v);
+    // The meanings of the reserved tiers (FAILURE, LOSS) are content no Gemini VIII outcome can show (M02).
+    for (const t of labels.tiers) check('tier.meaning', 'resolution_presentation.tiers[' + t.id + ']', t.meaning);
+  }
   for (const { node } of content.nodes.values()) {
     if (node.type === 'decision') check('decision.hint', node.id, node.hint);
     if (node.type === 'decision' || node.type === 'briefing') for (const p of node.participants ?? []) check('participant.label', p.id, p.label);
@@ -841,6 +859,8 @@ function mdCell(s: string): string {
 export function toMarkdown(sheet: Sheet): string {
   const out: string[] = [];
   out.push('# Dialogue sheet — Failure is Not an Option');
+  out.push('');
+  out.push('The credits section is authored 0.5.3 content for the future montage assembly. It is captured for director review before that scroll is implemented. Other rows are captured against the integrated M01 renderer.');
   out.push('');
   out.push(`Content ${sheet.version} · fingerprint \`${sheet.fingerprint}\` · ${sheet.rows.length} player-visible strings across ${sheet.runs} complete routes. Generated by \`npm run dialogue-sheet\` from \`content/\` and \`app/\`; never edit by hand. Every string appears once, at the first point a player can meet it; a string that appears only on some routes carries its branch. Kinds beginning \`ui.\` with id \`app\` are authored in the application, not in the content package.`);
   out.push('');

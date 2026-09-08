@@ -1,13 +1,14 @@
 {
-  "content_version": "0.5.2",
+  "content_version": "0.5.3",
   "labels": {
     "start_notice": "A historical mission with fictional return decisions and alternate outcomes.",
     "alternate_history_badge": "ALTERNATE HISTORY",
-    "alternate_history_explanation": "The earlier return order begins the alternate-history route. The later order follows the historical timing: the original mission report (H6, p. 6-9) records western Pacific zone 3 as available on revolutions 6 and 7, with revolution 7 selected. On either route, the game's propellant warning, recovery tradeoff, crew-condition sequence, controllers' reactions, and next-mission constraints are dramatized (F7, F8, F9); matching the timing does not make these consequences a reconstruction of the recovery. The post-flight stance and its relationship consequences are fictional (F10). The historical opening — docking, the communications gap, the crew's stabilization of the spacecraft, the termination rule, and a western Pacific recovery — follows sources H1–H4. Once the earlier order activates ALTERNATE HISTORY, a later historical choice does not reset it.",
+    "alternate_history_explanation": "The earlier return order begins the alternate-history route. The later order follows the historical timing: the original mission report (H6, p. 6-9) records western Pacific zone 3 as available on revolutions 6 and 7, with revolution 7 selected. On either route, the game's propellant warning, recovery tradeoff, crew-condition sequence, controllers' reactions, and next-mission constraints are dramatized; matching the timing does not make these consequences a reconstruction of the recovery. The post-flight stance and its relationship consequences are fictional. The historical opening — docking, the communications gap, the crew's stabilization of the spacecraft, the termination rule, and a western Pacific recovery — follows sources H1–H4. Once the earlier order activates ALTERNATE HISTORY, a later historical choice does not reset it.",
     "simulated_report": "Simulated report",
     "postflight_header": "Post-flight discussion",
     "historical_choice_badge": "HISTORICAL CHOICE",
-    "departures_heading": "Departures from the record"
+    "departures_heading": "Departures from the record",
+    "capcom_history_note": "Houston CAPCOM for Gemini VIII was Jim Lovell. His calls in the game are dramatized from the mission's air-ground transcript (H7); the crew's quoted words are from that transcript."
   },
   "notices": {
     "dedication": [
@@ -66,7 +67,7 @@
       "title": "Gemini VIII voice communications: air-to-ground, ground-to-air and onboard transcription",
       "author": "NASA-hosted mission transcript",
       "url": "https://www.nasa.gov/wp-content/uploads/2026/01/gt08-tec.pdf",
-      "note": "Read PDF pp. 75–79; visually checked PDF 77 (printed 76). Used for short calls, readbacks, uncertain reports and crew autonomy, not as dialogue to reproduce. Onboard/air-ground speech is not a complete Houston flight-loop transcript; noisy OCR was checked against the scan. No numeric propellant readings copied into the game."
+      "note": "Read PDF pp. 75–79; visually checked PDF 77 (printed 76). Used for short calls, readbacks, uncertain reports and crew autonomy, not as dialogue to reproduce. Onboard/air-ground speech is not a complete Houston flight-loop transcript; noisy OCR was checked against the scan. No numeric propellant readings copied into the game. Content 0.5.3: visually checked PDF pp. 72, 76–79 (printed 71, 75–78). Docking 06:33:52; emergency 07:17:15 (P, Scott); regaining control 07:20:05/07:21:12; Hawaii return/control discussion 07:38:07–07:39:53. Each CAPCOM line has page-specific provenance or a procedural tag. Houston relay framing is dramatized."
     },
     {
       "id": "H8",
@@ -146,5 +147,115 @@
       "title": "Illustrated prologue and recovery presentation",
       "text": "Original staged illustrations, lighting, weather, visual motion, the overview-to-preparation transition, recovery tier labels and result-line summaries. The six underlying game outcomes remain the simplified model described in F7. Different plate lighting expresses tone, not a measured recovery time, storm, medical finding or new consequence. Portrait expressions represent the game relationship changes in F8 and F10; they do not document the real astronauts’ feelings or add their words."
     }
-  ]
+  ],
+  "credits": [
+    {
+      "heading": "Sources",
+      "lines": [
+        "Gemini's First Docking Turns to Wild Ride in Orbit",
+        "55 Years Ago: Gemini VIII, the First Docking in Space",
+        "Project Gemini: A Chronology, Part III(B), March 16 entry",
+        "Gemini VIII mission overview",
+        "'Tumbling End Over End': The Trauma of Gemini VIII (Part 2), March 16, 2014",
+        "Gemini Program Mission Report, Gemini VIII (MSC-G-R-66-4), 29 April 1966",
+        "Gemini VIII voice communications: air-to-ground, ground-to-air and onboard transcription",
+        "Failure Is Not an Option — publisher excerpt, Chapter One: The Four-Inch Flight",
+        "Gemini: Bridge to the Moon",
+        "50 Years Ago: The Manned Spacecraft Center Renamed NASA’s Johnson Space Center"
+      ]
+    },
+    {
+      "heading": "Music",
+      "lines": [
+        "Dan Lee-Odinson, produced with Suno Pro, instrumental.",
+        "Orbit of Hope · Orbit of Hope (refrain) · Mission in Danger Drum Background · Per Aspera · Disaster and Loss · Mission in Danger"
+      ]
+    },
+    {
+      "heading": "Sound",
+      "lines": [
+        "Room Tone – Empty room with AC & desktop computer running — seventhsamurai — freesound.org — CC0 1.0",
+        "Typing Office chatter in background — SduggySounds — freesound.org — CC0 1.0",
+        "SWITCH BUTTON PRESSING.wav — EricsSoundschmiede — freesound.org — CC0 1.0",
+        "130111 light switches, clicks, dimmer slides, hotel London ON — TRP — freesound.org — CC0 1.0",
+        "Paper Rustling 01.wav — swidmark — freesound.org — CC0 1.0",
+        "End radio transmission — ReadeOnly — freesound.org — CC0 1.0",
+        "Beep 8 count (loopable) by JonNicholas, freesound.org, CC BY 3.0",
+        "Quindar tones generated for this project."
+      ]
+    },
+    {
+      "heading": "Type",
+      "lines": [
+        "Barlow and Barlow Condensed — Barlow Project Authors — SIL Open Font License 1.1.",
+        "Chakra Petch — Chakra Petch Project Authors — SIL Open Font License 1.1."
+      ]
+    },
+    {
+      "heading": "Archive",
+      "lines": [
+        "Archival clip credits will be added from the approved clip table before the film is released.",
+        "This project is not affiliated with, authorized, sponsored, or endorsed by NASA."
+      ]
+    },
+    {
+      "heading": "Made by",
+      "lines": [
+        "Directed and written by Dan Lee-Odinson",
+        "Art, content and treatments: GPT-6 Astra (Codex)",
+        "Design review and handoffs: Claude (Cowork)",
+        "Build: Claude Code",
+        "Created with generative AI under human direction, review and final decision.",
+        "Failure is Not an Option is an independent, non-commercial homage.",
+        "MIT (code) · CC BY 4.0 (content) — pending confirmation."
+      ]
+    }
+  ],
+  "opening_den": {
+    "background": "opening-den",
+    "projection_rect": {
+      "x": 830,
+      "y": 115,
+      "width": 928,
+      "height": 522
+    },
+    "smoke": {
+      "asset": "opening-den-smoke",
+      "placement": {
+        "x": 390,
+        "y": 315,
+        "width": 1152,
+        "height": 648,
+        "opacity": 0.16
+      },
+      "motion": {
+        "kind": "rise",
+        "direction": "up",
+        "seconds": 12,
+        "from": {
+          "x": 0,
+          "y": 0
+        },
+        "to": {
+          "x": 0,
+          "y": -55
+        }
+      }
+    },
+    "smoke_loop": {
+      "seconds": 12,
+      "crossfade_seconds": 3
+    },
+    "beam": {
+      "asset": "opening-den-beam",
+      "placement": {
+        "x": 144,
+        "y": -101,
+        "width": 1920,
+        "height": 1080,
+        "opacity": 0.32
+      }
+    },
+    "note": "Design coordinates are 1920x1080. projection_rect is a clear 16:9 inset inside the illustrated wall; preserve the wall border. Smoke loops with overlapping fades, not a visible position jump. Beam flicker and camera movement belong to montage assembly; no cue change."
+  }
 }

@@ -1,0 +1,47 @@
+{
+  "background": "opening-den",
+  "projection_rect": {
+    "x": 830,
+    "y": 115,
+    "width": 928,
+    "height": 522
+  },
+  "smoke": {
+    "asset": "opening-den-smoke",
+    "placement": {
+      "x": 390,
+      "y": 315,
+      "width": 1152,
+      "height": 648,
+      "opacity": 0.16
+    },
+    "motion": {
+      "kind": "rise",
+      "direction": "up",
+      "seconds": 12,
+      "from": {
+        "x": 0,
+        "y": 0
+      },
+      "to": {
+        "x": 0,
+        "y": -55
+      }
+    }
+  },
+  "smoke_loop": {
+    "seconds": 12,
+    "crossfade_seconds": 3
+  },
+  "beam": {
+    "asset": "opening-den-beam",
+    "placement": {
+      "x": 144,
+      "y": -101,
+      "width": 1920,
+      "height": 1080,
+      "opacity": 0.32
+    }
+  },
+  "note": "Design coordinates are 1920x1080. projection_rect is a clear 16:9 inset inside the illustrated wall; preserve the wall border. Smoke loops with overlapping fades, not a visible position jump. Beam flicker and camera movement belong to montage assembly; no cue change."
+}

@@ -44,6 +44,9 @@
         },
         "departures_heading": {
           "$ref": "defs.schema.json#/$defs/text"
+        },
+        "capcom_history_note": {
+          "$ref": "defs.schema.json#/$defs/text"
         }
       },
       "additionalProperties": false
@@ -129,6 +132,113 @@
         },
         "additionalProperties": false
       }
+    },
+    "credits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "heading",
+          "lines"
+        ],
+        "properties": {
+          "heading": {
+            "$ref": "defs.schema.json#/$defs/text"
+          },
+          "lines": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "defs.schema.json#/$defs/text"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "opening_den": {
+      "type": "object",
+      "required": [
+        "background",
+        "projection_rect",
+        "smoke",
+        "smoke_loop",
+        "beam",
+        "note"
+      ],
+      "properties": {
+        "background": {
+          "$ref": "defs.schema.json#/$defs/id"
+        },
+        "projection_rect": {
+          "type": "object",
+          "required": [
+            "x",
+            "y",
+            "width",
+            "height"
+          ],
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "width": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "height": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "smoke": {
+          "$ref": "mission.schema.json#/$defs/moving_element"
+        },
+        "smoke_loop": {
+          "type": "object",
+          "required": [
+            "seconds",
+            "crossfade_seconds"
+          ],
+          "properties": {
+            "seconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "crossfade_seconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "beam": {
+          "type": "object",
+          "required": [
+            "asset",
+            "placement"
+          ],
+          "properties": {
+            "asset": {
+              "$ref": "defs.schema.json#/$defs/id"
+            },
+            "placement": {
+              "$ref": "mission.schema.json#/$defs/moving_element/properties/placement"
+            }
+          },
+          "additionalProperties": false
+        },
+        "note": {
+          "$ref": "defs.schema.json#/$defs/text"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

@@ -153,9 +153,17 @@ export function validateContent(opts: ValidateOptions): ValidationReport {
       if ('goto' in e && !bundle.mission.phases.some((p) => p.id === e.goto)) errors.push(`${where}: goto references unknown phase ${e.goto}`);
     }
   };
-  const checkLines = (lines: { speaker: string | null; cites?: string[]; when?: Condition }[] | undefined, where: string): void => {
+  const checkLines = (lines: import('../../core/types').Line[] | undefined, where: string): void => {
     for (const [i, l] of (lines ?? []).entries()) {
       if (l.speaker && !index.characters.has(l.speaker)) errors.push(`${where} line ${i}: unknown speaker ${l.speaker}`);
+      const p = l.provenance;
+      if (l.speaker === 'g8-capcom' && index.characters.get(l.speaker)?.kind === 'historical' && !p) errors.push(`${where}: historical CAPCOM line needs provenance`);
+      if (p) {
+        for (const id of p.sources) if (!sourceIds.has(id)) errors.push(`${where}: unknown line source ${id}`);
+        for (const id of p.fiction) if (!fictionIds.has(id)) errors.push(`${where}: unknown line fiction ${id}`);
+        if (p.tag !== 'procedural' && (!p.sources.includes('H7') || !p.pdf_pages.length)) errors.push(`${where}: relay needs H7 PDF pages`);
+        if (p.sources.includes('H7') && (p.pdf_pages.some((page, i) => page > 113 || p.printed_pages[i] !== page - 1) || p.pdf_pages.length !== p.printed_pages.length)) errors.push(`${where}: invalid H7 page mapping`);
+      }
       for (const c of l.cites ?? []) if (!index.evidence.has(c)) errors.push(`${where} line ${i}: cites unknown evidence ${c}`);
       checkCond(l.when, `${where} line ${i}`);
     }

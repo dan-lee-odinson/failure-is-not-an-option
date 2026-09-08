@@ -1,5 +1,5 @@
 {
-  "content_version": "0.5.2",
+  "content_version": "0.5.3",
   "procedures": [
     {
       "id": "proc-report-provenance",

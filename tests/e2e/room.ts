@@ -240,6 +240,12 @@ export const TEXT_SAMPLES = [
   '[data-testid="participants"] .who',
   '[data-testid="hint-strip"]',
   '[data-testid="history-note"]',
+  '[data-testid="capcom-history-note"]',
+  '[data-testid="conversation"] .answer .what',
+  '[data-testid="questions"] .question[data-asked]',
+  '[data-testid="new-campaign-hint"]',
+  '[data-testid="overlay-evidence"] .ev-title',
+  '[data-testid="overlay-evidence"] .ev-body',
   '.menu-reason',
   '.menu-subtitle',
   '.hero-continue',
@@ -261,6 +267,7 @@ export const PLATE_TEXT_SAMPLES = [
   '.res-name',
   '.res-change.up',
   '.res-change.down',
+  '[data-testid="tier-meaning"]',
 ];
 
 /**

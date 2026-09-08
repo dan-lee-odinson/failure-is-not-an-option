@@ -28,6 +28,8 @@ export interface RelationshipChange {
 export interface ResolutionView {
   outcome: { id: string; title: string };
   tier: ResultTier;
+  /** The content's meaning of the tier (M02): shown on request from the ⓘ key and as the tier's tooltip. */
+  meaning: string | null;
   /** Manifest id of the plate. */
   plate: string;
   result_line: string;
@@ -77,6 +79,7 @@ export function describeResolution(content: ContentIndex, run: RunLike): Resolut
   return {
     outcome: { id: outcome.id, title: outcome.title },
     tier: outcome.tier,
+    meaning: labels.tiers.find((t) => t.id === outcome.tier)?.meaning ?? null,
     plate: outcome.plate,
     result_line: outcome.result_line,
     heading: labels.heading,

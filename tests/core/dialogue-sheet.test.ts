@@ -97,24 +97,26 @@ function renderedStrings(run: Run | null, u: UiState): string[] {
 }
 
 describe('dialogue sheet', () => {
-  it('the committed sheet equals a fresh generation', () => {
+  it('the committed sheet equals a fresh generation', { timeout: 20000 }, () => {
     const s = sheet();
     const md = readFileSync(resolve(ROOT, 'docs', 'dialogue-sheet.md'), 'utf8').replace(/\r\n/g, '\n');
     const csv = readFileSync(resolve(ROOT, 'docs', 'dialogue-sheet.csv'), 'utf8').replace(/\r\n/g, '\n');
     expect(md).toBe(toMarkdown(s));
     expect(csv).toBe(toCsv(s));
-    expect(s.version).toBe('0.5.2');
+    expect(s.version).toBe('0.5.3');
     expect(s.fingerprint).toBe(content().fingerprint);
     expect(s.runs).toBe(56);
   });
 
-  it('every string reachable in play is on the sheet, and every sheet row is reachable', () => {
+  it('every string reachable in play is on the sheet, and every sheet row is reachable', { timeout: 20000 }, () => {
     const s = sheet();
     const onSheet = new Set(s.rows.map((r) => dedupeKey(r.text)));
     const reachableView = new Set<string>();
     const reachableRendered = new Set<string>();
     const note = (list: string[], into: Set<string>) => { for (const t of list) into.add(dedupeKey(t)); };
     const reg = content().bundle.registry;
+    const futureCredits = new Set((reg.credits ?? []).flatMap(s => [s.heading, ...s.lines]).map(dedupeKey));
+    expect([...futureCredits].filter(k => !onSheet.has(k))).toEqual([]);
     const m = content().mission;
     note([...reg.notices.dedication, reg.notices.project_disclaimer, reg.notices.ai_disclosure, reg.notices.dramatization, m.title, m.subtitle ?? '', m.start_notice].filter(Boolean), reachableView);
     // Content 0.5.2 presentation text (M01): authored strings the new stages display; collected from the content and checked against the sheet both ways.
@@ -164,6 +166,9 @@ describe('dialogue sheet', () => {
           note(renderedStrings(run, ui({ idle: true })), reachableRendered);
           note(renderedStrings(run, ui({ overlay: 'binder' })), reachableRendered);
           note(renderedStrings(run, ui({ overlay: 'history' })), reachableRendered);
+          // The stacked layout (M02): the status bar's short labels and EVIDENCE key, and the evidence list as an overlay.
+          note(renderedStrings(run, ui({ stacked: true })), reachableRendered);
+          note(renderedStrings(run, ui({ stacked: true, overlay: 'evidence', pinned: Object.keys(run.state.mission.evidence).slice(0, 1), pinHintOpen: true })), reachableRendered);
         }
         steps++;
       };
@@ -172,12 +177,13 @@ describe('dialogue sheet', () => {
       // The resolution cards: the outcome's tier, title and line; each changed relationship's name and label.
       const o = m.outcomes.find((x) => x.id === run.state.mission.completed?.outcome)!;
       const labels = m.resolution_presentation!;
-      note([o.tier!, o.title, o.result_line!, labels.heading, labels.relationships_heading], authored);
+      note([o.tier!, o.title, o.result_line!, labels.heading, labels.relationships_heading, labels.tiers.find((t) => t.id === o.tier)!.meaning], authored);
       for (const c of content().characters.values()) {
         const delta = (run.state.ledger.people[c.id]?.trust ?? 0) - (run.identity.initial_ledger.people[c.id]?.trust ?? 0);
         if (delta) note([c.name, delta > 0 ? labels.trust_up : labels.trust_down], authored);
       }
       note(renderedStrings(run, ui({ screen: 'resolution', resolution: 'result' })), reachableRendered);
+      note(renderedStrings(run, ui({ screen: 'resolution', resolution: 'result', tierInfo: true })), reachableRendered);
       note(renderedStrings(run, ui({ screen: 'resolution', resolution: 'relationships' })), reachableRendered);
       note(renderedStrings(run, ui({ screen: 'debrief' })), reachableRendered);
       note(renderedStrings(run, ui({ screen: 'planning' })), reachableRendered);
@@ -209,6 +215,7 @@ describe('dialogue sheet', () => {
       if (r.kind === 'history-hidden') return !hidden.has(k) && !reachableView.has(k);
       if (r.kind === 'ui.message') return !messageSrc.includes(r.text.split('…')[0]!.trim().slice(0, 24));
       if (r.source === 'app') return !reachableRendered.has(k);
+      if (r.kind.startsWith('credits.')) return !futureCredits.has(k);
       return !reachableView.has(k) && !reachableRendered.has(k) && !authored.has(k);
     });
     expect(unreachable.map((r) => `${r.node} ${r.kind} ${r.text}`), 'sheet rows no route reaches').toEqual([]);

@@ -54,5 +54,14 @@ export function validatePresentation(bundle: ContentBundle, assets: Asset[]): st
     }
     for (const id of [...bundle.mission.debrief_layout.controllers, ...bundle.mission.debrief_layout.astronauts]) if (!people.get(id)?.portraits) errors.push(id + ': resolution participant has no expression pair');
   }
+  const den = bundle.registry.opening_den;
+  if (den) {
+    image(den.background, 1920, 1080, false, 'opening den');
+    motion(den.smoke, 'opening smoke');
+    image(den.beam.asset, 1920, 1080, true, 'opening beam');
+    const r = den.projection_rect;
+    if (r.x < 0 || r.y < 0 || r.x + r.width > 1920 || r.y + r.height > 1080 || r.width * 9 !== r.height * 16) errors.push('opening den: projection rectangle must fit the frame at 16:9');
+    if (den.smoke_loop.crossfade_seconds >= den.smoke_loop.seconds || den.smoke_loop.seconds !== den.smoke.motion.seconds) errors.push('opening den: invalid smoke loop timing');
+  }
   return errors;
 }

@@ -1,0 +1,10 @@
+{
+  "id": "den-lamp-off",
+  "tool": "OpenAI built-in imagegen",
+  "edit_target": "runtime/fno_opening_den_room_plate_v001.png (pre-revision copy preserved in history)",
+  "prompt": "Use case: lighting-weather. Edit target: the supplied existing 16:9 illustrated den game background. Change ONLY lighting. Turn the floor lamp at the left OFF: keep the lamp and shade exactly in place as unlit set dressing, no amber glow inside shade, no warm illumination on wall or furniture from lamp. Make the living room substantially darker, a cinematic night interior with deep shadows. The working film projector and reflected light from the projection wall are the main light source: pale neutral projector light subtly outlines Glen's right cheek, glasses, crew-cut silhouette and right shoulder, the projector reels and nearby tabletop; his back, left side, wood wall, chairs and carpet recede into rich shadow. Maintain just enough shadow detail to read illustration. Keep the projection wall clean, blank and bright with its exact existing shape and position. Preserve ALL composition, perspective, furniture, character identity and pose, vest, glasses, projector, table, cigar/ashtray, borders, proportions and aspect ratio. No new objects, text, logos, dates, stars or projected images. Preserve the original hand-drawn comic realism line work and low-texture painterly finish. This is the BASE plate: do not paint in smoke or a visible volumetric beam, those are existing separate animation layers. Full-bleed 1920x1080 landscape export if possible.",
+  "path": "C:/Users/wolfe/.codex/generated_images/01a0796b-cc32-7fc1-834b-520d57cf528c/exec-88d03967-63a5-49e7-84b0-4d29e3444e26.png",
+  "runtime_asset_id": "opening-den",
+  "content_version": "0.5.3",
+  "asset_revision": 2
+}

@@ -197,9 +197,9 @@ describe('resolution view', () => {
     for (const o of content().mission.outcomes) expect(o.kind).toBe('abort-safe');
     for (const prep of [[], ['contact'], ['contact', 'recovery']] as Prep[][]) for (const route of ['earlier', 'later'] as const) {
       const html = render(store(play(newRun(), script({ prep, route })), { screen: 'resolution' }));
-      const tier = /data-testid="resolution-tier">([A-Z]+)</.exec(html)![1];
+      const tier = /data-testid="resolution-tier"[^>]*>([A-Z]+)</.exec(html)![1];
       expect(['SUCCESS', 'MIXED', 'COSTLY']).toContain(tier);
-      expect(html).not.toMatch(/resolution-tier">(FAILURE|LOSS)</);
+      expect(html).not.toMatch(/resolution-tier"[^>]*>(FAILURE|LOSS)</);
     }
   });
 });
@@ -213,7 +213,7 @@ describe('resolution cards', () => {
     expect(html).toMatch(new RegExp(`<img class="pl-bg" src="[^"]*${filename('g8-resolution-success')}" alt="" data-backdrop data-testid="resolution-plate" />`));
     expect(html).toContain('<div class="res-overlay" data-testid="resolution-overlay">');
     expect(html).toContain('<div class="res-heading" data-testid="resolution-heading">RECOVERY RESULT</div>');
-    expect(html).toContain('<div class="res-tier" data-testid="resolution-tier">SUCCESS</div>');
+    expect(html).toMatch(/<div class="res-tier" data-testid="resolution-tier"[^>]*>SUCCESS<\/div>/); // M02 adds the tier's meaning as a title
     const o = content().mission.outcomes.find((x) => x.id === 'g8-out-earlier-2')!;
     expect(html).toContain(`<div class="res-title" data-testid="resolution-title">${esc(o.title)}</div>`);
     expect(html).toContain(`<p class="res-line" data-testid="resolution-line">${esc(o.result_line!)}</p>`);

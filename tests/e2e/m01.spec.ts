@@ -16,7 +16,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertRoomVisible, unhash } from './room';
-import { TEXT, VIEWPORTS, assertVisibleWithinViewport, awaitRoom, click, fresh, node, setText, shot, skipPrologue, start, toMenu, type TextSize } from './helpers';
+import { TEXT, VIEWPORTS, assertVisibleWithinViewport, awaitRoom, click, fresh, node, playRoute, setText, shot, skipPrologue, start, toMenu, type Prep, type RouteSpec, type TextSize } from './helpers';
 
 const ROOT = resolve(fileURLToPath(new URL('.', import.meta.url)), '..', '..');
 interface Motion { asset: string; placement: { x: number; y: number; width: number; height: number; opacity: number }; motion: { seconds: number; from: { x: number; y: number }; to: { x: number; y: number } } }
@@ -33,36 +33,6 @@ const manifest = JSON.parse(readFileSync(resolve(ROOT, 'assets', 'manifest.json'
 const file = (id: string): string => manifest.assets.find((a) => a.id === id)!.filename;
 const basename = (src: string | null): string => unhash(decodeURIComponent((src ?? '').split('/').pop() ?? ''));
 const PEOPLE_ORDER = [...mission.debrief_layout.controllers, ...mission.debrief_layout.astronauts];
-
-type Prep = 'contact' | 'recovery' | 'systems';
-interface RouteSpec { prep: Prep[]; route: 'earlier' | 'later'; stance: 'blame' | 'ground' }
-
-/** From the mission briefing to the outcome record, by clicking. */
-async function playRoute(page: Page, r: RouteSpec): Promise<void> {
-  expect(await node(page)).toBe('g8-brief');
-  await click(page, 'continue-g8-brief-continue');
-  for (const p of r.prep) await click(page, `option-g8-prep-${p}`);
-  await click(page, 'continue-g8-prep-finish');
-  await click(page, 'continue-g8-docking-report-continue');
-  await click(page, 'continue-g8-loss-of-contact-continue');
-  await click(page, 'continue-g8-gap-note-continue');
-  await click(page, 'continue-g8-crisis-report-continue');
-  await click(page, 'continue-g8-stabilization-report-continue');
-  await click(page, 'option-g8-order-return');
-  await click(page, `option-g8-return-${r.route}`);
-  await click(page, 'continue-g8-execute-return');
-  await click(page, 'continue-g8-ground-execution-continue');
-  await click(page, 'continue-g8-return-beat-1-continue');
-  await click(page, 'continue-g8-return-beat-2-continue');
-  await click(page, 'continue-g8-pickup-report-continue');
-  await click(page, 'continue-g8-relationship-response-continue');
-  await click(page, 'option-g8-adopt-provenance');
-  await click(page, 'continue-g8-accountability-brief-continue');
-  await click(page, r.stance === 'blame' ? 'option-g8-back-crew-criticism' : 'option-g8-own-ground-contingencies');
-  await click(page, 'continue-g8-resolve-accountability');
-  await click(page, 'continue-g8-finish');
-  await expect(page.getByTestId('screen-resolution')).toBeVisible();
-}
 
 /** The net trust change per person, read from the run's state (the same arithmetic the card uses; nothing is written). */
 async function expectedDeltas(page: Page): Promise<{ id: string; delta: number }[]> {

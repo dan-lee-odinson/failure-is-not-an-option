@@ -1,9 +1,9 @@
 {
-  "content_version": "0.5.2",
+  "content_version": "0.5.3",
   "manifest_version": "1.0.0",
-  "task": "FNO-M01",
+  "task": "FNO-Codex-Content-0.5.3",
   "status": "delivered",
-  "notes": "Production art exports (Codex art v1.0.0), the Apollo interface kit v002 faces used as label-free control backgrounds behind native buttons with live text, and the game's audio (Dan's soundtrack, the CC0/CC BY soundscape set, and the generated Quindar tones). Image paths are relative to assets/; audio paths are relative to public/audio/. Per-asset status final is the existing schema-compatible equivalent of delivered. Room badge is intentionally blank for the exact v005 SVG overlay. See docs/BUILD-HANDOFF-M00b.md. Content 0.5.2 (FNO-M01) adds 22 presentation exports: eight astronaut expressions, four Voss/Reed expressions, five prologue/facility backgrounds, three recovery plates and two moving layers; new art is delivered for director review (final is the schema delivery flag, not approval). See docs/BUILD-HANDOFF-M01.md and docs/codex-content-0.5.2/28-Prologue-and-Resolution-Treatment.md.",
+  "notes": "Production art exports (Codex art v1.0.0), the Apollo interface kit v002 faces used as label-free control backgrounds behind native buttons with live text, and the game's audio (Dan's soundtrack, the CC0/CC BY soundscape set, and the generated Quindar tones). Image paths are relative to assets/; audio paths are relative to public/audio/. Per-asset status final is the existing schema-compatible equivalent of delivered. Room badge is intentionally blank for the exact v005 SVG overlay. See docs/BUILD-HANDOFF-M00b.md. Content 0.5.2 (FNO-M01) adds 22 presentation exports: eight astronaut expressions, four Voss/Reed expressions, five prologue/facility backgrounds, three recovery plates and two moving layers; new art is delivered for director review (final is the schema delivery flag, not approval). See docs/BUILD-HANDOFF-M01.md and docs/codex-content-0.5.2/28-Prologue-and-Resolution-Treatment.md. Content 0.5.3 replaces the composite CAPCOM with Jim Lovell; the retired image remains in package art/history. New den layers are awaiting montage assembly, not a cue or opening-stage change.",
   "assets": [
     {
       "id": "room-gemini-console",
@@ -15,19 +15,6 @@
       "framing": "2D over-the-shoulder forward console plate; upright Glen and chair in left third, blank upper vest back, room and desk dominate.",
       "reference_version": "15-Claude-Art-Drop-Request; 14-Over-the-Shoulder-Camera-Direction; approved scene-samples-v002; FNO-M00a art v1.0.0",
       "origin": "AI-generated using OpenAI built-in image_gen.imagegen; FNO-M00a prompt set v1.0.0, room. Contract-size sRGB export. Source and processing provenance: 00_HANDOFF.md. Uniform Lanczos upscale with subpixel vertical crop; badge-free RGB export.",
-      "attribution": "Generated artwork under Danâ€™s human art direction, prompted and prepared by Codex. Uses project-generated scene references; no third-party photographic cutouts or official agency insignia. Controller identities are fictional composites.",
-      "status": "final"
-    },
-    {
-      "id": "portrait-capcom",
-      "filename": "fno_gemini_portrait_capcom_neutral_v001.png",
-      "width": 768,
-      "height": 1024,
-      "alpha": true,
-      "color_space": "sRGB",
-      "framing": "Canonical neutral head-and-upper-torso bust; entire head visible, shared 3:4 canvas; alpha outside figure. Face remains readable at thumbnail size.",
-      "reference_version": "15-Claude-Art-Drop-Request; 14-Over-the-Shoulder-Camera-Direction; approved scene-samples-v002; FNO-M00a art v1.0.0",
-      "origin": "AI-generated using OpenAI built-in image_gen.imagegen; FNO-M00a prompt set v1.0.0, capcom. Contract-size sRGB export. Source and processing provenance: 00_HANDOFF.md. User-authorized local background/alpha cleanup and proportional bust framing; antialiased RGBA export.",
       "attribution": "Generated artwork under Danâ€™s human art direction, prompted and prepared by Codex. Uses project-generated scene references; no third-party photographic cutouts or official agency insignia. Controller identities are fictional composites.",
       "status": "final"
     },
@@ -539,7 +526,7 @@
       "rights": "CC0 1.0 (public-domain dedication, verified on the Freesound sound page on 7 September 2026): may be copied, modified, distributed and used for any purpose; credited anyway.",
       "license": "CC0 1.0",
       "source_url": "https://freesound.org/people/EricsSoundschmiede/sounds/457411/",
-      "duration_s": 7.0,
+      "duration_s": 7,
       "origin": "Downloaded by Dan from Freesound on 7 September 2026 under its original filename; the file is unchanged. Use: Button press: Choose, Commit, Continue, Begin (one press cut from the file at runtime).",
       "attribution": "Uploaded to freesound.org by EricsSoundschmiede under CC0 1.0; chosen by Dan from 22-Soundscape-CC0-Candidates.md. Regions and gains live in app/soundscape-map.json.",
       "status": "final"
@@ -916,6 +903,71 @@
       "reference_version": "26-Playtest-2-Findings; 27-Direction-Prologue-Portraits-Resolution-Cards; accepted equipment and character sheets",
       "origin": "OpenAI built-in imagegen; generated source retained. White light-texture export with luminance-derived alpha and proportional contract-size resize. Source and prompt in art/M01-presentation-v001.",
       "attribution": "Original AI-generated illustration under Dan’s human art direction, prepared by Codex. No agency marks. Staging and expressions are authored presentation, not documentary evidence or attributed quotations.",
+      "status": "final"
+    },
+    {
+      "id": "portrait-lovell-neutral",
+      "filename": "fno_gemini_portrait_lovell_neutral_v001.png",
+      "width": 768,
+      "height": 1024,
+      "alpha": true,
+      "color_space": "sRGB",
+      "framing": "Head and upper torso cut from the existing v003 Lovell sheet; original expression unchanged.",
+      "reference_version": "character-sheets-v003 / fno_sheet_jim-lovell_v001.png; request 31",
+      "origin": "Existing generated sheet only; exact cell crop, paper-alpha cleanup with original shirt pixels retained, proportional framing. No new drawing.",
+      "attribution": "Project artwork under human direction. Historical Jim Lovell; expression is an art asset, not a claim of a documented feeling.",
+      "status": "final"
+    },
+    {
+      "id": "portrait-lovell-concerned",
+      "filename": "fno_gemini_portrait_lovell_concerned_v001.png",
+      "width": 768,
+      "height": 1024,
+      "alpha": true,
+      "color_space": "sRGB",
+      "framing": "Head and upper torso cut from the existing v003 Lovell sheet; original expression unchanged.",
+      "reference_version": "character-sheets-v003 / fno_sheet_jim-lovell_v001.png; request 31",
+      "origin": "Existing generated sheet only; exact cell crop, paper-alpha cleanup with original shirt pixels retained, proportional framing. No new drawing.",
+      "attribution": "Project artwork under human direction. Historical Jim Lovell; expression is an art asset, not a claim of a documented feeling.",
+      "status": "final"
+    },
+    {
+      "id": "opening-den",
+      "filename": "fno_opening_den_room_plate_v001.png",
+      "width": 1920,
+      "height": 1080,
+      "alpha": false,
+      "color_space": "sRGB",
+      "framing": "Over-the-shoulder Glen at left, home film projector and clean wall at right; runtime projection rectangle recorded in registry.opening_den.",
+      "reference_version": "30 section 8; 31 section 2; accepted room and Glen character sheet",
+      "origin": "OpenAI built-in imagegen. Proportional contract-size export. Sources and exact prompts retained in art/.",
+      "attribution": "Original game artwork under Dan’s direction, prepared by Codex. Glen retains his ageless identity; no agency marks, brands or dates.",
+      "status": "final"
+    },
+    {
+      "id": "opening-den-smoke",
+      "filename": "fno_opening_den_smoke_layer_v001.png",
+      "width": 1920,
+      "height": 1080,
+      "alpha": true,
+      "color_space": "sRGB",
+      "framing": "Full-canvas transparent VFX texture; placement/opacity in registry.opening_den.",
+      "reference_version": "30 section 8; 31 section 2; accepted room and Glen character sheet",
+      "origin": "OpenAI built-in imagegen. Luminance/alpha export with warm-white RGB; black matte removed. Sources and exact prompts retained in art/.",
+      "attribution": "Original game artwork under Dan’s direction, prepared by Codex. Glen retains his ageless identity; no agency marks, brands or dates.",
+      "status": "final"
+    },
+    {
+      "id": "opening-den-beam",
+      "filename": "fno_opening_den_beam_layer_v001.png",
+      "width": 1920,
+      "height": 1080,
+      "alpha": true,
+      "color_space": "sRGB",
+      "framing": "Full-canvas transparent VFX texture; placement/opacity in registry.opening_den.",
+      "reference_version": "30 section 8; 31 section 2; accepted room and Glen character sheet",
+      "origin": "OpenAI built-in imagegen. Luminance/alpha export with warm-white RGB; black matte removed. Sources and exact prompts retained in art/.",
+      "attribution": "Original game artwork under Dan’s direction, prepared by Codex. Glen retains his ageless identity; no agency marks, brands or dates.",
       "status": "final"
     }
   ]

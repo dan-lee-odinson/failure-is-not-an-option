@@ -3,100 +3,493 @@
   "$id": "https://fno.local/schema/defs.schema.json",
   "title": "Shared definitions: ids, conditions, effects, lines, options, provenance",
   "$defs": {
-    "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
-    "semver": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
-    "text": { "type": "string", "minLength": 1 },
-    "url": { "type": "string", "format": "uri" },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
     "condition": {
       "oneOf": [
-        { "type": "object", "required": ["fact"], "properties": { "fact": { "$ref": "#/$defs/id" } }, "additionalProperties": false },
-        { "type": "object", "required": ["evidence"], "properties": { "evidence": { "$ref": "#/$defs/id" } }, "additionalProperties": false },
-        { "type": "object", "required": ["procedure"], "properties": { "procedure": { "$ref": "#/$defs/id" } }, "additionalProperties": false },
-        { "type": "object", "required": ["chose"], "properties": { "chose": { "$ref": "#/$defs/id" } }, "additionalProperties": false },
-        { "type": "object", "required": ["event_seen"], "properties": { "event_seen": { "$ref": "#/$defs/id" } }, "additionalProperties": false },
-        { "type": "object", "required": ["all"], "properties": { "all": { "type": "array", "items": { "$ref": "#/$defs/condition" } } }, "additionalProperties": false },
-        { "type": "object", "required": ["any"], "properties": { "any": { "type": "array", "items": { "$ref": "#/$defs/condition" } } }, "additionalProperties": false },
-        { "type": "object", "required": ["not"], "properties": { "not": { "$ref": "#/$defs/condition" } }, "additionalProperties": false }
+        {
+          "type": "object",
+          "required": [
+            "fact"
+          ],
+          "properties": {
+            "fact": {
+              "$ref": "#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "evidence"
+          ],
+          "properties": {
+            "evidence": {
+              "$ref": "#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "procedure"
+          ],
+          "properties": {
+            "procedure": {
+              "$ref": "#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "chose"
+          ],
+          "properties": {
+            "chose": {
+              "$ref": "#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "event_seen"
+          ],
+          "properties": {
+            "event_seen": {
+              "$ref": "#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "all"
+          ],
+          "properties": {
+            "all": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/condition"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "any"
+          ],
+          "properties": {
+            "any": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/condition"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "not"
+          ],
+          "properties": {
+            "not": {
+              "$ref": "#/$defs/condition"
+            }
+          },
+          "additionalProperties": false
+        }
       ]
     },
     "effect": {
       "oneOf": [
-        { "type": "object", "required": ["set_fact"], "properties": { "set_fact": { "$ref": "#/$defs/id" }, "label": { "$ref": "#/$defs/text" } }, "additionalProperties": false },
-        { "type": "object", "required": ["add_evidence"], "properties": { "add_evidence": { "$ref": "#/$defs/id" } }, "additionalProperties": false },
-        { "type": "object", "required": ["adjust"], "properties": { "adjust": { "type": "object", "required": ["path", "by"], "properties": { "path": { "type": "string", "pattern": "^(people\\.[a-z0-9]+(-[a-z0-9]+)*\\.trust|quantities\\.(funding|operational_trust|political_capital|authority))$" }, "by": { "type": "integer" } }, "additionalProperties": false } }, "additionalProperties": false },
-        { "type": "object", "required": ["adopt_procedure"], "properties": { "adopt_procedure": { "$ref": "#/$defs/id" } }, "additionalProperties": false },
-        { "type": "object", "required": ["append_note"], "properties": { "append_note": { "type": "object", "required": ["person", "fact"], "properties": { "person": { "$ref": "#/$defs/id" }, "fact": { "$ref": "#/$defs/id" } }, "additionalProperties": false } }, "additionalProperties": false },
-        { "type": "object", "required": ["goto"], "properties": { "goto": { "$ref": "#/$defs/id" } }, "additionalProperties": false }
+        {
+          "type": "object",
+          "required": [
+            "set_fact"
+          ],
+          "properties": {
+            "set_fact": {
+              "$ref": "#/$defs/id"
+            },
+            "label": {
+              "$ref": "#/$defs/text"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "add_evidence"
+          ],
+          "properties": {
+            "add_evidence": {
+              "$ref": "#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "adjust"
+          ],
+          "properties": {
+            "adjust": {
+              "type": "object",
+              "required": [
+                "path",
+                "by"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "pattern": "^(people\\.[a-z0-9]+(-[a-z0-9]+)*\\.trust|quantities\\.(funding|operational_trust|political_capital|authority))$"
+                },
+                "by": {
+                  "type": "integer"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "adopt_procedure"
+          ],
+          "properties": {
+            "adopt_procedure": {
+              "$ref": "#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "append_note"
+          ],
+          "properties": {
+            "append_note": {
+              "type": "object",
+              "required": [
+                "person",
+                "fact"
+              ],
+              "properties": {
+                "person": {
+                  "$ref": "#/$defs/id"
+                },
+                "fact": {
+                  "$ref": "#/$defs/id"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "goto"
+          ],
+          "properties": {
+            "goto": {
+              "$ref": "#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        }
       ]
     },
-    "effects": { "type": "array", "items": { "$ref": "#/$defs/effect" } },
+    "effects": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/effect"
+      }
+    },
     "line": {
       "type": "object",
-      "required": ["speaker", "text"],
+      "required": [
+        "speaker",
+        "text"
+      ],
       "properties": {
-        "speaker": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
-        "text": { "$ref": "#/$defs/text" },
-        "cites": { "type": "array", "items": { "$ref": "#/$defs/id" } },
-        "when": { "$ref": "#/$defs/condition" }
+        "speaker": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "text": {
+          "$ref": "#/$defs/text"
+        },
+        "cites": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "when": {
+          "$ref": "#/$defs/condition"
+        },
+        "provenance": {
+          "$ref": "#/$defs/line_provenance"
+        }
       },
       "additionalProperties": false
     },
     "question": {
       "type": "object",
-      "required": ["id", "text", "answer"],
+      "required": [
+        "id",
+        "text",
+        "answer"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
-        "text": { "$ref": "#/$defs/text" },
-        "answer": { "$ref": "#/$defs/line" },
-        "reveals": { "type": "array", "items": { "$ref": "#/$defs/id" } }
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "text": {
+          "$ref": "#/$defs/text"
+        },
+        "answer": {
+          "$ref": "#/$defs/line"
+        },
+        "reveals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        }
       },
       "additionalProperties": false
     },
     "document": {
       "type": "object",
-      "required": ["evidence"],
-      "properties": { "evidence": { "$ref": "#/$defs/id" }, "when": { "$ref": "#/$defs/condition" } },
+      "required": [
+        "evidence"
+      ],
+      "properties": {
+        "evidence": {
+          "$ref": "#/$defs/id"
+        },
+        "when": {
+          "$ref": "#/$defs/condition"
+        }
+      },
       "additionalProperties": false
     },
     "continue": {
       "type": "object",
-      "required": ["id", "label"],
-      "properties": { "id": { "$ref": "#/$defs/id" }, "label": { "$ref": "#/$defs/text" } },
+      "required": [
+        "id",
+        "label"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "$ref": "#/$defs/text"
+        }
+      },
       "additionalProperties": false
     },
     "option": {
       "type": "object",
-      "required": ["id", "intent", "evidence", "cost", "uncertainty", "effects"],
+      "required": [
+        "id",
+        "intent",
+        "evidence",
+        "cost",
+        "uncertainty",
+        "effects"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
-        "intent": { "$ref": "#/$defs/text" },
-        "statement": { "$ref": "#/$defs/text" },
-        "subtitle": { "$ref": "#/$defs/text" },
-        "evidence": { "type": "array", "items": { "$ref": "#/$defs/id" } },
-        "attraction": { "$ref": "#/$defs/text" },
-        "cost": { "$ref": "#/$defs/text" },
-        "uncertainty": { "$ref": "#/$defs/text" },
-        "requires": { "$ref": "#/$defs/condition" },
-        "unavailable_reason": { "$ref": "#/$defs/text" },
-        "supported_by": { "type": "array", "items": { "$ref": "#/$defs/id" } },
-        "effects": { "$ref": "#/$defs/effects" }
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "intent": {
+          "$ref": "#/$defs/text"
+        },
+        "statement": {
+          "$ref": "#/$defs/text"
+        },
+        "subtitle": {
+          "$ref": "#/$defs/text"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "attraction": {
+          "$ref": "#/$defs/text"
+        },
+        "cost": {
+          "$ref": "#/$defs/text"
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/text"
+        },
+        "requires": {
+          "$ref": "#/$defs/condition"
+        },
+        "unavailable_reason": {
+          "$ref": "#/$defs/text"
+        },
+        "supported_by": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "effects": {
+          "$ref": "#/$defs/effects"
+        }
       },
       "additionalProperties": false
     },
     "provenance": {
       "type": "object",
-      "required": ["sources", "fiction", "note"],
+      "required": [
+        "sources",
+        "fiction",
+        "note"
+      ],
       "properties": {
-        "sources": { "type": "array", "items": { "type": "string", "pattern": "^H[0-9]+$" } },
-        "fiction": { "type": "array", "items": { "type": "string", "pattern": "^F[0-9]+$" } },
-        "note": { "type": "string" }
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^H[0-9]+$"
+          }
+        },
+        "fiction": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^F[0-9]+$"
+          }
+        },
+        "note": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "conditional_text": {
       "type": "object",
-      "required": ["when", "text"],
-      "properties": { "when": { "$ref": "#/$defs/condition" }, "text": { "$ref": "#/$defs/text" } },
+      "required": [
+        "when",
+        "text"
+      ],
+      "properties": {
+        "when": {
+          "$ref": "#/$defs/condition"
+        },
+        "text": {
+          "$ref": "#/$defs/text"
+        }
+      },
+      "additionalProperties": false
+    },
+    "line_provenance": {
+      "type": "object",
+      "required": [
+        "tag",
+        "sources",
+        "pdf_pages",
+        "printed_pages",
+        "met",
+        "fiction",
+        "note"
+      ],
+      "properties": {
+        "tag": {
+          "enum": [
+            "procedural",
+            "paraphrase",
+            "quotation"
+          ]
+        },
+        "sources": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^H[0-9]+$"
+          }
+        },
+        "pdf_pages": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "printed_pages": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "met": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9]{2}:[0-9]{2}:[0-9]{2}$"
+          }
+        },
+        "fiction": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^F[0-9]+$"
+          }
+        },
+        "note": {
+          "$ref": "#/$defs/text"
+        }
+      },
       "additionalProperties": false
     }
   }

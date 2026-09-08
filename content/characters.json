@@ -1,5 +1,5 @@
 {
-  "content_version": "0.5.2",
+  "content_version": "0.5.3",
   "characters": [
     {
       "id": "glen-kurtz",
@@ -8,7 +8,7 @@
       "display": "Glen Kurtz — FLIGHT",
       "kind": "player",
       "portrait": null,
-      "portrayal": "Fictional player director. An unmistakable fictional homage; not a portrayal of any real flight director.",
+      "portrayal": "Fictional player director. An unmistakable fictional homage; not a portrayal of any real flight director. Glen Kurtz is ageless: the same man at Gemini VIII and Artemis; never draw him older.",
       "dramatization": true
     },
     {
@@ -87,14 +87,20 @@
     },
     {
       "id": "g8-capcom",
-      "name": "CAPCOM",
+      "name": "Jim Lovell",
       "role": "CAPCOM",
-      "display": "CAPCOM",
-      "kind": "composite-controller",
-      "manner": "direct",
-      "portrait": "portrait-capcom",
-      "portrayal": "Unnamed composite; direct. Not an actual historical console operator.",
-      "dramatization": true
+      "display": "JIM LOVELL — CAPCOM",
+      "kind": "historical",
+      "portrait": "portrait-lovell-neutral",
+      "portrayal": "Historical Houston CAPCOM. Procedural loop calls and sourced crew/station relays only; each line records provenance. Relay framing is dramatized, with no invented opinions, recommendations or feelings.",
+      "dramatization": true,
+      "portraits": {
+        "neutral": "portrait-lovell-neutral",
+        "concerned": "portrait-lovell-concerned"
+      },
+      "sources": [
+        "H7"
+      ]
     },
     {
       "id": "g8-systems",

@@ -1,0 +1,72 @@
+{
+  "passed": true,
+  "images": [
+    {
+      "id": "portrait-lovell-neutral",
+      "file": "assets/fno_gemini_portrait_lovell_neutral_v001.png",
+      "width": 768,
+      "height": 1024,
+      "channels": 4,
+      "hasAlpha": true,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "passed": true
+    },
+    {
+      "id": "portrait-lovell-concerned",
+      "file": "assets/fno_gemini_portrait_lovell_concerned_v001.png",
+      "width": 768,
+      "height": 1024,
+      "channels": 4,
+      "hasAlpha": true,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "passed": true
+    },
+    {
+      "id": "opening-den",
+      "file": "assets/fno_opening_den_room_plate_v001.png",
+      "width": 1920,
+      "height": 1080,
+      "channels": 3,
+      "hasAlpha": false,
+      "alpha_range": null,
+      "passed": true
+    },
+    {
+      "id": "opening-den-smoke",
+      "file": "assets/fno_opening_den_smoke_layer_v001.png",
+      "width": 1920,
+      "height": 1080,
+      "channels": 4,
+      "hasAlpha": true,
+      "alpha_range": [
+        0,
+        251
+      ],
+      "passed": true
+    },
+    {
+      "id": "opening-den-beam",
+      "file": "assets/fno_opening_den_beam_layer_v001.png",
+      "width": 1920,
+      "height": 1080,
+      "channels": 4,
+      "hasAlpha": true,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "passed": true
+    }
+  ],
+  "visual_review": [
+    "Original Lovell sheet and both extracted portraits inspected; neutral/concerned cell identity, head/headset, opaque white shirt, transparent exterior and no cell labels.",
+    "Den and composite inspected for Glen from behind, vest, lounger, projector, cigar/ashtray, clean projection inset, aligned beam and smoke.",
+    "Initial beam.png has a visible checker treatment and is rejected source history only. Runtime beam uses beam-final.png with matte converted to alpha."
+  ]
+}

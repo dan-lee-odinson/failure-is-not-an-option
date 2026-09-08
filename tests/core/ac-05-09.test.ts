@@ -168,10 +168,10 @@ describe('AC-09 — Invalid inputs and imports are rejected before activation', 
   });
 
   it('unsupported content versions from earlier packages', () => {
-    for (const v of ['0.1.0', '0.2.0', '0.3.0', '0.4.0', '0.5.0']) {
+    for (const v of ['0.1.0', '0.2.0', '0.3.0', '0.4.0', '0.5.0', '0.5.1', '0.5.2']) {
       const s = goodSave();
       s.identity.content_version = v;
-      reject(s, /unsupported-content-version/, new RegExp(`content version ${v.replace(/\./g, '\\.')}.*supports 0\\.5\\.2`));
+      reject(s, /unsupported-content-version/, new RegExp(`content version ${v.replace(/\./g, '\\.')}.*supports 0\\.5\\.3`));
     }
     const s = goodSave();
     s.identity.content_fingerprint = 'deadbeef';

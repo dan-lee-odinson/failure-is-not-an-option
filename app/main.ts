@@ -7,7 +7,7 @@
  */
 import { Run, describeNode, indexContent, type Input } from '../core';
 import { bundle } from './content-bundle';
-import { DESIGN, render } from './render';
+import { DESIGN, esc, render } from './render';
 import { describeResolution } from './resolution';
 import { exportFilename, exportText, hasBrowserSave, importFromText, loadFromBrowser, saveToBrowser } from './storage';
 import { layoutEmblem } from './plate';
@@ -196,7 +196,88 @@ function enterRoom(): void {
 
 function toDebrief(): void {
   store.ui.screen = 'debrief';
+  store.ui.tierInfo = false;
   announce('Debrief.');
+}
+
+// ---------------------------------------------------------------------------
+// Stacked play layout (M02, Part 2): presentation only, never persisted
+// ---------------------------------------------------------------------------
+
+/** The dialogue area must show at least this many lines of body text; otherwise the layout stacks. */
+const STACK_MIN_LINES = 4;
+/** The viewport, text size and node the current stacked decision was made for; a change re-evaluates from the column layout. */
+let stackedKey = '';
+
+/** The heaviest conversation screen the content can produce: the longest scene title and header label, and the largest set of Glen's questions. */
+const PROBE = ((): { title: string; label: string; questions: string[] } => {
+  let title = '';
+  let label = '';
+  let questions: string[] = [];
+  for (const { node } of content.nodes.values()) {
+    if ((node.type === 'briefing' || node.type === 'decision' || node.type === 'event') && (node.title ?? '').length > title.length) title = node.title ?? '';
+    if ((node.type === 'briefing' || node.type === 'decision') && (node.header_label ?? '').length > label.length) label = node.header_label ?? '';
+    if ((node.type === 'briefing' || node.type === 'decision') && (node.questions?.length ?? 0) > questions.length) questions = (node.questions ?? []).map((q) => q.text);
+  }
+  return { title, label, questions };
+})();
+
+/**
+ * In the column layout as painted, with this viewport and text size: would the conversation panel's dialogue area be
+ * shorter than four lines of body text on the heaviest screen? Measured with a hidden probe panel in the real
+ * stylesheet — the card strip at its CSS maximum, the panel's head, the active portrait where the stylesheet stacks it
+ * above the lines, and the largest question set pinned in the footer — so the answer depends only on the viewport and
+ * the text size, never on the node, and the layout never flips between screens within a session.
+ */
+function dialogueStarves(root: HTMLElement): boolean {
+  const stage = root.querySelector<HTMLElement>('.stage');
+  const strip = root.querySelector<HTMLElement>('.strip');
+  const status = root.querySelector<HTMLElement>('.status-bar');
+  if (!stage || !strip || !status) return false;
+  const stripMax = parseFloat(getComputedStyle(strip).maxHeight) || strip.getBoundingClientRect().height;
+  const stageWorst = innerHeight - status.getBoundingClientRect().height - stripMax;
+  const probe = document.createElement('section');
+  probe.className = 'conversation panel';
+  probe.setAttribute('aria-hidden', 'true');
+  probe.style.visibility = 'hidden';
+  probe.style.pointerEvents = 'none';
+  probe.innerHTML = `<div class="conv-head"><div class="scene-title">${esc(PROBE.title)}</div><div class="header-label">${esc(PROBE.label)}</div></div>`
+    + `<div class="conv-body with-portrait"><figure class="active-portrait"><img alt="" /><figcaption class="who">x</figcaption></figure><div class="conv-lines"><div class="line no-speaker"><div><div class="what">x</div></div></div></div></div>`
+    + (PROBE.questions.length ? `<div class="conv-questions"><div class="questions">${PROBE.questions.map((q) => `<button type="button" class="question paper" tabindex="-1">${esc(q)}</button>`).join('')}</div></div>` : '');
+  stage.appendChild(probe);
+  try {
+    const inset = parseFloat(getComputedStyle(probe).top) || 0;
+    const height = Math.max(0, stageWorst - 2 * inset);
+    probe.style.maxHeight = `${height}px`;
+    probe.style.height = `${height}px`;
+    const body = probe.querySelector<HTMLElement>('.conv-body')!;
+    const lines = probe.querySelector<HTMLElement>('.conv-lines')!;
+    const b = body.getBoundingClientRect();
+    const l = lines.getBoundingClientRect();
+    const cs = getComputedStyle(lines);
+    const lineHeight = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.45;
+    return b.bottom - Math.max(b.top, l.top) < STACK_MIN_LINES * lineHeight;
+  } finally {
+    probe.remove();
+  }
+}
+
+/** Decide the layout for this viewport and text size from the column layout, once; paint again only if it changes. */
+function evaluateStacked(root: HTMLElement): void {
+  const ui = store.ui;
+  const key = ui.screen === 'console' ? `${innerWidth}x${innerHeight}|${ui.textSize}` : '';
+  if (key === stackedKey) return;
+  stackedKey = key;
+  if (!key) { ui.stacked = false; return; }
+  ui.stacked = false;
+  root.innerHTML = render(store);
+  ui.stacked = dialogueStarves(root);
+}
+
+let paintFrame = 0;
+function schedulePaint(): void {
+  if (paintFrame) return;
+  paintFrame = requestAnimationFrame(() => { paintFrame = 0; paint(); });
 }
 
 /**
@@ -300,7 +381,11 @@ function persistAudio(): void {
   director.setPrefs(store.ui.audio);
 }
 
-/** Begin (or Skip) is the explicit player interaction: the master goes on unless the player has already set it (playtest 2, note 1). */
+/**
+ * Begin (or Skip) is the explicit player interaction: the master goes on unless the player has already set it (playtest 2,
+ * note 1). The menu's play keys (New Campaign, Continue, Load, Import) count too (M02): a returning player who never
+ * pressed Begin on this browser gets the same default; a persisted setting always wins.
+ */
 function audioOnAtBegin(): void {
   director.unlock();
   if (!audioPersisted && !store.ui.audio.enabled) {
@@ -405,9 +490,16 @@ export function dispatch(action: string, arg?: string): void {
       break;
     }
     case 'start-new': {
+      audioOnAtBegin();
       director.signal('start-new');
       director.event('ui:menu-select');
       startNewCampaign();
+      break;
+    }
+    case 'tier-info-toggle': {
+      if (ui.screen !== 'resolution') break;
+      ui.tierInfo = !ui.tierInfo;
+      director.event('ui:menu-select');
       break;
     }
     case 'prologue-next': {
@@ -442,10 +534,11 @@ export function dispatch(action: string, arg?: string): void {
       break;
     }
     case 'to-resolution': {
-      if (store.run && describeResolution(content, store.run)) { ui.screen = 'resolution'; ui.resolution = 'result'; }
+      if (store.run && describeResolution(content, store.run)) { ui.screen = 'resolution'; ui.resolution = 'result'; ui.tierInfo = false; }
       break;
     }
     case 'start-load': {
+      audioOnAtBegin();
       director.signal('start-load');
       director.event('ui:menu-select');
       const r = loadFromBrowser(content);
@@ -523,6 +616,7 @@ export function dispatch(action: string, arg?: string): void {
       break;
     }
     case 'load-browser': {
+      audioOnAtBegin();
       const r = loadFromBrowser(content);
       if (r.ok) { activateRun(r.run, true); ui.saveMessage = 'Save loaded.'; ui.overlay = null; }
       else ui.saveMessage = r.message;
@@ -537,6 +631,7 @@ export function dispatch(action: string, arg?: string): void {
     }
     case 'import-text': {
       if (arg === undefined) break;
+      audioOnAtBegin();
       const r = importFromText(content, arg);
       if (r.ok) { activateRun(r.run, true); ui.saveMessage = 'Import verified and loaded.'; ui.overlay = null; }
       else ui.saveMessage = `Import rejected — your current session and stored save are unchanged. ${r.message}`;
@@ -544,6 +639,7 @@ export function dispatch(action: string, arg?: string): void {
       break;
     }
     case 'new-campaign': {
+      audioOnAtBegin();
       director.signal('start-new');
       director.event('ui:menu-select');
       startNewCampaign();
@@ -581,6 +677,8 @@ export function dispatch(action: string, arg?: string): void {
 let lastFocus: string | null = null;
 let lastScreenId: string | null = null;
 let lastNodeId: string | null = null;
+/** The console node the previous paint showed (the stacked layout scrolls to the top when it changes). */
+let lastPaintedNode: string | null = null;
 const openCapcomLines = new Set<string>();
 
 /** Presentation-only audio signals derived from the painted state (never from the log). */
@@ -657,18 +755,27 @@ function paint(): void {
   document.documentElement.setAttribute('data-text', store.ui.textSize);
   store.ui.fullscreen = fullscreenState();
   idleDirty = false;
+  evaluateStacked(root);
+  if (!store.ui.stacked && store.ui.overlay === 'evidence') store.ui.overlay = null; // the column is back: the list lives there again
   root.innerHTML = render(store);
   layoutEmblem();
   driveLayer(layerBefore);
   const newScroll = document.getElementById('op-scroll');
   if (newScroll && keepScroll !== null) newScroll.scrollTop = keepScroll;
+  // In the stacked layout the page scrolls: a new node is read from the top, and the automatic focus on the next key (below the fold) must not drag the page down to it.
+  const stacked = store.ui.stacked;
+  const nodeNow = store.ui.screen === 'console' ? store.run?.currentNode()?.node.id ?? null : null;
+  if (stacked && nodeNow !== lastPaintedNode) window.scrollTo(0, 0);
+  lastPaintedNode = nodeNow;
+  const focusOpts: FocusOptions = { preventScroll: stacked };
   if (store.ui.overlay) {
-    const first = root.querySelector<HTMLElement>('.overlay [data-focus]');
-    first?.focus();
+    // A control inside the overlay keeps focus across a repaint (a pin in the evidence list); otherwise the first control.
+    const inside = focusKey ? root.querySelector<HTMLElement>(`.overlay [data-focus="${CSS.escape(focusKey)}"]`) : null;
+    (inside && !inside.hasAttribute('disabled') ? inside : root.querySelector<HTMLElement>('.overlay [data-focus]'))?.focus(focusOpts);
   } else if (focusKey) {
     const el = root.querySelector<HTMLElement>(`[data-focus="${CSS.escape(focusKey)}"]`);
-    if (el && !el.hasAttribute('disabled')) el.focus();
-    else root.querySelector<HTMLElement>('[data-focus-default]')?.focus();
+    if (el && !el.hasAttribute('disabled')) el.focus(focusOpts);
+    else root.querySelector<HTMLElement>('[data-focus-default]')?.focus(focusOpts);
   }
   syncAudio();
   driveProseScroll();
@@ -728,6 +835,12 @@ function wire(): void {
       dispatch('close-overlay');
       return;
     }
+    if (ev.key === 'Escape' && store.ui.tierInfo) {
+      ev.preventDefault();
+      lastFocus = 'tier-info-toggle';
+      dispatch('tier-info-toggle');
+      return;
+    }
     if (ev.key === 'Tab' && store.ui.overlay) {
       const focusables = Array.from(root.querySelectorAll<HTMLElement>('.overlay button, .overlay a[href], .overlay input, .overlay [tabindex="0"], .overlay summary'))
         .filter((el) => !el.hasAttribute('disabled'));
@@ -754,13 +867,14 @@ function splitAction(s: string): [string, string | undefined] {
 
 declare global {
   interface Window {
-    __fno?: { store: Store; dispatch: typeof dispatch; fingerprint: string; audio: { enabled: () => boolean; unlocked: () => boolean }; idle: () => boolean; guarded: () => boolean };
+    __fno?: { store: Store; dispatch: typeof dispatch; fingerprint: string; audio: { enabled: () => boolean; unlocked: () => boolean }; idle: () => boolean; guarded: () => boolean; stacked: () => boolean };
   }
 }
 
 applyTheme(document.documentElement, store.ui.uiMode);
 wire();
-window.addEventListener('resize', () => { layoutEmblem(); driveLayer(layerState()); });
+// A resize re-lays the emblem and the layer at once, and repaints a console screen so the stacked layout is re-evaluated.
+window.addEventListener('resize', () => { layoutEmblem(); driveLayer(layerState()); if (store.ui.screen === 'console') schedulePaint(); });
 if (store.ui.stage === 'menu') refreshContinueSave();
 paint();
-window.__fno = { store, dispatch, fingerprint: content.fingerprint, audio: { enabled: () => director.enabled, unlocked: () => director.unlocked }, idle: () => store.ui.idle, guarded: () => Date.now() < guardUntil };
+window.__fno = { store, dispatch, fingerprint: content.fingerprint, audio: { enabled: () => director.enabled, unlocked: () => director.unlocked }, idle: () => store.ui.idle, guarded: () => Date.now() < guardUntil, stacked: () => store.ui.stacked };

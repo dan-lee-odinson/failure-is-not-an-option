@@ -51,12 +51,14 @@ export function script(s: Script = {}): Input[] {
   inputs.push(cont('g8-loss-of-contact'));
   if (s.questions) inputs.push(ask('g8-gap-note', 'g8-q-gap'));
   inputs.push(cont('g8-gap-note'));
+  if (s.questions) inputs.push(ask('g8-crisis-report', 'g8-q-crew-crisis'));
   inputs.push(cont('g8-crisis-report'));
   inputs.push(cont('g8-stabilization-report'));
   inputs.push(opt('g8-rule-decision', 'g8-order-return'));
   if (s.questions) {
     inputs.push(ask('g8-return-brief', 'g8-q-recovery-risk'));
     inputs.push(ask('g8-return-brief', 'g8-q-reserve-risk'));
+    inputs.push(ask('g8-return-brief', 'g8-q-crew-return'));
   }
   inputs.push(opt('g8-return-brief', 'g8-return-' + route));
   inputs.push(cont('g8-order-receipt', 'g8-execute-return'));

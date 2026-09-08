@@ -1,0 +1,62 @@
+[
+  {
+    "expression": "neutral",
+    "width": 768,
+    "height": 1024,
+    "id": "portrait-lovell-neutral",
+    "filename": "fno_gemini_portrait_lovell_neutral_v001.png",
+    "alpha": true,
+    "source": "lovell-sheet-v003-original.png",
+    "processing": "Original expression-cell pixels only. Edge-connected paper alpha cleanup; largest ink component removes labels. Restore original pale shirt pixels within each retained ink scanline, then inner crop, proportional resize, transparent padding. No drawing or face generation.",
+    "rendered_height": 792,
+    "source_crop": {
+      "x": 1030,
+      "y": 14,
+      "width": 425,
+      "height": 330
+    },
+    "inner_crop": {
+      "x": 60,
+      "y": 0,
+      "width": 300,
+      "height": 330
+    },
+    "output_placement": {
+      "x": 24,
+      "y": 120,
+      "width": 720,
+      "height": 792
+    },
+    "source_sha256": "03e4fd2d5875fc4c84b9160ac369ef5ea959f831f94e244485c8cc3fac3454bf"
+  },
+  {
+    "expression": "concerned",
+    "width": 768,
+    "height": 1024,
+    "id": "portrait-lovell-concerned",
+    "filename": "fno_gemini_portrait_lovell_concerned_v001.png",
+    "alpha": true,
+    "source": "lovell-sheet-v003-original.png",
+    "processing": "Original expression-cell pixels only. Edge-connected paper alpha cleanup; largest ink component removes labels. Restore original pale shirt pixels within each retained ink scanline, then inner crop, proportional resize, transparent padding. No drawing or face generation.",
+    "rendered_height": 742,
+    "source_crop": {
+      "x": 1025,
+      "y": 651,
+      "width": 425,
+      "height": 309
+    },
+    "inner_crop": {
+      "x": 60,
+      "y": 0,
+      "width": 300,
+      "height": 309
+    },
+    "output_placement": {
+      "x": 24,
+      "y": 120,
+      "width": 720,
+      "height": 742
+    },
+    "source_sha256": "03e4fd2d5875fc4c84b9160ac369ef5ea959f831f94e244485c8cc3fac3454bf"
+  }
+]

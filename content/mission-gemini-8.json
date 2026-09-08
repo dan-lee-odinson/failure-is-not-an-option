@@ -1,5 +1,5 @@
 {
-  "content_version": "0.5.2",
+  "content_version": "0.5.3",
   "id": "gemini-8",
   "title": "Gemini VIII",
   "subtitle": "The Weight of the Call",
@@ -299,10 +299,27 @@
           "lines": [
             {
               "speaker": "g8-capcom",
-              "text": "Flight, docking is confirmed. We'll check with the crew again on the next pass.",
+              "text": "Flight, Rose Knot Victor relays Armstrong's report: they're docked.",
               "cites": [
                 "g8-ev-docked"
-              ]
+              ],
+              "provenance": {
+                "tag": "paraphrase",
+                "sources": [
+                  "H7"
+                ],
+                "pdf_pages": [
+                  72
+                ],
+                "printed_pages": [
+                  71
+                ],
+                "met": [
+                  "06:33:52"
+                ],
+                "fiction": [],
+                "note": "Crew report relayed through Houston; not a verbatim Lovell utterance. Original C is command pilot Armstrong."
+              }
             }
           ],
           "continue": {
@@ -336,11 +353,20 @@
           "lines": [
             {
               "speaker": "g8-capcom",
-              "text": "Flight, we've lost the signal. The crew were docked on the last report. We'll call them at the next station.",
+              "text": "Flight, we've lost the signal. We'll call at the next station.",
               "cites": [
                 "g8-ev-docked",
                 "g8-ev-contact-primer"
-              ]
+              ],
+              "provenance": {
+                "tag": "procedural",
+                "sources": [],
+                "pdf_pages": [],
+                "printed_pages": [],
+                "met": [],
+                "fiction": [],
+                "note": "Original procedural loss-of-signal/next-contact call for the game loop. Not a historical quotation."
+              }
             },
             {
               "speaker": null,
@@ -359,7 +385,24 @@
               "text": "What can we confirm?",
               "answer": {
                 "speaker": "g8-capcom",
-                "text": "They confirmed docking before we lost contact. We can't confirm their present attitude or what they're doing now."
+                "text": "The last report confirms docking. We've no new report on their attitude.",
+                "provenance": {
+                  "tag": "paraphrase",
+                  "sources": [
+                    "H7"
+                  ],
+                  "pdf_pages": [
+                    72
+                  ],
+                  "printed_pages": [
+                    71
+                  ],
+                  "met": [
+                    "06:33:52"
+                  ],
+                  "fiction": [],
+                  "note": "Docking confirmation paraphrased; absence of a current report is the procedural limit of this game contact gap."
+                }
               }
             }
           ],
@@ -389,16 +432,61 @@
           "lines": [
             {
               "speaker": "g8-capcom",
-              "text": "Flight, Coastal Sentry Quebec has an emergency call. They're undocked and rolling out of control. The crew are working to stop it.",
+              "text": "Flight, Coastal Sentry Quebec relays Scott: “We have serious problems here. We’re … tumbling end over end up here.” They’re disengaged from the Agena.",
               "cites": [
                 "g8-ev-crisis"
-              ]
+              ],
+              "provenance": {
+                "tag": "quotation",
+                "sources": [
+                  "H7"
+                ],
+                "pdf_pages": [
+                  76
+                ],
+                "printed_pages": [
+                  75
+                ],
+                "met": [
+                  "07:17:15"
+                ],
+                "fiction": [],
+                "note": "P identifies pilot Scott, not Armstrong. Quoted clauses retain the scan wording; ellipsis replaces the repeated “we’re”; apostrophe typography normalized. Final sentence paraphrases the same call. Houston relay framing is dramatized, not a recorded Lovell quote."
+              }
             }
           ],
           "continue": {
             "id": "g8-crisis-report-continue",
             "label": "Continue"
-          }
+          },
+          "questions": [
+            {
+              "id": "g8-q-crew-crisis",
+              "text": "What's the crew telling us?",
+              "answer": {
+                "speaker": "g8-capcom",
+                "text": "CSQ's next report: Scott says they're slowly regaining control in RCS DIRECT. Armstrong says they're pulsing the RCS to reduce the roll.",
+                "provenance": {
+                  "tag": "paraphrase",
+                  "sources": [
+                    "H7"
+                  ],
+                  "pdf_pages": [
+                    77
+                  ],
+                  "printed_pages": [
+                    76
+                  ],
+                  "met": [
+                    "07:20:05",
+                    "07:21:12"
+                  ],
+                  "fiction": [],
+                  "note": "Two successive crew updates closely paraphrased through the station; the optional question advances the report within the compressed crisis scene. No diagnosis or emotion inferred."
+                }
+              }
+            }
+          ]
         },
         {
           "type": "briefing",
@@ -559,6 +647,35 @@
                 "cites": [
                   "g8-ev-reserve"
                 ]
+              }
+            },
+            {
+              "id": "g8-q-crew-return",
+              "text": "What's the crew saying, and how are they?",
+              "answer": {
+                "speaker": "g8-capcom",
+                "text": "Hawaii relays that Armstrong has the spacecraft under control, drifting slowly with limited control. We've no crew request choosing between these two return opportunities.",
+                "provenance": {
+                  "tag": "paraphrase",
+                  "sources": [
+                    "H7"
+                  ],
+                  "pdf_pages": [
+                    78,
+                    79
+                  ],
+                  "printed_pages": [
+                    77,
+                    78
+                  ],
+                  "met": [
+                    "07:38:07",
+                    "07:39:39",
+                    "07:39:53"
+                  ],
+                  "fiction": [],
+                  "note": "Control report from C at 07:39:53. The local discussion of areas 6-3/7-3 is ground-originated; it supplies no crew preference. The transcript records Flight preferring 7-3 at 07:39:39; that remains source history, not Lovell’s recommendation. Absence wording is bounded to the relayed reports at this decision, not a claim about every utterance in the mission."
+                }
               }
             }
           ],
@@ -1039,7 +1156,18 @@
               "lines": [
                 {
                   "speaker": "g8-capcom",
-                  "text": "Splashdown confirmed. Both crew members responding."
+                  "text": "Flight, splashdown report received. Both crew members responding.",
+                  "provenance": {
+                    "tag": "procedural",
+                    "sources": [],
+                    "pdf_pages": [],
+                    "printed_pages": [],
+                    "met": [],
+                    "fiction": [
+                      "F7"
+                    ],
+                    "note": "Procedural receipt of the fictional earlier-route recovery report already established by this event; not a historical crew quotation or medical assessment."
+                  }
                 },
                 {
                   "speaker": "g8-recovery",

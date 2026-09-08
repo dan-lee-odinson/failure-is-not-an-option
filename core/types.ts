@@ -36,6 +36,8 @@ export type Effect =
   | { goto: string };
 
 export interface Line {
+  /** Review/source metadata; never spoken or applied as an effect. */
+  provenance?: { tag: 'procedural' | 'paraphrase' | 'quotation'; sources: string[]; pdf_pages: number[]; printed_pages: number[]; met: string[]; fiction: string[]; note: string };
   /** Character id, or null for narration / director's brief. */
   speaker: string | null;
   text: string;
@@ -365,6 +367,8 @@ export interface FictionEntry {
 }
 
 export interface Registry {
+  opening_den?: { background: string; projection_rect: { x: number; y: number; width: number; height: number }; smoke: MovingElement; smoke_loop: { seconds: number; crossfade_seconds: number }; beam: { asset: string; placement: MovingElement['placement'] }; note: string };
+  credits?: { heading: string; lines: string[] }[];
   content_version: string;
   labels: {
     start_notice: string;
@@ -374,6 +378,7 @@ export interface Registry {
     alternate_history_explanation: string;
     simulated_report: string;
     postflight_header: string;
+    capcom_history_note?: string;
   };
   notices: { dedication: string[]; project_disclaimer: string; ai_disclosure: string; dramatization: string };
   sources: SourceEntry[];
