@@ -639,7 +639,7 @@ function renderAbout(store: Store): string {
     <h3>Typefaces</h3>
     <p>Barlow and Barlow Condensed (Barlow Project Authors, 2017) and Chakra Petch (Chakra Petch Project Authors, 2018), each under the SIL Open Font License 1.1; the unmodified fonts and their OFL.txt ship under public/fonts/.</p>
     <h3>Licences</h3>
-    <p class="muted">Content package ${esc(store.content.mission.content_version)} · fingerprint <code>${esc(store.content.fingerprint)}</code>. No NASA insignia, worm, or seal appears in any generated asset. Licenses are proposed (MIT for code, CC BY 4.0 for content) pending confirmation before publication.</p>`;
+    <p class="muted">Content package ${esc(store.content.mission.content_version)} · fingerprint <code>${esc(store.content.fingerprint)}</code>. No NASA insignia, worm, or seal appears in any generated asset. Code under the MIT License; original content under CC BY 4.0; third-party material keeps its own terms and credits (LICENSE and LICENSE-CONTENT in the repository).</p>`;
 }
 
 // ---------------------------------------------------------------------------

@@ -60,7 +60,7 @@ describe('0.5.3 Lovell relay and opening content',()=>{
   for(const a of assets().filter((a:{source_url?:string})=>a.source_url?.startsWith('https://freesound.org')))expect(sound).toContain(a.credit);
   expect(sound).toContain('Beep 8 count (loopable) by JonNicholas, freesound.org, CC BY 3.0');
   expect(credits.find(s=>s.heading==='Sources')!.lines).toEqual(content().bundle.registry.sources.map(s=>s.title));
-  expect(credits.at(-1)!.lines.at(-1)).toContain('pending confirmation');
+  expect(credits.at(-1)!.lines.at(-1)).toBe('MIT (code) · CC BY 4.0 (original content) — see LICENSE and LICENSE-CONTENT.');
   expect(content().bundle.registry.labels.alternate_history_explanation).not.toMatch(/\(F(?:7|10)/);
   expect(content().characters.get('glen-kurtz')!.portrayal).toContain('ageless');
  });

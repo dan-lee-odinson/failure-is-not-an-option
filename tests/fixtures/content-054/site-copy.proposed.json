@@ -302,7 +302,7 @@
       {
         "tag": "p",
         "section": "notices",
-        "text": "The project is being prepared for an open-source release. MIT for the code and Creative Commons Attribution 4.0 for original game content are the proposed licenses; they are not yet in force. The confirmed terms and source will accompany the public release. Third-party materials will remain subject to their own credits and terms."
+        "text": "The project is open source. The code is released under the MIT License and the original game content under Creative Commons Attribution 4.0 International; the full terms are in LICENSE and LICENSE-CONTENT in the repository. Third-party materials — NASA and National Archives imagery and film, the Freesound sounds and the typefaces — are not covered by those licences and remain under their own credits and terms."
       },
       {
         "tag": "p",

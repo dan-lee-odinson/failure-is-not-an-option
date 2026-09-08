@@ -1,14 +1,17 @@
-PROPOSED LICENSE - NOT YET IN FORCE. Dan Lee-Odinson confirms this license before publication.
 This file covers the game content under content/ and the assets under assets/
-(mission text, dialogue, evidence, procedures, the fiction register, the asset manifest,
-and generated placeholder images). Code is covered by LICENSE (MIT).
+(mission text, dialogue, evidence, procedures, the fiction register, the asset
+manifest, the original artwork, the music and the generated placeholder images).
+Code is covered by LICENSE (MIT).
 
 Creative Commons Attribution 4.0 International (CC BY 4.0)
 
-The content of this project is licensed under the Creative Commons Attribution 4.0
-International License. To view a copy of this license, visit
+Copyright (c) 2026 Dan Lee-Odinson
+
+The original content of this project is licensed under the Creative Commons
+Attribution 4.0 International License. To view a copy of this license, visit
 https://creativecommons.org/licenses/by/4.0/ or send a letter to
 Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+Legal code: https://creativecommons.org/licenses/by/4.0/legalcode
 
 You are free to:
   Share - copy and redistribute the material in any medium or format.
@@ -24,12 +27,44 @@ Under the following terms:
                 measures that legally restrict others from doing anything the
                 license permits.
 
+What this licence covers:
+  The original work of this project: the scenario and mission text, dialogue,
+  evidence and procedure entries, the fiction register, the character of Glen
+  Kurtz and the other invented elements, the project emblem, the control-room,
+  den and prologue artwork, the character and equipment artwork, the interface
+  kit, and the music.
+
+What this licence does NOT cover:
+  Third-party material bundled with the game is not licensed under CC BY 4.0.
+  Each item keeps its own terms and its own credit line, which appears in the
+  game's About / Credits screen and the Archive section of the credits:
+  - NASA photographs, film and audio: used under NASA's media usage guidelines
+    (https://www.nasa.gov/nasa-brand-center/images-and-media/). NASA content is
+    generally not copyrighted, but NASA insignia, logotype and seals are protected
+    and are not used here, and nothing in this project implies NASA's endorsement.
+  - National Archives (NARA) film obtained through Public.Resource.Org: public
+    domain / CC0.
+  - Sounds from freesound.org: CC0, except "Beep 8 count (loopable)" by
+    JonNicholas, CC BY 3.0 (LICENSES/CC-BY-3.0.txt).
+  - Typefaces Barlow, Barlow Condensed and Chakra Petch: SIL Open Font License
+    1.1 (licence files alongside the fonts).
+  - The names and NASA portraits of real people appear under the NASA terms
+    above. Nothing in this project presents their words; see the notices below.
+
+AI-assisted works:
+  Parts of the artwork were produced with generative tools directed and reviewed
+  by the project, and the music was produced by Dan Lee-Odinson with Suno under
+  Suno's paid-plan terms. The copyright status of machine-assisted works is not
+  settled everywhere. This licence grants whatever rights the licensor holds in
+  those works and asserts no more.
+
 Attribution line for reuse:
   "Failure is Not an Option" game content, by Dan Lee-Odinson (direction) with
   Codex (GPT-6 Astra, content) and Claude (Anthropic, engineering), CC BY 4.0.
 
 Notices carried with the content:
   This content is not affiliated with, authorized, sponsored, or endorsed by NASA.
-  Historical sources are cited in docs/codex-content-0.4.0/02-Sources-and-Acceptance.md;
-  the fiction register there labels every invented element. No NASA insignia, worm
+  Historical sources are cited in the source register of the current content
+  packet under docs/ (docs/codex-content-0.5.4/ at the time of writing); the
+  fiction register there labels every invented element. No NASA insignia, worm
   logotype, or seal appears in any generated asset.

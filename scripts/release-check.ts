@@ -5,9 +5,11 @@
  * that contradicts the LICENSE files, a manifest asset missing from the build, or a video Pages would serve slowly:
  *   1. registry.credits has an Archive section without the 0.5.3 placeholder line;
  *   2. registry.site is present with the ten ordered blocks (doc 41), so the home page renders from content;
- *   3. the LICENSE files' "PROPOSED … NOT YET IN FORCE" header and the site's open-source statement agree: while the
- *      files say proposed, the page must say the licences are not yet in force, and once the header is gone the page
- *      must not still say so;
+ *   3. the licences are in force (doc 44): neither LICENSE file carries the PROPOSED / NOT YET IN FORCE header,
+ *      LICENSE-CONTENT carries the third-party carve-out, the site's open-source statement names the in-force terms,
+ *      and no proposed-state phrase ("pending confirmation", "not yet in force", "to be chosen before publication",
+ *      "proposed licence", "proposed MIT") is left anywhere in content/, assets/manifest.json, README, the licence
+ *      files or the built dist/ — a stale content packet cannot regress the site to "proposed";
  *   4. every manifest asset is in dist/ (images by their hashed name, audio under dist/audio/, video under dist/video/);
  *   5. the video file is under 30 MB;
  *   6. dist/index.html and dist/demo/index.html exist with their canonical links and the og:image; no CNAME in dist/
@@ -47,17 +49,44 @@ else {
   notes.push(`registry.site: ${registry.site.blocks.reduce((n, b) => n + b.items.length, 0)} items`);
 }
 
-// 3. licences: the files and the page agree
-const proposedHeader = /^PROPOSED LICENSE - NOT YET IN FORCE/;
-const licenseProposed = ['LICENSE', 'LICENSE-CONTENT'].map((f) => ({ f, proposed: proposedHeader.test(readFileSync(resolve(root, f), 'utf8')) }));
+// 3. licences in force (doc 44 §3 D)
+const PROPOSED_PHRASES: [RegExp, string][] = [
+  [/PROPOSED LICENSE/, 'PROPOSED LICENSE'], [/NOT YET IN FORCE/i, 'not yet in force'], [/pending confirmation/i, 'pending confirmation'],
+  [/to be chosen before publication/i, 'to be chosen before publication'], [/to be confirmed before publication/i, 'to be confirmed before publication'],
+  [/proposed licen[cs]e/i, 'proposed licence'], [/proposed MIT/i, 'proposed MIT'],
+];
+const license = readFileSync(resolve(root, 'LICENSE'), 'utf8');
+const licenseContent = readFileSync(resolve(root, 'LICENSE-CONTENT'), 'utf8');
+if (!/^MIT License$/m.test(license)) fail('LICENSE is not the MIT License text');
+if (!/Copyright \(c\) 2026 Dan Lee-Odinson/.test(license)) fail('LICENSE does not name the copyright holder');
+if (!/Creative Commons Attribution 4\.0 International \(CC BY 4\.0\)/.test(licenseContent)) fail('LICENSE-CONTENT is not CC BY 4.0');
+if (!/Copyright \(c\) 2026 Dan Lee-Odinson/.test(licenseContent)) fail('LICENSE-CONTENT does not name the copyright holder');
+if (!/What this licence does NOT cover/.test(licenseContent)) fail('LICENSE-CONTENT has no third-party carve-out section (doc 44 §1.2)');
+for (const need of ['NASA', 'National Archives', 'freesound.org', 'SIL Open Font License']) if (!licenseContent.includes(need)) fail(`LICENSE-CONTENT's carve-out does not mention ${need}`);
 const openSource = registry.site?.blocks.find((b) => b.id === 'open_source')?.items.map((i) => i.text ?? '').join(' ') ?? '';
-const pageSaysProposed = /not yet in force/i.test(openSource) && /proposed/i.test(openSource);
-for (const { f, proposed } of licenseProposed) {
-  if (proposed && !pageSaysProposed) fail(`${f} is still marked PROPOSED / NOT YET IN FORCE but the site's open-source statement no longer says so`);
-  if (!proposed && pageSaysProposed) fail(`${f} is in force but the site's open-source statement still says the licences are proposed and not yet in force`);
+if (!/MIT License/.test(openSource) || !/Creative Commons Attribution 4\.0 International/.test(openSource) || !/LICENSE-CONTENT/.test(openSource)) fail("the site's open-source statement does not name the in-force licences (MIT License, Creative Commons Attribution 4.0 International, LICENSE-CONTENT)");
+const madeBy = (registry.credits ?? []).find((s) => s.heading === 'Made by');
+if (!madeBy || !madeBy.lines.some((l) => /MIT \(code\)/.test(l) && /CC BY 4\.0/.test(l) && /LICENSE-CONTENT/.test(l))) fail('registry.credits "Made by" has no line naming the in-force licences');
+/** Every text file under a directory (recursively), by extension. */
+const walk = (dir: string, exts: string[], out: string[] = []): string[] => {
+  if (!existsSync(dir)) return out;
+  for (const e of readdirSync(dir)) {
+    const p = resolve(dir, e);
+    if (statSync(p).isDirectory()) walk(p, exts, out);
+    else if (exts.some((x) => e.endsWith(x))) out.push(p);
+  }
+  return out;
+};
+const scanned = [resolve(root, 'LICENSE'), resolve(root, 'LICENSE-CONTENT'), resolve(root, 'README.md'), resolve(root, 'assets', 'manifest.json'), ...walk(resolve(root, 'content'), ['.json']), ...walk(dist, ['.html', '.js', '.css', '.json', '.txt'])];
+let proposedHits = 0;
+for (const f of scanned) {
+  const text = readFileSync(f, 'utf8');
+  for (const [re, label] of PROPOSED_PHRASES) {
+    const m = re.exec(text);
+    if (m) { proposedHits += 1; fail(`${f.slice(root.length + 1).replace(/\\/g, '/')}: still says "${label}" (at "…${text.slice(Math.max(0, m.index - 40), m.index + label.length + 20).replace(/\s+/g, ' ')}…"); the licences are in force (doc 44)`); }
+  }
 }
-notes.push(`licences: files ${licenseProposed.every((l) => l.proposed) ? 'proposed' : licenseProposed.some((l) => l.proposed) ? 'MIXED' : 'in force'}, site says ${pageSaysProposed ? 'proposed' : 'in force'}`);
-if (licenseProposed.some((l) => l.proposed) !== licenseProposed.every((l) => l.proposed)) fail('LICENSE and LICENSE-CONTENT disagree about being in force');
+notes.push(`licences: in force (MIT code, CC BY 4.0 original content with the third-party carve-out); ${scanned.length} files scanned for proposed-state phrases, ${proposedHits} hit(s)`);
 
 // 4. every manifest asset in dist/
 if (!existsSync(dist)) fail('dist/ is missing: run npm run build first');
