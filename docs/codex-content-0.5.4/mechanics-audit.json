@@ -1,0 +1,46 @@
+{
+  "baseline": "50ba5be5bb76500dce20dba2bc8742fffb93a85c",
+  "result": "PASS",
+  "allowed_content_changes": [
+    "content_version 0.5.3 -> 0.5.4 in six content files and manifest",
+    "registry.credits Archive lines only",
+    "registry.site addition"
+  ],
+  "all_other_content_equal": {
+    "content/characters.json": true,
+    "content/evidence.json": true,
+    "content/followon-gemini-9a.json": true,
+    "content/mission-gemini-8.json": true,
+    "content/procedures.json": true,
+    "content/registry.json": true,
+    "assets/manifest.json": true
+  },
+  "engine_and_app_changes": false,
+  "changed_paths": [
+    "assets/manifest.json",
+    "content/characters.json",
+    "content/evidence.json",
+    "content/followon-gemini-9a.json",
+    "content/mission-gemini-8.json",
+    "content/procedures.json",
+    "content/registry.json",
+    "core/types.ts",
+    "docs/dialogue-sheet.csv",
+    "docs/dialogue-sheet.md",
+    "schema/registry.schema.json",
+    "scripts/lib/dialogue-sheet.ts",
+    "scripts/lib/validator.ts",
+    "tests/core/ac-05-09.test.ts",
+    "tests/core/dialogue-sheet.test.ts",
+    "tests/core/presentation-m02.test.ts",
+    "tests/core/replay.test.ts",
+    "tests/core/validator.test.ts"
+  ],
+  "new_integration_paths": [
+    "tests/core/content-054-site.test.ts",
+    "tests/fixtures/content-054/archive-lines.json",
+    "tests/fixtures/content-054/homepage.html",
+    "tests/fixtures/content-054/homepage.js",
+    "tests/fixtures/content-054/site-copy.proposed.json"
+  ]
+}

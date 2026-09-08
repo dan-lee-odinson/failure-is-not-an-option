@@ -366,7 +366,12 @@ export interface FictionEntry {
   text: string;
 }
 
+export type SiteBlockId = 'hero' | 'about' | 'demo' | 'gallery' | 'coming_soon' | 'bio' | 'notices' | 'nasa_marks' | 'open_source' | 'footer';
+export type SiteNoticeId = 'dedication' | 'project_disclaimer' | 'ai_disclosure' | 'dramatization';
+export type SiteItem = { id: string; kind: 'metadata' | 'heading' | 'paragraph' | 'link' | 'button' | 'label' | 'alt' | 'aria' | 'tooltip' | 'notice' | 'template'; href?: string } &
+  ({ text: string; notice_id?: never } | { notice_id: SiteNoticeId; text?: never });
 export interface Registry {
+  site?: { blocks: { id: SiteBlockId; items: SiteItem[] }[] };
   opening_den?: { background: string; projection_rect: { x: number; y: number; width: number; height: number }; smoke: MovingElement; smoke_loop: { seconds: number; crossfade_seconds: number }; beam: { asset: string; placement: MovingElement['placement'] }; note: string };
   credits?: { heading: string; lines: string[] }[];
   content_version: string;

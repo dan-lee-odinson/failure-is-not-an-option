@@ -92,7 +92,20 @@ export function validateContent(opts: ValidateOptions): ValidationReport {
   ]);
   if (versions.size !== 1) errors.push(`content_version differs across files: ${[...versions].join(', ')}`);
 
-  uniq(errors, 'debrief rule', bundle.mission.debrief.map((r) => r.id));
+  if (bundle.registry.site) {
+    const blocks = bundle.registry.site.blocks;
+    const order = ['hero', 'about', 'demo', 'gallery', 'coming_soon', 'bio', 'notices', 'nasa_marks', 'open_source', 'footer'];
+    if (JSON.stringify(blocks.map(b => b.id)) !== JSON.stringify(order)) errors.push('registry.site: blocks must use the ten named ids in display order');
+    for (const block of blocks) {
+      uniq(errors, `registry.site.${block.id} item`, block.items.map(i => i.id));
+      for (const item of block.items) {
+        if ((item.kind === 'notice') !== (item.notice_id !== undefined)) errors.push(`registry.site.${block.id}.${item.id}: notice kind must reference a canonical notice id`);
+        if (item.notice_id !== undefined && !Object.hasOwn(bundle.registry.notices, item.notice_id)) errors.push(`registry.site.${block.id}.${item.id}: unknown notice id`);
+      }
+    }
+  }
+
+  uniq(errors, 'debrief rule' , bundle.mission.debrief.map((r) => r.id));
   uniq(errors, 'source', bundle.registry.sources.map((s) => s.id));
   uniq(errors, 'fiction entry', bundle.registry.fiction.map((f) => f.id));
   uniq(errors, 'status block', bundle.followon.status_blocks.map((b) => b.id));

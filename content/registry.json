@@ -1,5 +1,5 @@
 {
-  "content_version": "0.5.3",
+  "content_version": "0.5.4",
   "labels": {
     "start_notice": "A historical mission with fictional return decisions and alternate outcomes.",
     "alternate_history_badge": "ALTERNATE HISTORY",
@@ -194,7 +194,20 @@
     {
       "heading": "Archive",
       "lines": [
-        "Archival clip credits will be added from the approved clip table before the film is released.",
+        "Gemini VIII, Atlas-Agena lift-off, 16 March 1966 — NASA photograph S66-24482 (Johnson Space Center)",
+        "Apollo 11 crew walkout — Michael Collins NASA TV video file (NASA Headquarters)",
+        "Apollo 11 launch, 16 July 1969 — KSC-69-71212 (NASA)",
+        "Apollo 11 moonwalk — Apollo 11 moonwalk montage (NASA Headquarters)",
+        "Apollo–Soyuz, 1975 — The Mission of Apollo / Soyuz, National Archives and Records Administration, via Public.Resource.Org, CC0 1.0",
+        "Skylab — KSC-08-S-00032 (NASA Kennedy Space Center)",
+        "STS-1, 12 April 1981 — STS-1 Columbia 40th Anniversary (NASA Armstrong Flight Research Center)",
+        "The Challenger and Columbia crews — NASA Remembers Its Fallen Heroes 2023 (NASA Headquarters)",
+        "International Space Station — ISS@25: Operations (NASA Kennedy Space Center)",
+        "Atlantis, STS-135, 21 July 2011 — The Shuttle's Last Flight | An end. A new beginning (NASA Headquarters)",
+        "Crew Dragon Demo-2, 30 May 2020 — NASA Astronauts Launch from America in Historic Test Flight of SpaceX Crew Dragon (NASA Headquarters)",
+        "Artemis II, 1 April 2026 — Artemis II Live Launch Coverage (NASA Kennedy Space Center)",
+        "Earth — Earth Views from the International Space Station (NASA Headquarters)",
+        "NASA content is generally not subject to copyright and is used under NASA's media usage guidelines.",
         "This project is not affiliated with, authorized, sponsored, or endorsed by NASA."
       ]
     },
@@ -257,5 +270,643 @@
       }
     },
     "note": "Design coordinates are 1920x1080. projection_rect is a clear 16:9 inset inside the illustrated wall; preserve the wall border. Smoke loops with overlapping fades, not a visible position jump. Beam flicker and camera movement belong to montage assembly; no cue change."
+  },
+  "site": {
+    "blocks": [
+      {
+        "id": "hero",
+        "items": [
+          {
+            "id": "metadata-01",
+            "kind": "metadata",
+            "text": "Failure is Not an Option — A Flight Director Game"
+          },
+          {
+            "id": "metadata-02",
+            "kind": "metadata",
+            "text": "Take the flight director’s seat in a story-driven mission control game. Play the Gemini VIII demo. An independent tribute to the people of the space program."
+          },
+          {
+            "id": "metadata-03",
+            "kind": "metadata",
+            "text": "Failure is Not an Option"
+          },
+          {
+            "id": "metadata-04",
+            "kind": "metadata",
+            "text": "The mission is in your hands. A story-driven flight director game. Play the Gemini VIII demo; full game coming soon."
+          },
+          {
+            "id": "link-01",
+            "kind": "link",
+            "text": "Skip to content",
+            "href": "#main"
+          },
+          {
+            "id": "aria-01",
+            "kind": "aria",
+            "text": "Failure is Not an Option — home"
+          },
+          {
+            "id": "link-02",
+            "kind": "link",
+            "text": "FAILURE IS NOT AN OPTION A FLIGHT DIRECTOR GAME",
+            "href": "#top"
+          },
+          {
+            "id": "aria-02",
+            "kind": "aria",
+            "text": "Main navigation"
+          },
+          {
+            "id": "link-03",
+            "kind": "link",
+            "text": "The game",
+            "href": "#game"
+          },
+          {
+            "id": "link-04",
+            "kind": "link",
+            "text": "Screenshots",
+            "href": "#screenshots"
+          },
+          {
+            "id": "link-05",
+            "kind": "link",
+            "text": "About the dev",
+            "href": "#developer"
+          },
+          {
+            "id": "link-06",
+            "kind": "link",
+            "text": "Play the demo ↗",
+            "href": "./demo/"
+          },
+          {
+            "id": "paragraph-01",
+            "kind": "paragraph",
+            "text": "MISSION CONTROL IS YOURS"
+          },
+          {
+            "id": "heading-01",
+            "kind": "heading",
+            "text": "FAILURE IS NOT AN OPTION"
+          },
+          {
+            "id": "paragraph-02",
+            "kind": "paragraph",
+            "text": "Two astronauts. A damaged spacecraft. The next call is yours."
+          },
+          {
+            "id": "link-07",
+            "kind": "link",
+            "text": "PLAY THE DEMO ↗",
+            "href": "./demo/"
+          },
+          {
+            "id": "link-08",
+            "kind": "link",
+            "text": "Explore the game ↓",
+            "href": "#game"
+          },
+          {
+            "id": "paragraph-03",
+            "kind": "paragraph",
+            "text": "Gemini VIII · Play in your browser"
+          },
+          {
+            "id": "label-01",
+            "kind": "label",
+            "text": "HOUSTON, TEXAS / 1966"
+          },
+          {
+            "id": "label-02",
+            "kind": "label",
+            "text": "INDEPENDENT · STORY-DRIVEN · 2D"
+          }
+        ]
+      },
+      {
+        "id": "about",
+        "items": [
+          {
+            "id": "paragraph-01",
+            "kind": "paragraph",
+            "text": "01 / ABOUT THE GAME"
+          },
+          {
+            "id": "heading-01",
+            "kind": "heading",
+            "text": "History sets the scene. Your decisions shape what follows."
+          },
+          {
+            "id": "paragraph-02",
+            "kind": "paragraph",
+            "text": "Take the flight director’s seat in a narrative game inspired by real missions and the people who made them possible."
+          },
+          {
+            "id": "paragraph-03",
+            "kind": "paragraph",
+            "text": "You are Glen Kurtz: a fictional tribute to the legendary Gene Kranz, whose leadership helped guide Mission Control through pivotal moments of Gemini and Apollo. The signature vest is a nod to Kranz; Glen’s story is his own. Ageless by design, he represents generations of flight directors, from the earliest missions to those still ahead."
+          },
+          {
+            "id": "paragraph-04",
+            "kind": "paragraph",
+            "text": "Listen to your controllers. Weigh incomplete information. Make the call, then live with its consequences. Follow the historical path or branch into an alternate outcome. The astronauts are real; the decisions and consequences blend documented events with clearly identified fiction."
+          },
+          {
+            "id": "label-01",
+            "kind": "label",
+            "text": "01"
+          },
+          {
+            "id": "heading-02",
+            "kind": "heading",
+            "text": "Read the room."
+          },
+          {
+            "id": "paragraph-05",
+            "kind": "paragraph",
+            "text": "Your controllers see different risks. Ask questions and work through the evidence before you commit."
+          },
+          {
+            "id": "label-02",
+            "kind": "label",
+            "text": "02"
+          },
+          {
+            "id": "heading-03",
+            "kind": "heading",
+            "text": "Make the call."
+          },
+          {
+            "id": "paragraph-06",
+            "kind": "paragraph",
+            "text": "Getting the crew home means weighing time in orbit against the conditions awaiting them at sea."
+          },
+          {
+            "id": "label-03",
+            "kind": "label",
+            "text": "03"
+          },
+          {
+            "id": "heading-04",
+            "kind": "heading",
+            "text": "Carry the consequences."
+          },
+          {
+            "id": "paragraph-07",
+            "kind": "paragraph",
+            "text": "Your preparations and orders affect the return. Your response afterward shapes relationships and the next planning step."
+          }
+        ]
+      },
+      {
+        "id": "demo",
+        "items": [
+          {
+            "id": "paragraph-01",
+            "kind": "paragraph",
+            "text": "THE PLAYABLE DEMO"
+          },
+          {
+            "id": "heading-01",
+            "kind": "heading",
+            "text": "GEMINI VIII The Weight of the Call"
+          },
+          {
+            "id": "paragraph-02",
+            "kind": "paragraph",
+            "text": "A historic docking. A sudden emergency. Armstrong and Scott have brought their spacecraft back under control. Now your team must bring them home."
+          },
+          {
+            "id": "paragraph-03",
+            "kind": "paragraph",
+            "text": "Prepare your controllers, weigh competing return risks, and face the consequences of your decision in the post-flight discussion."
+          },
+          {
+            "id": "link-01",
+            "kind": "link",
+            "text": "TAKE YOUR SEAT ↗",
+            "href": "./demo/"
+          },
+          {
+            "id": "paragraph-04",
+            "kind": "paragraph",
+            "text": "A historical mission with fictional return decisions and alternate outcomes."
+          },
+          {
+            "id": "aria-01",
+            "kind": "aria",
+            "text": "Enlarge screenshot: deciding when to bring the crew home"
+          },
+          {
+            "id": "link-02",
+            "kind": "link",
+            "text": "VIEW FULL SCREEN ↗",
+            "href": "./site-assets/screenshot-return.webp"
+          },
+          {
+            "id": "alt-01",
+            "kind": "alt",
+            "text": "Gemini VIII return planning: controllers explain the risks of an earlier or later return, with two choices below."
+          },
+          {
+            "id": "label-01",
+            "kind": "label",
+            "text": "MISSION CONTROL / RETURN PLANNING"
+          },
+          {
+            "id": "label-02",
+            "kind": "label",
+            "text": "IN-GAME CAPTURE"
+          }
+        ]
+      },
+      {
+        "id": "gallery",
+        "items": [
+          {
+            "id": "paragraph-01",
+            "kind": "paragraph",
+            "text": "02 / INSIDE MISSION CONTROL"
+          },
+          {
+            "id": "heading-01",
+            "kind": "heading",
+            "text": "A seat in the room."
+          },
+          {
+            "id": "paragraph-02",
+            "kind": "paragraph",
+            "text": "Captured from the playable build. Select a frame to take a closer look."
+          },
+          {
+            "id": "aria-01",
+            "kind": "aria",
+            "text": "Enlarge screenshot: the Gemini program prologue"
+          },
+          {
+            "id": "link-01",
+            "kind": "link",
+            "text": "EXPAND ↗",
+            "href": "./site-assets/screenshot-program.webp"
+          },
+          {
+            "id": "alt-01",
+            "kind": "alt",
+            "text": "Illustrated Gemini program prologue, with a spacecraft and technicians in a hangar."
+          },
+          {
+            "id": "label-01",
+            "kind": "label",
+            "text": "01"
+          },
+          {
+            "id": "heading-02",
+            "kind": "heading",
+            "text": "Before the call"
+          },
+          {
+            "id": "paragraph-03",
+            "kind": "paragraph",
+            "text": "Step into the mission’s historical context."
+          },
+          {
+            "id": "aria-02",
+            "kind": "aria",
+            "text": "Enlarge screenshot: Jim Lovell relays the crew’s emergency report"
+          },
+          {
+            "id": "link-02",
+            "kind": "link",
+            "text": "EXPAND ↗",
+            "href": "./site-assets/screenshot-crisis.webp"
+          },
+          {
+            "id": "alt-02",
+            "kind": "alt",
+            "text": "Jim Lovell’s CAPCOM portrait and the relayed crew report appear over the illustrated control room."
+          },
+          {
+            "id": "label-02",
+            "kind": "label",
+            "text": "02"
+          },
+          {
+            "id": "heading-03",
+            "kind": "heading",
+            "text": "The loop comes alive"
+          },
+          {
+            "id": "paragraph-04",
+            "kind": "paragraph",
+            "text": "Read the reports. Understand what is at stake."
+          },
+          {
+            "id": "aria-03",
+            "kind": "aria",
+            "text": "Enlarge screenshot: the return decision"
+          },
+          {
+            "id": "link-03",
+            "kind": "link",
+            "text": "EXPAND ↗",
+            "href": "./site-assets/screenshot-return.webp"
+          },
+          {
+            "id": "alt-03",
+            "kind": "alt",
+            "text": "Return options show the competing risks of additional time in orbit and a longer wait at sea."
+          },
+          {
+            "id": "label-03",
+            "kind": "label",
+            "text": "03"
+          },
+          {
+            "id": "heading-04",
+            "kind": "heading",
+            "text": "The weight of the call"
+          },
+          {
+            "id": "paragraph-05",
+            "kind": "paragraph",
+            "text": "Two viable orders. Different consequences."
+          },
+          {
+            "id": "heading-05",
+            "kind": "heading",
+            "text": "Screenshot"
+          },
+          {
+            "id": "aria-04",
+            "kind": "aria",
+            "text": "Close screenshot viewer"
+          },
+          {
+            "id": "button-01",
+            "kind": "button",
+            "text": "CLOSE ×"
+          },
+          {
+            "id": "button-02",
+            "kind": "button",
+            "text": "← Previous"
+          },
+          {
+            "id": "button-03",
+            "kind": "button",
+            "text": "Next →"
+          },
+          {
+            "id": "heading-06",
+            "kind": "heading",
+            "text": "Before the call — Gemini program"
+          },
+          {
+            "id": "alt-04",
+            "kind": "alt",
+            "text": "The Gemini program prologue in the playable game."
+          },
+          {
+            "id": "heading-07",
+            "kind": "heading",
+            "text": "The loop comes alive — crew report"
+          },
+          {
+            "id": "alt-05",
+            "kind": "alt",
+            "text": "Jim Lovell’s CAPCOM portrait and relay of the crew report in Mission Control."
+          },
+          {
+            "id": "heading-08",
+            "kind": "heading",
+            "text": "The weight of the call — return planning"
+          },
+          {
+            "id": "alt-06",
+            "kind": "alt",
+            "text": "Controllers’ reports, evidence and the two return orders in the Gemini VIII scenario."
+          },
+          {
+            "id": "template-01",
+            "kind": "template",
+            "text": "{current} / {total}"
+          }
+        ]
+      },
+      {
+        "id": "coming_soon",
+        "items": [
+          {
+            "id": "paragraph-01",
+            "kind": "paragraph",
+            "text": "BEYOND THE DEMO"
+          },
+          {
+            "id": "heading-01",
+            "kind": "heading",
+            "text": "FULL GAME COMING SOON"
+          },
+          {
+            "id": "paragraph-02",
+            "kind": "paragraph",
+            "text": "A larger story is taking shape. For now, your seat is waiting in Gemini VIII."
+          },
+          {
+            "id": "link-01",
+            "kind": "link",
+            "text": "Play the first scenario ↗",
+            "href": "./demo/"
+          }
+        ]
+      },
+      {
+        "id": "bio",
+        "items": [
+          {
+            "id": "alt-01",
+            "kind": "alt",
+            "text": "Dan Lee-Odinson at Kennedy Space Center, with the Vehicle Assembly Building behind him."
+          },
+          {
+            "id": "label-01",
+            "kind": "label",
+            "text": "DAN LEE-ODINSON / KENNEDY SPACE CENTER"
+          },
+          {
+            "id": "paragraph-01",
+            "kind": "paragraph",
+            "text": "03 / ABOUT THE DEV"
+          },
+          {
+            "id": "heading-01",
+            "kind": "heading",
+            "text": "A lifelong dream. A new trajectory."
+          },
+          {
+            "id": "paragraph-02",
+            "kind": "paragraph",
+            "text": "I’m Dan Lee-Odinson, a Technical Project Manager and Space Studies student at Everglades University."
+          },
+          {
+            "id": "paragraph-03",
+            "kind": "paragraph",
+            "text": "My fascination with space began when I was six, holding my breath as Discovery’s STS-26 crew launched on the historic Return to Flight after the Challenger disaster. Watching Artemis II lift off in April 2026 turned that lifelong passion into a determination to be part of what comes next."
+          },
+          {
+            "id": "paragraph-04",
+            "kind": "paragraph",
+            "text": "Since then, I’ve been working toward one goal: to learn everything I can and bring my skills to a future career in Mission Operations and Program Management."
+          },
+          {
+            "id": "paragraph-05",
+            "kind": "paragraph",
+            "text": "I’m inspired by the people of NASA and the space agencies and companies around the world expanding what humanity can do in space—and by the dedication of everyone on the ground who makes those journeys possible."
+          },
+          {
+            "id": "paragraph-06",
+            "kind": "paragraph",
+            "text": "This game is my tribute to you all."
+          },
+          {
+            "id": "aria-01",
+            "kind": "aria",
+            "text": "Find Dan online"
+          },
+          {
+            "id": "link-01",
+            "kind": "link",
+            "text": "LinkedIn ↗",
+            "href": "https://www.linkedin.com/in/dan-lee-odinson"
+          },
+          {
+            "id": "link-02",
+            "kind": "link",
+            "text": "GitHub ↗",
+            "href": "https://github.com/dan-lee-odinson"
+          },
+          {
+            "id": "link-03",
+            "kind": "link",
+            "text": "DEV Community ↗",
+            "href": "https://dev.to/dan-lee-odinson"
+          }
+        ]
+      },
+      {
+        "id": "notices",
+        "items": [
+          {
+            "id": "paragraph-01",
+            "kind": "paragraph",
+            "text": "04 / THE PEOPLE BEHIND THE MISSION"
+          },
+          {
+            "id": "heading-01",
+            "kind": "heading",
+            "text": "Made as a tribute."
+          },
+          {
+            "id": "notice-01",
+            "kind": "notice",
+            "notice_id": "dedication"
+          },
+          {
+            "id": "heading-02",
+            "kind": "heading",
+            "text": "Independent project"
+          },
+          {
+            "id": "notice-02",
+            "kind": "notice",
+            "notice_id": "project_disclaimer"
+          },
+          {
+            "id": "notice-03",
+            "kind": "notice",
+            "notice_id": "dramatization"
+          },
+          {
+            "id": "heading-03",
+            "kind": "heading",
+            "text": "AI disclosure"
+          },
+          {
+            "id": "notice-04",
+            "kind": "notice",
+            "notice_id": "ai_disclosure"
+          }
+        ]
+      },
+      {
+        "id": "nasa_marks",
+        "items": [
+          {
+            "id": "heading-01",
+            "kind": "heading",
+            "text": "NASA marks & generated artwork"
+          },
+          {
+            "id": "paragraph-01",
+            "kind": "paragraph",
+            "text": "Failure is Not an Option is not sponsored, endorsed, or authorized by NASA. We seek to respectfully follow NASA’s published media and brand guidelines, including its restrictions on NASA insignia, logotypes, and seals appearing with AI-generated imagery. The game uses an original fictional emblem for its generated artwork and branding."
+          },
+          {
+            "id": "paragraph-02",
+            "kind": "paragraph",
+            "text": "NASA marks visible in authentic photographs or archival footage remain part of their original real-world context and do not imply NASA sponsorship or endorsement."
+          },
+          {
+            "id": "paragraph-03",
+            "kind": "paragraph",
+            "text": "Read NASA’s Images and Media Guidelines ↗"
+          }
+        ]
+      },
+      {
+        "id": "open_source",
+        "items": [
+          {
+            "id": "heading-01",
+            "kind": "heading",
+            "text": "Open-source statement"
+          },
+          {
+            "id": "paragraph-01",
+            "kind": "paragraph",
+            "text": "The project is being prepared for an open-source release. MIT for the code and Creative Commons Attribution 4.0 for original game content are the proposed licenses; they are not yet in force. The confirmed terms and source will accompany the public release. Third-party materials will remain subject to their own credits and terms."
+          },
+          {
+            "id": "paragraph-02",
+            "kind": "paragraph",
+            "text": "Follow development on GitHub ↗"
+          }
+        ]
+      },
+      {
+        "id": "footer",
+        "items": [
+          {
+            "id": "link-01",
+            "kind": "link",
+            "text": "FAILURE IS NOT AN OPTION",
+            "href": "#top"
+          },
+          {
+            "id": "label-01",
+            "kind": "label",
+            "text": "A game by Dan Lee-Odinson · 2026"
+          },
+          {
+            "id": "link-02",
+            "kind": "link",
+            "text": "Credits & disclosures",
+            "href": "#notices"
+          }
+        ]
+      }
+    ]
   }
 }

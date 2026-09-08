@@ -1,0 +1,28 @@
+{
+  "commit": "50ba5be5bb76500dce20dba2bc8742fffb93a85c",
+  "files": {
+    "assets/manifest.json": "84107c00006798d6570e2195669135a7ddf767dd07f8e4cd04b4132e53510aef",
+    "content/characters.json": "365dd46a28bea657fcd2b1971136267bbea0846a66eaf319cd44f582561b155b",
+    "content/evidence.json": "a37d974275534a27222c74b1b99a8ed27b1d9bf9fe695f5df7f447b9381c7af8",
+    "content/followon-gemini-9a.json": "f4097877c788866d3d38bc880ec6b596f9fb2ba73c4319c7eab7b8fb86f0136e",
+    "content/mission-gemini-8.json": "31028138fb46e3723bc70ca88aa15d056fbf003dca9b625f26e0d63b8d20a768",
+    "content/procedures.json": "334cbd2d53f271984027aac042e723ef6fa8d5cd5e8ebe4138d840e238ee5703",
+    "content/registry.json": "adab42156ccc747257e2110f2456f18b99c59c5c58ef5dbe5b34480f245c93f3",
+    "core/types.ts": "ec70395392cf85ceaf9508049311e437f42e341f17c213187dd24ec95fb14458",
+    "docs/dialogue-sheet.csv": "e756f5d0224fc06887fc42391563bbee16510a3e4c7b4080851d71b102d40ce4",
+    "docs/dialogue-sheet.md": "0fbae13e2e2e87de78d7b8fd6fe3d79c6c0a2fdc217e5c11f511c5c4ad0bf349",
+    "schema/registry.schema.json": "db8a53c697836bd2477de99b93f95343c8bc1ae38b19c1718fa132cbc80a56aa",
+    "scripts/lib/dialogue-sheet.ts": "062aca8b7cf12f7c14bf01bb6520975c9915a0b6999a78138898d83eb078cead",
+    "scripts/lib/validator.ts": "a809c3fb0faba05686bb962c8bd8d560d49fb679978d4d000cbf63cc9e5dbb47",
+    "tests/core/ac-05-09.test.ts": "986bb0d78a4a73162434d6a4a1cdf639f92ad3fa8c6f3bd858073f27f91f634a",
+    "tests/core/dialogue-sheet.test.ts": "76405d3d34db6e661d779c670c6acf261f6caa7df653d9c667107d7d08280ccc",
+    "tests/core/presentation-m02.test.ts": "f3bb010f7847cd22a5dba8248e2d57d35d22bfd588ec8c6955a39731e063abae",
+    "tests/core/replay.test.ts": "62dd533be35cfa713dcaf20dc26d5679f7eeb44e99453d0bad78cf1c720a1c2d",
+    "tests/core/validator.test.ts": "37c69e02012670a0ee1db11a52d0be4ae058bfb9eb60d9dab1cdc83902be60cc",
+    "tests/core/content-054-site.test.ts": null,
+    "tests/fixtures/content-054/archive-lines.json": null,
+    "tests/fixtures/content-054/homepage.html": null,
+    "tests/fixtures/content-054/homepage.js": null,
+    "tests/fixtures/content-054/site-copy.proposed.json": null
+  }
+}

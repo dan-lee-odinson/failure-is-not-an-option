@@ -45,7 +45,7 @@ describe('content 0.5.3: Jim Lovell as CAPCOM', () => {
     expect(existsSync(resolve(ROOT, 'assets', 'fno_gemini_portrait_lovell_neutral_v001.png'))).toBe(true);
     expect(existsSync(resolve(ROOT, 'assets', 'fno_gemini_portrait_lovell_concerned_v001.png'))).toBe(true);
     const manifest = JSON.parse(readFileSync(resolve(ROOT, 'assets', 'manifest.json'), 'utf8')) as { content_version: string; assets: { id: string; filename: string }[] };
-    expect(manifest.content_version).toBe('0.5.3');
+    expect(manifest.content_version).toBe('0.5.4');
     expect(manifest.assets.some((a) => a.filename === 'fno_gemini_portrait_capcom_neutral_v001.png' || a.id === 'portrait-capcom')).toBe(false);
     expect(existsSync(resolve(ROOT, 'assets', 'fno_gemini_portrait_capcom_neutral_v001.png'))).toBe(false);
     expect(manifest.assets).toHaveLength(69);

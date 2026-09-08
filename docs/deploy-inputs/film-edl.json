@@ -1,0 +1,475 @@
+{
+  "title": "Failure is Not an Option — opening film v002",
+  "deliverables": {
+    "FNO-Opening-Film-v002.mp4": {
+      "size_bytes": 46725483,
+      "sha256": "9233b8c2200e8b9d5208b7a5f8a1d61b9b4ccea123d9e2eace7e25f871371a56",
+      "frames": 6058,
+      "seconds": 201.93,
+      "video": "Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 1682 kb/s, 30 fps, 30 tbr, 15360 tbn (default)",
+      "audio": "Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 160 kb/s (default)",
+      "integrated_lufs": -12.7,
+      "true_peak_dbfs": -0.5
+    },
+    "FNO-Opening-Film-v002.webm": {
+      "size_bytes": 47218015,
+      "sha256": "3b80cebcb010d3913a18f1e3d5699955d86e774741d2ca43ff85b20356909857",
+      "frames": 6058,
+      "seconds": 201.94,
+      "video": "Stream #0:0: Video: vp9 (Profile 0), yuv420p(tv, progressive), 1920x1080, SAR 1:1 DAR 16:9, 30 fps, 30 tbr, 1k tbn (default)",
+      "audio": "Stream #0:1: Audio: opus, 48000 Hz, stereo, fltp (default)",
+      "integrated_lufs": -12.6,
+      "true_peak_dbfs": -0.1
+    }
+  },
+  "frame": "1920x1080, 30 fps CFR, yuv420p; one continuous timeline; the projection rectangle fills the frame until 2:12",
+  "design": "Composited at 3972x2234 (design 1920x1080 x 1920/928) so the film sits at native resolution on the projection rectangle; the camera crop is scaled to 1920x1080",
+  "timeline_seconds": {
+    "fps": 30,
+    "total_seconds": 201.933,
+    "total_frames": 6058,
+    "leader": 6.0,
+    "film": 132.0,
+    "pull_back": [
+      132.0,
+      138.0
+    ],
+    "gap": 1.0,
+    "credits_start": 139.0,
+    "credits_seconds": 60.333,
+    "credits_speed_px_per_s": 150.0,
+    "credits_png_height": 7970,
+    "tail_start": 199.333,
+    "lamp_dies_at": 199.933,
+    "den_darken_seconds": 1.5,
+    "black_hold": 0.5
+  },
+  "events": [
+    {
+      "at": 0.0,
+      "event": "projector start: beam flickers in under the swell (0.4 s → 2.6 s), blank light on the wall; the lamp is a per-frame multiplier on the projected light and on the beam layer alpha"
+    },
+    {
+      "at": 6.0,
+      "event": "first image; a two-frame bright bump as the frame catches"
+    },
+    {
+      "at": 132.0,
+      "event": "camera: six-second cubic ease-out from the projection rectangle (scale 1920/928, origin 830,115) to the full room; Glen does not move"
+    },
+    {
+      "at": 138.0,
+      "event": "full room; Orbit of Hope ends naturally at 2:17.98"
+    },
+    {
+      "at": 139.0,
+      "event": "credits scroll on the wall: dedication, notices, then registry.credits in order (Archive filled from the approved table); dark ink on the lit field, 150 px/s at film resolution, 60.333 s; Orbit of Hope (refrain) from its start, 1.5 s fade-in"
+    },
+    {
+      "at": 199.333,
+      "event": "tail leader: blank light flapping in the gate (0.6 s)"
+    },
+    {
+      "at": 199.933,
+      "event": "the lamp dies with the den: two early stutters, then out over 1.5 s while the beam fades and the den darkens; the refrain fades over the last 2.5 s"
+    },
+    {
+      "at": 201.933,
+      "event": "black. The player dissolves (700 ms) into the console under the hero title from here (OPENING-DEN.md)"
+    }
+  ],
+  "shots": [
+    {
+      "shot": 1,
+      "slug": "projector-start",
+      "film_in": 0.0,
+      "film_out": 6.0,
+      "seconds": 6.0,
+      "clip": null,
+      "note": "no archive: the blank light of the projector on the wall, flickering in"
+    },
+    {
+      "shot": 2,
+      "slug": "agena-launch-still",
+      "film_in": 6.0,
+      "film_out": 12.0,
+      "seconds": 6.0,
+      "clip": "selects-v003/clips/02-agena-launch-still.mp4",
+      "clip_sha256": "f9fb5e4c63a9eb05e4578a2e3ee349cfa148e2c9e35fe6c3a57841e162562da5",
+      "segments": [
+        {
+          "source": "02-agena-launch-S66-24482.jpg",
+          "kind": "photograph",
+          "push_in_percent": 4,
+          "pan": false,
+          "duration_seconds": 6.0
+        }
+      ],
+      "source_page_url": "https://images.nasa.gov/details/S66-24482",
+      "terms_as_shown": "NASA content — generally not subject to copyright; used under NASA Media Usage Guidelines; not affiliated with or endorsed by NASA."
+    },
+    {
+      "shot": 3,
+      "slug": "suited-crew-walkout",
+      "film_in": 12.0,
+      "film_out": 18.5,
+      "seconds": 6.5,
+      "clip": "selects-v003/clips/03-suited-crew-walkout.mp4",
+      "clip_sha256": "c56e0a042639981681e5f1b679f78960761b51cb5fb3604fcb0883a8aafa5227",
+      "segments": [
+        {
+          "source": "Michael Collins-NASA-TV_VIDEO_FILE~orig.mp4",
+          "in_seconds": 233.5,
+          "out_seconds": 240.0,
+          "duration_seconds": 6.5
+        }
+      ],
+      "source_page_url": "https://images.nasa.gov/details/Michael%20Collins-NASA-TV_VIDEO_FILE",
+      "terms_as_shown": "NASA content — generally not subject to copyright; used under NASA Media Usage Guidelines; not affiliated with or endorsed by NASA."
+    },
+    {
+      "shot": 4,
+      "slug": "apollo-saturn-v-launch",
+      "film_in": 18.5,
+      "film_out": 42.5,
+      "seconds": 24.0,
+      "clip": "selects-v003/clips/04-apollo-saturn-v-launch.mp4",
+      "clip_sha256": "0e255168ed49b1f8ec27527a1dfc7480179233196478c6f4b621c302afc22f0f",
+      "segments": [
+        {
+          "source": "Aplllo 11.mp4",
+          "in_seconds": 14.0,
+          "out_seconds": 38.0,
+          "duration_seconds": 24.0
+        }
+      ],
+      "source_page_url": "https://images.nasa.gov/details/KSC_69-71212-sRGB",
+      "terms_as_shown": "NASA content — generally not subject to copyright; used under NASA Media Usage Guidelines; not affiliated with or endorsed by NASA."
+    },
+    {
+      "shot": 5,
+      "slug": "apollo-11-moonwalk",
+      "film_in": 42.5,
+      "film_out": 54.5,
+      "seconds": 12.0,
+      "clip": "selects-v003/clips/05-apollo-11-moonwalk.mp4",
+      "clip_sha256": "5dd868cdc51c24c4fcfa41a54f2d6ebaade17b0831da47b6c0080739aea9af52",
+      "segments": [
+        {
+          "source": "Apollo_11_moonwalk_montage_720p~orig.mov",
+          "source_index": 3,
+          "in_seconds": 38,
+          "out_seconds": 50,
+          "duration_seconds": 12
+        }
+      ],
+      "source_page_url": "https://images.nasa.gov/details/Apollo_11_moonwalk_montage_720p",
+      "terms_as_shown": "NASA content — generally not subject to copyright; used under NASA Media Usage Guidelines; not affiliated with or endorsed by NASA."
+    },
+    {
+      "shot": 6,
+      "slug": "apollo-soyuz-hatch-greeting",
+      "film_in": 54.5,
+      "film_out": 62.5,
+      "seconds": 8.0,
+      "clip": "selects-v003/clips/06-apollo-soyuz-hatch-greeting.mp4",
+      "clip_sha256": "721eb46307bb3ba2909297a74864719be6a1ca58293ffa524b59ea4befbfb0c6",
+      "segments": [
+        {
+          "source": "apollo soyuz.mp4",
+          "source_index": 2,
+          "in_seconds": 851,
+          "out_seconds": 859,
+          "duration_seconds": 8
+        }
+      ],
+      "source_page_url": "https://archive.org/details/gov.archives.arc.1154974",
+      "terms_as_shown": "NARA film via Public.Resource.Org, CC0 1.0."
+    },
+    {
+      "shot": 7,
+      "slug": "skylab-workshop",
+      "film_in": 62.5,
+      "film_out": 72.5,
+      "seconds": 10.0,
+      "clip": "selects-v003/clips/07-skylab-workshop.mp4",
+      "clip_sha256": "ae8e48dcac12921c963c94ea9b79bbd63634243e117dfeb450094f0f1607bcb4",
+      "segments": [
+        {
+          "source": "ksc_042308_skylab1~orig.mp4",
+          "source_index": 8,
+          "in_seconds": 280,
+          "out_seconds": 290,
+          "duration_seconds": 10
+        }
+      ],
+      "source_page_url": "https://images.nasa.gov/details/ksc_042308_skylab1",
+      "terms_as_shown": "NASA content — generally not subject to copyright; used under NASA Media Usage Guidelines; not affiliated with or endorsed by NASA."
+    },
+    {
+      "shot": 8,
+      "slug": "sts-1-launch",
+      "film_in": 72.5,
+      "film_out": 82.5,
+      "seconds": 10.0,
+      "clip": "selects-v003/clips/08-sts-1-launch.mp4",
+      "clip_sha256": "c7c50199469045df2631e9c46fd1d9eedeed1c577b8aaecdb99e71ad9b1d185e",
+      "segments": [
+        {
+          "source": "AFRC-2021-13558-1-STS-1_40th~orig.mp4",
+          "source_index": 13,
+          "in_seconds": 7,
+          "out_seconds": 17,
+          "duration_seconds": 10
+        }
+      ],
+      "source_page_url": "https://images.nasa.gov/details/AFRC-2021-13558-1-STS-1_40th",
+      "terms_as_shown": "NASA content — generally not subject to copyright; used under NASA Media Usage Guidelines; not affiliated with or endorsed by NASA."
+    },
+    {
+      "shot": 9,
+      "slug": "challenger-crew-and-memorial",
+      "film_in": 82.5,
+      "film_out": 88.5,
+      "seconds": 6.0,
+      "clip": "selects-v003/clips/09-challenger-crew-and-memorial.mp4",
+      "clip_sha256": "42dc02e132a5eab694918e210e9476bcb199a9c0ffa770d98ba6915730b494e5",
+      "segments": [
+        {
+          "source": "NASA Remembers Its Fallen Heroes 2023~orig.mp4",
+          "in_seconds": 39.3,
+          "out_seconds": 43.1,
+          "duration_seconds": 3.8
+        },
+        {
+          "source": "NASA Remembers Its Fallen Heroes 2023~orig.mp4",
+          "in_seconds": 132.0,
+          "out_seconds": 134.2,
+          "duration_seconds": 2.2
+        }
+      ],
+      "source_page_url": "https://images.nasa.gov/details/NASA%20Remembers%20Its%20Fallen%20Heroes%202023",
+      "terms_as_shown": "NASA content — generally not subject to copyright; used under NASA Media Usage Guidelines; not affiliated with or endorsed by NASA."
+    },
+    {
+      "shot": 11,
+      "slug": "iss-international-crews",
+      "film_in": 88.5,
+      "film_out": 104.5,
+      "seconds": 16.0,
+      "clip": "selects-v003/clips/11-iss-international-crews.mp4",
+      "clip_sha256": "ebc3a06919ab0cd91b3b1b6b9f8f8cf3f7b3240209b15110307dcff4f88cdad3",
+      "segments": [
+        {
+          "source": "KSC-20231208-VP-MWC01-001-ISS25TH-HORIZONTAL-M1852-BATCH-3-UHD~orig.mp4",
+          "in_seconds": 143.8,
+          "out_seconds": 159.8,
+          "duration_seconds": 16.0
+        }
+      ],
+      "source_page_url": "https://images.nasa.gov/details/KSC-20231208-VP-MWC01-001-ISS25TH-HORIZONTAL-M1852-BATCH-3-UHD",
+      "terms_as_shown": "NASA content — generally not subject to copyright; used under NASA Media Usage Guidelines; not affiliated with or endorsed by NASA."
+    },
+    {
+      "shot": 12,
+      "slug": "columbia-crew-walkout",
+      "film_in": 104.5,
+      "film_out": 110.5,
+      "seconds": 6.0,
+      "clip": "selects-v003/clips/12-columbia-crew-walkout.mp4",
+      "clip_sha256": "e0fb462e1fbe5c1af9dd58c552b023c82fb33ed886c352382b370bae3e00cc19",
+      "segments": [
+        {
+          "source": "NASA Remembers Its Fallen Heroes 2023~orig.mp4",
+          "source_index": 11,
+          "in_seconds": 155,
+          "out_seconds": 161,
+          "duration_seconds": 6
+        }
+      ],
+      "source_page_url": "https://images.nasa.gov/details/NASA%20Remembers%20Its%20Fallen%20Heroes%202023",
+      "terms_as_shown": "NASA content — generally not subject to copyright; used under NASA Media Usage Guidelines; not affiliated with or endorsed by NASA."
+    },
+    {
+      "shot": 13,
+      "slug": "atlantis-final-landing",
+      "film_in": 110.5,
+      "film_out": 118.5,
+      "seconds": 8.0,
+      "clip": "selects-v003/clips/13-atlantis-final-landing.mp4",
+      "clip_sha256": "6a987c0b58c9f64ab708cb670613040d9aecd09f01a684cab0af093db3a38580",
+      "segments": [
+        {
+          "source": "The Shuttles Last Flight. An end. A new beginning~orig.mp4",
+          "in_seconds": 441.5,
+          "out_seconds": 449.5,
+          "duration_seconds": 8.0
+        }
+      ],
+      "source_page_url": "https://images.nasa.gov/details/The%20Shuttles%20Last%20Flight.%20An%20end.%20A%20new%20beginning",
+      "terms_as_shown": "NASA content — generally not subject to copyright; used under NASA Media Usage Guidelines; not affiliated with or endorsed by NASA."
+    },
+    {
+      "shot": 14,
+      "slug": "crew-dragon-launch",
+      "film_in": 118.5,
+      "film_out": 123.6,
+      "seconds": 5.1,
+      "clip": "selects-v003/clips/14-crew-dragon-launch.mp4",
+      "clip_sha256": "429d435b22b58e674f9ed189c72a030812c493acf622a04ee4e14c5bd18a53e7",
+      "segments": [
+        {
+          "source": "NASA Astronauts Launch from America in Historic Test Flight of SpaceX Crew Dragon~orig.mp4",
+          "source_index": 10,
+          "in_seconds": 17,
+          "out_seconds": 22.1,
+          "duration_seconds": 5.1
+        }
+      ],
+      "source_page_url": "https://images.nasa.gov/details/NASA%20Astronauts%20Launch%20from%20America%20in%20Historic%20Test%20Flight%20of%20SpaceX%20Crew%20Dragon",
+      "terms_as_shown": "NASA content — generally not subject to copyright; used under NASA Media Usage Guidelines; not affiliated with or endorsed by NASA."
+    },
+    {
+      "shot": 15,
+      "slug": "artemis-ii-launch",
+      "film_in": 123.6,
+      "film_out": 132.0,
+      "seconds": 8.4,
+      "clip": "selects-v003/clips/15-artemis-ii-launch.mp4",
+      "clip_sha256": "3903ffaa2c19ab4eb4ca6979c964a4fa70f133da957129b6040d356bffe72ce3",
+      "segments": [
+        {
+          "source": "KSC-20260401-MH-JBP01-0001-Artemis_II_Launch_Cessna_GSS_8k_120fps-M19183~large.mp4",
+          "source_index": 7,
+          "in_seconds": 33,
+          "out_seconds": 41.4,
+          "duration_seconds": 8.4
+        }
+      ],
+      "source_page_url": "https://images.nasa.gov/details/KSC-20260401-MH-JBP01-0001-Artemis_II_Launch_Cessna_GSS_8k_120fps-M19183",
+      "terms_as_shown": "NASA content — generally not subject to copyright; used under NASA Media Usage Guidelines; not affiliated with or endorsed by NASA."
+    },
+    {
+      "shot": 16,
+      "slug": "earth-limb",
+      "film_in": 132.0,
+      "film_out": 138.0,
+      "seconds": 6.0,
+      "clip": "selects-v003/clips/16-earth-limb.mp4",
+      "clip_sha256": "45eb02a6eafed996c65e08e857eed6e9d5bbab39081879f51f7aa401633a53dd",
+      "segments": [
+        {
+          "source": "Earth Views from the International Space Station~orig.mp4",
+          "source_index": 4,
+          "in_seconds": 20,
+          "out_seconds": 26,
+          "duration_seconds": 6
+        }
+      ],
+      "source_page_url": "https://images.nasa.gov/details/Earth%20Views%20from%20the%20International%20Space%20Station",
+      "terms_as_shown": "NASA content — generally not subject to copyright; used under NASA Media Usage Guidelines; not affiliated with or endorsed by NASA."
+    }
+  ],
+  "music": [
+    {
+      "asset": "audio-orbit-of-hope",
+      "file": "public/audio/Orbit of Hope.mp3",
+      "from": 0.0,
+      "source_start": 0.0,
+      "to": 137.98,
+      "note": "no edit; runs out naturally as the pull-back completes"
+    },
+    {
+      "asset": "audio-orbit-of-hope-refrain",
+      "file": "public/audio/Orbit of Hope (refrain).mp3",
+      "from": 139.0,
+      "source_start": 0.0,
+      "to": 201.933,
+      "fade_in": 1.5,
+      "fade_out": 2.5,
+      "note": "under the credits; the menu loop uses the same track in the game"
+    }
+  ],
+  "projector_treatment": {
+    "gate_mask": "rounded 30 px corners, 10 px feather, 6 % corner falloff (layers/gate-mask-1920.png)",
+    "wall": "the plate's own projection rectangle at 8 % brightness; the projected image is screen-blended onto it so black in the film is unlit wall",
+    "tint": "colorchannelmixer rr .90 rg .06 rb .04 / gr .05 gg .90 gb .02 / br .04 bg .06 bb .81 (mild warmth and desaturation)",
+    "grain": "noise alls=4 temporal",
+    "gate_weave": "x = 1.6 sin(2π·0.55t) + 1.0 sin(2π·1.7t+1); y = 1.2 sin(2π·0.8t+2) + 0.8 sin(2π·2.3t) px at film resolution",
+    "flicker": "seeded (19660316) random drift ±2.5 % plus ±1.2 % per frame and rare two-frame dips to 88 %; commands.txt"
+  },
+  "den": {
+    "plate": "opening-den (fno_opening_den_room_plate_v001.png, lamp-off revision)",
+    "projection_rect": {
+      "x": 830,
+      "y": 115,
+      "width": 928,
+      "height": 522
+    },
+    "beam": {
+      "asset": "opening-den-beam",
+      "placement": [
+        144,
+        -101,
+        1920,
+        1080
+      ],
+      "opacity": 0.32,
+      "flicker": "opacity × (0.85 + 0.15·lamp), off with the lamp"
+    },
+    "smoke": {
+      "asset": "opening-den-smoke",
+      "placement": [
+        390,
+        315,
+        1152,
+        648
+      ],
+      "opacity": 0.16,
+      "motion": "rise 0 → −55 px over 12 s, linear; two instances started every 9 s, 3 s linear crossfade"
+    },
+    "composite_order": [
+      "room",
+      "film or credits on the projection rectangle",
+      "beam",
+      "smoke"
+    ]
+  },
+  "credits": {
+    "content_version": "0.5.3",
+    "png_height": 7970,
+    "png_sha256": "903ac9f0d4b18b39d9671a0000bea2c429c0bbd6af01767a9093484e57904890",
+    "sections": [
+      {
+        "heading": "Sources",
+        "lines": 10
+      },
+      {
+        "heading": "Music",
+        "lines": 2
+      },
+      {
+        "heading": "Sound",
+        "lines": 8
+      },
+      {
+        "heading": "Type",
+        "lines": 2
+      },
+      {
+        "heading": "Archive",
+        "lines": 15
+      },
+      {
+        "heading": "Made by",
+        "lines": 7
+      }
+    ],
+    "archive_section": "placeholder line replaced by the fourteen approved sources (provenance/archive-lines.json); the NASA non-affiliation line kept as authored"
+  },
+  "selects": {
+    "packet": "video/selects-v003",
+    "edl": "selects-v003/edit-decision-list.json"
+  },
+  "revision": "v002 (8 September, later): shot 9 trimmed so the Challenger walkout ends before the Columbia crew photograph; everything else as v001, re-rendered. v001 withdrawn."
+}

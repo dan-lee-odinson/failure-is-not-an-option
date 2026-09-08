@@ -239,6 +239,113 @@
         }
       },
       "additionalProperties": false
+    },
+    "site": {
+      "type": "object",
+      "required": [
+        "blocks"
+      ],
+      "properties": {
+        "blocks": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "items"
+            ],
+            "properties": {
+              "id": {
+                "enum": [
+                  "hero",
+                  "about",
+                  "demo",
+                  "gallery",
+                  "coming_soon",
+                  "bio",
+                  "notices",
+                  "nasa_marks",
+                  "open_source",
+                  "footer"
+                ]
+              },
+              "items": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "kind"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9-]*$"
+                    },
+                    "kind": {
+                      "enum": [
+                        "metadata",
+                        "heading",
+                        "paragraph",
+                        "link",
+                        "button",
+                        "label",
+                        "alt",
+                        "aria",
+                        "tooltip",
+                        "notice",
+                        "template"
+                      ]
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    },
+                    "notice_id": {
+                      "enum": [
+                        "dedication",
+                        "project_disclaimer",
+                        "ai_disclosure",
+                        "dramatization"
+                      ]
+                    },
+                    "href": {
+                      "type": "string",
+                      "minLength": 1,
+                      "pattern": "^(https://|\\./|#)\\S+$"
+                    }
+                  },
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "text": {}
+                      },
+                      "required": [
+                        "text"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "notice_id": {}
+                      },
+                      "required": [
+                        "notice_id"
+                      ]
+                    }
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

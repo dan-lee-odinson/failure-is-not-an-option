@@ -103,7 +103,7 @@ describe('dialogue sheet', () => {
     const csv = readFileSync(resolve(ROOT, 'docs', 'dialogue-sheet.csv'), 'utf8').replace(/\r\n/g, '\n');
     expect(md).toBe(toMarkdown(s));
     expect(csv).toBe(toCsv(s));
-    expect(s.version).toBe('0.5.3');
+    expect(s.version).toBe('0.5.4');
     expect(s.fingerprint).toBe(content().fingerprint);
     expect(s.runs).toBe(56);
   });
@@ -212,6 +212,7 @@ describe('dialogue sheet', () => {
     const messageSrc = MESSAGE_SOURCES.map((f) => readFileSync(resolve(ROOT, f), 'utf8')).join('\n').replace(/\\'/g, "'");
     const unreachable = s.rows.filter((r) => {
       const k = dedupeKey(r.text);
+      if (r.phase === 'site') return false; // Separately checked against named items, notice references and the approved HTML fixture.
       if (r.kind === 'history-hidden') return !hidden.has(k) && !reachableView.has(k);
       if (r.kind === 'ui.message') return !messageSrc.includes(r.text.split('…')[0]!.trim().slice(0, 24));
       if (r.source === 'app') return !reachableRendered.has(k);
@@ -259,7 +260,7 @@ describe('dialogue sheet', () => {
     for (const k of hiddenKeys) expect(onSheetKeys.has(k), `hidden string on the sheet: ${k.slice(0, 60)}`).toBe(true);
     expect(s.rows.some((r) => r.kind === 'evidence.provenance')).toBe(false);
 
-    const keys = s.rows.map((r) => dedupeKey(r.text));
+    const keys = s.rows.filter(r => r.phase !== 'site').map((r) => dedupeKey(r.text));
     expect(new Set(keys).size).toBe(keys.length); // no duplicates
     const by = (text: string) => s.rows.find((r) => norm(r.text) === norm(text));
     expect(by('Bring them down at the earlier opportunity.')!.branch).toBe('');

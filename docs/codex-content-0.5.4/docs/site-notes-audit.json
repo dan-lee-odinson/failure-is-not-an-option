@@ -1,0 +1,628 @@
+{
+  "csv_rows": 30,
+  "xlsx_note_rows": 30,
+  "xlsx_comment_parts": [],
+  "notes_source": "Earlier 0.5.0 review notes; see FNO-M00-Codex-Content-v0.5.0/00_HANDOFF.md. Files dated 7 September 2026, 10:46.",
+  "new_052_053_notes_found": false,
+  "csv_notes": [
+    {
+      "order": "32",
+      "phase": "g8-prep",
+      "node": "g8-brief",
+      "kind": "briefing",
+      "speaker": "",
+      "branch": "",
+      "id": "g8-brief",
+      "text": "Your crew will attempt docking with Agena. Choose up to two supplemental ground rehearsals. The crew's training and the mission rules are already in place. You are deciding which handoffs this room will practice together.",
+      "notes": "Explain what this means - what does a ground rehearsal do? Is the handoff a document? A set of rules? "
+    },
+    {
+      "order": "35",
+      "phase": "g8-prep",
+      "node": "g8-brief",
+      "kind": "evidence.title",
+      "speaker": "",
+      "branch": "",
+      "id": "g8-ev-contact-primer",
+      "text": "A report is not continuous coverage.",
+      "notes": "Reword, this is an AI aphorism. This needs to convey to the player in plain language what is being said."
+    },
+    {
+      "order": "36",
+      "phase": "g8-prep",
+      "node": "g8-brief",
+      "kind": "ui.button",
+      "speaker": "",
+      "branch": "",
+      "id": "app",
+      "text": "Pin",
+      "notes": "It's not clear what this does"
+    },
+    {
+      "order": "41",
+      "phase": "g8-prep",
+      "node": "g8-brief",
+      "kind": "evidence.body",
+      "speaker": "",
+      "branch": "",
+      "id": "g8-ev-contact-primer",
+      "text": "Separate the last received observation from the spacecraft's current unknown state. The crew must act onboard when contact is unavailable.",
+      "notes": "This is unclear - how do we separate the observation from the unknown state?"
+    },
+    {
+      "order": "43",
+      "phase": "g8-prep",
+      "node": "g8-brief",
+      "kind": "evidence.body",
+      "speaker": "",
+      "branch": "",
+      "id": "g8-ev-rule",
+      "text": "Once RCS use is reported, the remaining docking and EVA objectives are relinquished and the room plans the contingency return. The selectable return opportunities later in this scenario are fictional.",
+      "notes": "Do not call out the fictional sections inside the evidence / choice options. Only reveal in the top \"Alernate History\" marker, or a similar \"Historical Choice\" marker at the the top of the screen. Then call out the historical / ahistorical choices in the after report"
+    },
+    {
+      "order": "45",
+      "phase": "g8-prep",
+      "node": "g8-brief",
+      "kind": "ui.button",
+      "speaker": "",
+      "branch": "",
+      "id": "app",
+      "text": "Unpin",
+      "notes": "It's not clear what this does"
+    },
+    {
+      "order": "46",
+      "phase": "g8-prep",
+      "node": "g8-prep-select",
+      "kind": "briefing",
+      "speaker": "",
+      "branch": "",
+      "id": "g8-prep-select",
+      "text": "Each rehearsal is a performed ground exercise. It records what this room practiced together; it does not change the crew's training, the radio coverage, the ships, or the spacecraft.",
+      "notes": "Elaborate on this more, what it means, what the different roles in the room practice."
+    },
+    {
+      "order": "49",
+      "phase": "g8-prep",
+      "node": "g8-prep-select",
+      "kind": "ui.hint",
+      "speaker": "",
+      "branch": "",
+      "id": "app",
+      "text": "Opportunities remaining: 2 of 2. Reading, pinning, and questions cost nothing.",
+      "notes": "Clarify this more - it's already unclear what pinning does"
+    },
+    {
+      "order": "52",
+      "phase": "g8-prep",
+      "node": "g8-prep-select",
+      "kind": "ui.tooltip",
+      "speaker": "",
+      "branch": "",
+      "id": "app",
+      "text": "Pin evidence",
+      "notes": "It's not clear what this does"
+    },
+    {
+      "order": "58",
+      "phase": "g8-prep",
+      "node": "g8-prep-select",
+      "kind": "option.intent",
+      "speaker": "",
+      "branch": "",
+      "id": "g8-prep-recovery",
+      "text": "Rehearse the aircraft-to-ship pickup handoff.",
+      "notes": "Is \"handoff\" a NASA mission ops term?"
+    },
+    {
+      "order": "95",
+      "phase": "g8-gap",
+      "node": "g8-gap-note",
+      "kind": "label",
+      "speaker": "",
+      "branch": "",
+      "id": "g8-gap-note",
+      "text": "A silent loop is not a diagnosis.",
+      "notes": "AI aphorism, change this"
+    },
+    {
+      "order": "96",
+      "phase": "g8-gap",
+      "node": "g8-gap-note",
+      "kind": "line",
+      "speaker": "CAPCOM",
+      "branch": "",
+      "id": "g8-gap-note#1",
+      "text": "We have the last report. We do not have the next one.",
+      "notes": "This feels mechanical, no human would say this"
+    },
+    {
+      "order": "133",
+      "phase": "g8-recovery",
+      "node": "g8-return-brief",
+      "kind": "line",
+      "speaker": "FLIGHT DYNAMICS",
+      "branch": "",
+      "id": "g8-return-brief#1",
+      "text": "Two return opportunities in this plan. The first gets them down sooner. The second puts the recovery force closer. We cannot have both.",
+      "notes": "use contractions in narrative prose: can't instead of cannot, unless it is a title."
+    },
+    {
+      "order": "135",
+      "phase": "g8-recovery",
+      "node": "g8-return-brief",
+      "kind": "line",
+      "speaker": "Mara Voss — SYSTEMS",
+      "branch": "",
+      "id": "g8-return-brief#2",
+      "text": "Get them off the spacecraft. Stable is what they're doing now. It isn't a promise about another orbit.",
+      "notes": "\"Stable is what they're doing now\" is awkward phrasing. \"Their condition is stable, for now. It might not be after another orbit.\""
+    },
+    {
+      "order": "137",
+      "phase": "g8-recovery",
+      "node": "g8-return-brief",
+      "kind": "line",
+      "speaker": "Elias Reed — RECOVERY",
+      "branch": "",
+      "id": "g8-return-brief#3",
+      "text": "And the ocean is not a safe room. Give me the later opportunity and I can have the recovery force waiting closer to them.",
+      "notes": "\"The ocean is not a safe room\" is another AI aphorism. Use something more natural like \"Every extra minute on the open ocean brings more risk to the crew.\""
+    },
+    {
+      "order": "139",
+      "phase": "g8-recovery",
+      "node": "g8-return-brief",
+      "kind": "question",
+      "speaker": "Glen Kurtz — FLIGHT",
+      "branch": "",
+      "id": "g8-q-recovery-risk",
+      "text": "What does the earlier return cost them?",
+      "notes": "Instead of \"cost them\", how about \"What are the risks of an earlier return?\""
+    },
+    {
+      "order": "140",
+      "phase": "g8-recovery",
+      "node": "g8-return-brief",
+      "kind": "question",
+      "speaker": "Glen Kurtz — FLIGHT",
+      "branch": "",
+      "id": "g8-q-reserve-risk",
+      "text": "What does another orbit cost them?",
+      "notes": "Instead of \"cost them\", how about \"What are the risks of another orbit?\""
+    },
+    {
+      "order": "145",
+      "phase": "g8-recovery",
+      "node": "g8-return-brief",
+      "kind": "ui.prompt",
+      "speaker": "Glen Kurtz — FLIGHT",
+      "branch": "",
+      "id": "g8-return-brief",
+      "text": "Which danger are you willing to carry?",
+      "notes": "This is very dry - the wording should carry the drama of the decision."
+    },
+    {
+      "order": "154",
+      "phase": "g8-recovery",
+      "node": "g8-return-brief",
+      "kind": "option.cost",
+      "speaker": "",
+      "branch": "",
+      "id": "g8-return-earlier",
+      "text": "Accept a prolonged wait at sea and the crew's increasing exhaustion. Elias must execute with sparse surface coverage.",
+      "notes": "what does \"sparse surface coverage\" mean? Describe the cost."
+    },
+    {
+      "order": "182",
+      "phase": "g8-recovery",
+      "node": "g8-return-brief",
+      "kind": "answer",
+      "speaker": "Elias Reed — RECOVERY",
+      "branch": "",
+      "id": "g8-q-recovery-risk",
+      "text": "A long wait for pickup. Air support helps, but it cannot turn a distant ship into a nearby one. A clean handoff can shorten the last part.",
+      "notes": "\"but it cannot turn a distat ship into a nearby one\" is awkward, reword to more natural prose - \"it doesn't make the ship any closer\" or something like that."
+    },
+    {
+      "order": "211",
+      "phase": "g8-return-execution",
+      "node": "g8-ground-execution",
+      "kind": "event.text",
+      "speaker": "",
+      "branch": "later q0",
+      "id": "g8-exec-later-0",
+      "text": "Reserve-warning assessment requires a routing clarification and its protective recommendation an acknowledgement retry.",
+      "notes": "What does this mean? If this is readable by the player it needs to be simplified into plain language"
+    },
+    {
+      "order": "212",
+      "phase": "g8-return-execution",
+      "node": "g8-ground-execution",
+      "kind": "event.text",
+      "speaker": "",
+      "branch": "earlier q0",
+      "id": "g8-exec-earlier-0",
+      "text": "Final pickup instruction requires an ownership clarification and an acknowledgement retry.",
+      "notes": "What does this mean? If this is readable by the player it needs to be simplified into plain language"
+    },
+    {
+      "order": "228",
+      "phase": "g8-return-execution",
+      "node": "g8-return-beat-2",
+      "kind": "consequence",
+      "speaker": "",
+      "branch": "earlier q2",
+      "id": "g8-beat2-earlier-2",
+      "text": "The rehearsed handoffs avoid an additional pickup delay. The sea wait still leaves the crew worn down; the retrieval team brings both aboard.",
+      "notes": "the first sentence needs rewording in plain language."
+    },
+    {
+      "order": "230",
+      "phase": "g8-return-execution",
+      "node": "g8-return-beat-2",
+      "kind": "consequence",
+      "speaker": "",
+      "branch": "later q1",
+      "id": "g8-beat2-later-1",
+      "text": "One ground handoff needs correction under the reserve warning. The room completes the entry handoff under strain. The crew reach the closer recovery force tired but responsive.",
+      "notes": "The first two sentences need rewording in plain language"
+    },
+    {
+      "order": "232",
+      "phase": "g8-return-execution",
+      "node": "g8-return-beat-2",
+      "kind": "consequence",
+      "speaker": "",
+      "branch": "earlier q1",
+      "id": "g8-beat2-earlier-1",
+      "text": "One ground handoff needs correction before pickup. The crew are exhausted after the sea wait, but the retrieval team completes the transfer.",
+      "notes": "the first sentence needs rewording in plain language."
+    },
+    {
+      "order": "234",
+      "phase": "g8-return-execution",
+      "node": "g8-return-beat-2",
+      "kind": "consequence",
+      "speaker": "",
+      "branch": "later q2",
+      "id": "g8-beat2-later-2",
+      "text": "The reserve warning and protective recommendation pass through the rehearsed handoffs without rework. Reserve remains critical through the modeled entry sequence. The crew reach the closer recovery force tired but responsive.",
+      "notes": "The first two sentences need rewording in plain language"
+    },
+    {
+      "order": "236",
+      "phase": "g8-return-execution",
+      "node": "g8-return-beat-2",
+      "kind": "consequence",
+      "speaker": "",
+      "branch": "later q0",
+      "id": "g8-beat2-later-0",
+      "text": "The reserve warning and its acknowledgement need two ground handoff corrections. Entry coordination becomes a scramble. The crew complete entry and reach the closer recovery force visibly spent.",
+      "notes": "The first two sentences need rewording in plain language"
+    },
+    {
+      "order": "269",
+      "phase": "g8-recovered",
+      "node": "g8-relationship-response",
+      "kind": "reaction",
+      "speaker": "Mara Voss — SYSTEMS",
+      "branch": "later q2",
+      "id": "g8-rel-later-2#2",
+      "text": "I wanted them down sooner. You had the room ready for the warning. We still have to rehearse that reserve constraint before another flight.",
+      "notes": "clarify \"reserve constraint\""
+    },
+    {
+      "order": "282",
+      "phase": "g8-recovered",
+      "node": "g8-lesson-decision",
+      "kind": "option.uncertainty",
+      "speaker": "",
+      "branch": "",
+      "id": "g8-adopt-provenance",
+      "text": "Better provenance cannot restore radio coverage.",
+      "notes": "What does this mean? If this is readable by the player it needs to be simplified into plain language"
+    },
+    {
+      "order": "292",
+      "phase": "g8-postflight",
+      "node": "g8-accountability-brief",
+      "kind": "evidence.body",
+      "speaker": "",
+      "branch": "",
+      "id": "g8-ev-postflight-context",
+      "text": "AmericaSpace reports that later analysis cleared Armstrong and Scott. Cunningham nevertheless criticized their performance, while Stafford criticized undocking. Kranz instead identified insufficient ground contingency procedures for the docked phase. Borman and Schirra defended the crew.",
+      "notes": "Don't quote source provenance in the game dialogue, save it for the references section. "
+    }
+  ],
+  "xlsx_note_rows_read": [
+    {
+      "A": "32",
+      "B": "g8-prep",
+      "C": "g8-brief",
+      "D": "briefing",
+      "G": "g8-brief",
+      "H": "Your crew will attempt docking with Agena. Choose up to two supplemental ground rehearsals. The crew's training and the mission rules are already in place. You are deciding which handoffs this room will practice together.",
+      "I": "Explain what this means - what does a ground rehearsal do? Is the handoff a document? A set of rules? "
+    },
+    {
+      "A": "35",
+      "B": "g8-prep",
+      "C": "g8-brief",
+      "D": "evidence.title",
+      "G": "g8-ev-contact-primer",
+      "H": "A report is not continuous coverage.",
+      "I": "Reword, this is an AI aphorism. This needs to convey to the player in plain language what is being said."
+    },
+    {
+      "A": "36",
+      "B": "g8-prep",
+      "C": "g8-brief",
+      "D": "ui.button",
+      "G": "app",
+      "H": "Pin",
+      "I": "It's not clear what this does"
+    },
+    {
+      "A": "41",
+      "B": "g8-prep",
+      "C": "g8-brief",
+      "D": "evidence.body",
+      "G": "g8-ev-contact-primer",
+      "H": "Separate the last received observation from the spacecraft's current unknown state. The crew must act onboard when contact is unavailable.",
+      "I": "This is unclear - how do we separate the observation from the unknown state?"
+    },
+    {
+      "A": "43",
+      "B": "g8-prep",
+      "C": "g8-brief",
+      "D": "evidence.body",
+      "G": "g8-ev-rule",
+      "H": "Once RCS use is reported, the remaining docking and EVA objectives are relinquished and the room plans the contingency return. The selectable return opportunities later in this scenario are fictional.",
+      "I": "Do not call out the fictional sections inside the evidence / choice options. Only reveal in the top \"Alernate History\" marker, or a similar \"Historical Choice\" marker at the the top of the screen. Then call out the historical / ahistorical choices in the after report"
+    },
+    {
+      "A": "45",
+      "B": "g8-prep",
+      "C": "g8-brief",
+      "D": "ui.button",
+      "G": "app",
+      "H": "Unpin",
+      "I": "It's not clear what this does"
+    },
+    {
+      "A": "46",
+      "B": "g8-prep",
+      "C": "g8-prep-select",
+      "D": "briefing",
+      "G": "g8-prep-select",
+      "H": "Each rehearsal is a performed ground exercise. It records what this room practiced together; it does not change the crew's training, the radio coverage, the ships, or the spacecraft.",
+      "I": "Elaborate on this more, what it means, what the different roles in the room practice."
+    },
+    {
+      "A": "49",
+      "B": "g8-prep",
+      "C": "g8-prep-select",
+      "D": "ui.hint",
+      "G": "app",
+      "H": "Opportunities remaining: 2 of 2. Reading, pinning, and questions cost nothing.",
+      "I": "Clarify this more - it's already unclear what pinning does"
+    },
+    {
+      "A": "52",
+      "B": "g8-prep",
+      "C": "g8-prep-select",
+      "D": "ui.tooltip",
+      "G": "app",
+      "H": "Pin evidence",
+      "I": "It's not clear what this does"
+    },
+    {
+      "A": "58",
+      "B": "g8-prep",
+      "C": "g8-prep-select",
+      "D": "option.intent",
+      "G": "g8-prep-recovery",
+      "H": "Rehearse the aircraft-to-ship pickup handoff.",
+      "I": "Is \"handoff\" a NASA mission ops term?"
+    },
+    {
+      "A": "95",
+      "B": "g8-gap",
+      "C": "g8-gap-note",
+      "D": "label",
+      "G": "g8-gap-note",
+      "H": "A silent loop is not a diagnosis.",
+      "I": "AI aphorism, change this"
+    },
+    {
+      "A": "96",
+      "B": "g8-gap",
+      "C": "g8-gap-note",
+      "D": "line",
+      "E": "CAPCOM",
+      "G": "g8-gap-note#1",
+      "H": "We have the last report. We do not have the next one.",
+      "I": "This feels mechanical, no human would say this"
+    },
+    {
+      "A": "133",
+      "B": "g8-recovery",
+      "C": "g8-return-brief",
+      "D": "line",
+      "E": "FLIGHT DYNAMICS",
+      "G": "g8-return-brief#1",
+      "H": "Two return opportunities in this plan. The first gets them down sooner. The second puts the recovery force closer. We cannot have both.",
+      "I": "use contractions in narrative prose: can't instead of cannot, unless it is a title."
+    },
+    {
+      "A": "135",
+      "B": "g8-recovery",
+      "C": "g8-return-brief",
+      "D": "line",
+      "E": "Mara Voss — SYSTEMS",
+      "G": "g8-return-brief#2",
+      "H": "Get them off the spacecraft. Stable is what they're doing now. It isn't a promise about another orbit.",
+      "I": "\"Stable is what they're doing now\" is awkward phrasing. \"Their condition is stable, for now. It might not be after another orbit.\""
+    },
+    {
+      "A": "137",
+      "B": "g8-recovery",
+      "C": "g8-return-brief",
+      "D": "line",
+      "E": "Elias Reed — RECOVERY",
+      "G": "g8-return-brief#3",
+      "H": "And the ocean is not a safe room. Give me the later opportunity and I can have the recovery force waiting closer to them.",
+      "I": "\"The ocean is not a safe room\" is another AI aphorism. Use something more natural like \"Every extra minute on the open ocean brings more risk to the crew.\""
+    },
+    {
+      "A": "139",
+      "B": "g8-recovery",
+      "C": "g8-return-brief",
+      "D": "question",
+      "E": "Glen Kurtz — FLIGHT",
+      "G": "g8-q-recovery-risk",
+      "H": "What does the earlier return cost them?",
+      "I": "Instead of \"cost them\", how about \"What are the risks of an earlier return?\""
+    },
+    {
+      "A": "140",
+      "B": "g8-recovery",
+      "C": "g8-return-brief",
+      "D": "question",
+      "E": "Glen Kurtz — FLIGHT",
+      "G": "g8-q-reserve-risk",
+      "H": "What does another orbit cost them?",
+      "I": "Instead of \"cost them\", how about \"What are the risks of another orbit?\""
+    },
+    {
+      "A": "145",
+      "B": "g8-recovery",
+      "C": "g8-return-brief",
+      "D": "ui.prompt",
+      "E": "Glen Kurtz — FLIGHT",
+      "G": "g8-return-brief",
+      "H": "Which danger are you willing to carry?",
+      "I": "This is very dry - the wording should carry the drama of the decision."
+    },
+    {
+      "A": "154",
+      "B": "g8-recovery",
+      "C": "g8-return-brief",
+      "D": "option.cost",
+      "G": "g8-return-earlier",
+      "H": "Accept a prolonged wait at sea and the crew's increasing exhaustion. Elias must execute with sparse surface coverage.",
+      "I": "what does \"sparse surface coverage\" mean? Describe the cost."
+    },
+    {
+      "A": "182",
+      "B": "g8-recovery",
+      "C": "g8-return-brief",
+      "D": "answer",
+      "E": "Elias Reed — RECOVERY",
+      "G": "g8-q-recovery-risk",
+      "H": "A long wait for pickup. Air support helps, but it cannot turn a distant ship into a nearby one. A clean handoff can shorten the last part.",
+      "I": "\"but it cannot turn a distat ship into a nearby one\" is awkward, reword to more natural prose - \"it doesn't make the ship any closer\" or something like that."
+    },
+    {
+      "A": "211",
+      "B": "g8-return-execution",
+      "C": "g8-ground-execution",
+      "D": "event.text",
+      "F": "later q0",
+      "G": "g8-exec-later-0",
+      "H": "Reserve-warning assessment requires a routing clarification and its protective recommendation an acknowledgement retry.",
+      "I": "What does this mean? If this is readable by the player it needs to be simplified into plain language"
+    },
+    {
+      "A": "212",
+      "B": "g8-return-execution",
+      "C": "g8-ground-execution",
+      "D": "event.text",
+      "F": "earlier q0",
+      "G": "g8-exec-earlier-0",
+      "H": "Final pickup instruction requires an ownership clarification and an acknowledgement retry.",
+      "I": "What does this mean? If this is readable by the player it needs to be simplified into plain language"
+    },
+    {
+      "A": "228",
+      "B": "g8-return-execution",
+      "C": "g8-return-beat-2",
+      "D": "consequence",
+      "F": "earlier q2",
+      "G": "g8-beat2-earlier-2",
+      "H": "The rehearsed handoffs avoid an additional pickup delay. The sea wait still leaves the crew worn down; the retrieval team brings both aboard.",
+      "I": "the first sentence needs rewording in plain language."
+    },
+    {
+      "A": "230",
+      "B": "g8-return-execution",
+      "C": "g8-return-beat-2",
+      "D": "consequence",
+      "F": "later q1",
+      "G": "g8-beat2-later-1",
+      "H": "One ground handoff needs correction under the reserve warning. The room completes the entry handoff under strain. The crew reach the closer recovery force tired but responsive.",
+      "I": "The first two sentences need rewording in plain language"
+    },
+    {
+      "A": "232",
+      "B": "g8-return-execution",
+      "C": "g8-return-beat-2",
+      "D": "consequence",
+      "F": "earlier q1",
+      "G": "g8-beat2-earlier-1",
+      "H": "One ground handoff needs correction before pickup. The crew are exhausted after the sea wait, but the retrieval team completes the transfer.",
+      "I": "the first sentence needs rewording in plain language."
+    },
+    {
+      "A": "234",
+      "B": "g8-return-execution",
+      "C": "g8-return-beat-2",
+      "D": "consequence",
+      "F": "later q2",
+      "G": "g8-beat2-later-2",
+      "H": "The reserve warning and protective recommendation pass through the rehearsed handoffs without rework. Reserve remains critical through the modeled entry sequence. The crew reach the closer recovery force tired but responsive.",
+      "I": "The first two sentences need rewording in plain language"
+    },
+    {
+      "A": "236",
+      "B": "g8-return-execution",
+      "C": "g8-return-beat-2",
+      "D": "consequence",
+      "F": "later q0",
+      "G": "g8-beat2-later-0",
+      "H": "The reserve warning and its acknowledgement need two ground handoff corrections. Entry coordination becomes a scramble. The crew complete entry and reach the closer recovery force visibly spent.",
+      "I": "The first two sentences need rewording in plain language"
+    },
+    {
+      "A": "269",
+      "B": "g8-recovered",
+      "C": "g8-relationship-response",
+      "D": "reaction",
+      "E": "Mara Voss — SYSTEMS",
+      "F": "later q2",
+      "G": "g8-rel-later-2#2",
+      "H": "I wanted them down sooner. You had the room ready for the warning. We still have to rehearse that reserve constraint before another flight.",
+      "I": "clarify \"reserve constraint\""
+    },
+    {
+      "A": "282",
+      "B": "g8-recovered",
+      "C": "g8-lesson-decision",
+      "D": "option.uncertainty",
+      "G": "g8-adopt-provenance",
+      "H": "Better provenance cannot restore radio coverage.",
+      "I": "What does this mean? If this is readable by the player it needs to be simplified into plain language"
+    },
+    {
+      "A": "292",
+      "B": "g8-postflight",
+      "C": "g8-accountability-brief",
+      "D": "evidence.body",
+      "G": "g8-ev-postflight-context",
+      "H": "AmericaSpace reports that later analysis cleared Armstrong and Scott. Cunningham nevertheless criticized their performance, while Stafford criticized undocking. Kranz instead identified insufficient ground contingency procedures for the docked phase. Borman and Schirra defended the crew.",
+      "I": "Don't quote source provenance in the game dialogue, save it for the references section. "
+    }
+  ]
+}
