@@ -936,7 +936,8 @@ function driveProseScroll(): void {
     const unit = frame.getBoundingClientRect().width / DESIGN.width || 1;
     const max = el.scrollHeight - el.clientHeight;
     if (Math.abs(el.scrollTop - pos) > 2) pos = el.scrollTop; // scrolled by hand meanwhile
-    if (scrollLastTs) { pos = Math.min(max, pos + CREDITS_PX_PER_S * unit * ((ts - scrollLastTs) / 1000)); el.scrollTop = pos; }
+    const rate = parseFloat(getComputedStyle(el).getPropertyValue('--credits-rate')) || CREDITS_PX_PER_S * unit; // a phone's paper sheet sets its own pace (styles.css)
+    if (scrollLastTs) { pos = Math.min(max, pos + rate * ((ts - scrollLastTs) / 1000)); el.scrollTop = pos; }
     scrollLastTs = ts;
     if (el.scrollTop >= max - 0.5) {
       // The last line has cleared the top: a 1.2 s hold, then the run-out (never while the player has paused).

@@ -574,6 +574,7 @@ html[data-text="large"] .res-copy.relationships { top: 10%; }
   flex-direction: column;
   gap: 0.8rem;
   backdrop-filter: blur(8px);
+  container: conv / inline-size; /* the phone-width speaker layout answers to the panel's own width (FNO-HOTFIX-01) */
 }
 .conv-head { display: flex; flex-direction: column; gap: 0.3rem; flex: 0 0 auto; }
 .conv-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; align-items: start; overflow: auto; overflow-x: hidden; min-height: 0; flex: 1 1 auto; scrollbar-width: thin; }
@@ -768,7 +769,7 @@ html[data-text="large"] .strip { max-height: min(40vh, calc(100vh - 22rem)); }
 .readout .not-ready { color: var(--muted); }
 
 /* Paper cards: intent and risk/cost first; attraction, uncertainty and support behind Details. */
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 0.9rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(19rem, 100%), 1fr)); gap: 0.9rem; }
 .cards.committed { margin-bottom: 1rem; }
 .card { padding: 0.8rem 0.95rem 0.85rem; display: flex; flex-direction: column; gap: 0.45rem; }
 .card[data-state="unavailable"], .card[data-state="closed"] { background: var(--paper-unavailable); box-shadow: none; }
@@ -834,6 +835,7 @@ html[data-text="large"] .strip { max-height: min(40vh, calc(100vh - 22rem)); }
 .overlay .page .title { font-weight: 700; }
 .overlay .page .status { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: #5b4a12; }
 .overlay .muted { color: #cfd8cf; }
+.overlay code { overflow-wrap: anywhere; }
 .paper-overlay .muted { color: var(--paper-muted); }
 .overlay ul.plain { padding-left: 1.2rem; }
 .overlay input[type="file"] { color: var(--panel-ink); }
@@ -860,7 +862,7 @@ html[data-text="large"] .strip { max-height: min(40vh, calc(100vh - 22rem)); }
 .panel.paper .report .label { color: var(--stamp); }
 .panel.paper .hint { color: var(--paper-muted); font-size: 0.88rem; }
 .panel.paper .muted { color: var(--paper-muted); }
-.people { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.6rem; margin-top: 0.6rem; }
+.people { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr)); gap: 0.6rem; margin-top: 0.6rem; }
 .person { background: var(--paper-2); border: 1px solid var(--paper-rule); padding: 0.5rem 0.7rem; }
 .person .name { font-weight: 600; }
 .person .trust { font-family: var(--font-mono); font-size: 0.85rem; }
@@ -874,6 +876,92 @@ details summary { cursor: pointer; }
 .screen-planning .prompt { font-size: 1.15rem; font-weight: 600; margin: 1rem 0 0.6rem; }
 .screen-planning .continue-row .hint { color: var(--cream); font-size: 0.88rem; }
 .constraint { border-left: 3px solid var(--amber); padding: 0.6rem 0.9rem; background: var(--charcoal); max-width: 70ch; }
-.tiles { grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); margin: 0.8rem 0; }
+.tiles { grid-template-columns: repeat(auto-fit, minmax(min(17rem, 100%), 1fr)); margin: 0.8rem 0; }
 .tile[data-highlight="true"] { outline: 3px solid var(--stamp); outline-offset: -3px; }
 .committed-text { color: var(--green); font-weight: 600; }
+
+/* ---------- phone-width layout (FNO-HOTFIX-01, doc 47 §2; Codex's FNO-LIVE-01 and FNO-LIVE-02) ---------- */
+
+/* A. The conversation panel narrower than 540 px (its body under ~500: a phone, or a squeezed column): the active
+   speaker becomes a compact header above the lines — a 96 px portrait with the name beside it — and each line's portrait
+   shrinks to 40 px beside full-width text; a word that cannot fit breaks rather than clips. Whatever the layout or text size. */
+@container conv (max-width: 540px) {
+  .conv-body.with-portrait, .console-shell.stacked .conv-body.with-portrait, html[data-text="large"] .conv-body.with-portrait { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; }
+  .active-portrait, .console-shell.stacked .active-portrait, html[data-text="large"] .active-portrait {
+    position: static; flex-direction: row; align-items: center; gap: 0.7rem; padding: 0.25rem 0.1rem;
+  }
+  .active-portrait img, .console-shell.stacked .active-portrait img, html[data-text="large"] .active-portrait img { height: 96px; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6)); }
+  .active-portrait .who { text-align: left; font-size: 0.85rem; }
+  .line { grid-template-columns: 40px minmax(0, 1fr); gap: 0.6rem; padding: 0.55rem 0.7rem; }
+  .line.no-speaker { grid-template-columns: minmax(0, 1fr); }
+  .line .portrait, html[data-text="large"] .line .portrait { width: 40px; height: 53px; }
+  .line .portrait.empty { font-size: 0.55rem; }
+  .line .who, .line .what, .active-portrait .who, .narration, .conv-lines .answer { overflow-wrap: break-word; }
+  .conv-lines .answer { margin-left: 0.5rem; }
+}
+
+@media (max-width: 599px) {
+  /* B. The status bar: the status text on a row of its own; the keys wrap onto as many rows as they need, each at
+     least 40 px tall, filling the rows; the mode lamp stays with the status text. */
+  .status-bar, .console-shell.stacked .status-bar { flex-wrap: wrap; gap: 0.4rem 0.6rem; padding: 0.4rem 0.7rem 0.5rem; }
+  .status-left { flex: 1 1 100%; gap: 0.35rem 0.6rem; }
+  .status-keys { flex: 1 1 100%; flex-wrap: wrap; gap: 0.4rem; }
+  .status-bar .k, .console-shell.stacked .status-bar .k { flex: 1 1 auto; min-width: 0; min-height: 40px; padding: 0.55em 0.6em 0.75em; font-size: 0.8rem; }
+  .lamp { padding: 0.35rem 0.7rem 0.35rem 2rem; font-size: 0.8rem; }
+  /* The conversation panel takes the width, with lighter padding, in both layouts. */
+  .conversation { left: 0.6rem; right: 0.6rem; padding: 0.75rem 0.7rem 0.9rem; }
+  .console-shell.stacked .conversation { margin: 0.6rem 0.6rem 0.6rem 0.6rem; max-height: 62vh; }
+  html[data-text="large"] .conversation { padding: 0.65rem 0.6rem 0.8rem; }
+  .strip { padding: 0.8rem 0.7rem 1rem; }
+  .stage { min-height: 50vh; }
+  .participant { width: 6.6rem; padding: 0.45rem 0.3rem; }
+  .participant .portrait { width: 72px; height: 96px; }
+  /* Overlays: the settings sliders wrap, the evidence heads stack, the close row stays reachable. */
+  .overlay-backdrop { padding: 0.6rem; }
+  .overlay { padding: 0.9rem 0.9rem 1.1rem; }
+  .vol { flex-wrap: wrap; }
+  .vol input[type="range"] { width: min(8rem, 100%); }
+  .sliders .vol span { min-width: 0; flex: 1 1 100%; }
+  .ev-item .ev-head { flex-wrap: wrap; }
+  .overlay .file { max-width: 100%; }
+  .overlay input[type="file"] { width: 100%; max-width: 100%; min-width: 0; }
+  .screen-debrief, .screen-planning { padding: 1rem 0.8rem 2.5rem; }
+  /* The menu: the whole title lockup across the width, above the keys. */
+  .hero-title { width: 100vw; height: 56.25vw; }
+  .stage-menu .hero-title { top: 0; transform: translate(-50%, 0) scale(1); }
+  /* The menu block owns the screen below the lockup; it sits at the bottom when there is room and scrolls when the enlarged keys need more. */
+  .menu-block { left: 4%; right: 4%; top: calc(56.25vw + 0.4rem); bottom: 2.5%; overflow: auto; scrollbar-width: none; }
+  .menu-block > :first-child { margin-top: auto; }
+  .k-title { min-width: 0; min-height: 3.6rem; flex: 1 1 8.5rem; font-size: 1.05rem; padding: 0.6em 0.6em 0.95em; }
+  /* C. The plates (prologue, scenario card, resolution cards) and the den credits on a portrait phone: the 16:9 frame
+     at the top of the screen, the text below it across the width instead of inside the picture. */
+  .screen-plate .pl-frame { top: 0; transform: translate(-50%, 0); overflow: visible; }
+  .screen-plate .pl-scene { overflow: hidden; }
+  .pl-text { left: 0; top: 100%; width: 100%; height: auto; max-height: calc(100vh - 56.25vw - 6.5rem); padding: 0.6rem 0.6rem 0; }
+  .pl-copy { max-height: calc(100vh - 56.25vw - 7.2rem); padding: 0.8rem 0.9rem 0.9rem; box-shadow: none; background-color: rgba(3, 12, 16, 0.92); }
+  .pl-heading, .pl-mission { font-size: clamp(1.3rem, 7vw, 1.8rem); }
+  .pl-caption, .pl-context { font-size: 1rem; }
+  .res-overlay { position: static; background: transparent; }
+  .res-overlay::before { content: ""; position: absolute; left: 0; top: 0; width: 100%; height: 56.25vw; background: rgba(4, 21, 26, 0.55); pointer-events: none; }
+  .res-head { left: 0.6rem; top: 0.6rem; }
+  .res-copy, .res-copy.relationships { position: absolute; left: 0; top: 100%; width: 100%; max-height: calc(100vh - 56.25vw - 6.5rem); padding: 0.7rem 0.7rem 0.4rem; background: rgba(3, 12, 16, 0.92); }
+  html[data-text="large"] .res-copy.relationships { top: 100%; }
+  .res-tier-row { flex-wrap: wrap; gap: 0.5rem 1rem; }
+  .res-tier { font-size: clamp(2.6rem, 16vw, 4.5rem); letter-spacing: 0.02em; }
+  .res-person, html[data-text="large"] .res-person { flex-basis: calc((100% - 1rem) / 2); min-width: 0; }
+  .res-person img, .res-person .portrait.empty { height: 110px; }
+  .op-controls, .pl-controls { min-height: 5.5rem; padding: 0.7rem 0.6rem; gap: 0.5rem; }
+  .op-controls .k-key { min-width: 0; min-height: 3rem; font-size: 1rem; }
+  /* The den credits: the frame grows to the screen, the den picture stays 16:9 at its top, the beam and smoke (too
+     small to read at this size) are hidden, and the credits scroll as ink on a paper sheet below the picture at a
+     readable size; --credits-rate keeps the pace of the wall (about 2.2 lines a second) in the sheet's own pixels. */
+  .op-credits .den-frame { top: 0; transform: translate(-50%, 0); height: calc(100vh - 7.5rem); } /* the controls take two rows on a phone */
+  .op-credits .den-plate { height: 56.25vw; }
+  .op-credits .den-beam, .op-credits .den-smoke { visibility: hidden; }
+  .op-credits .wall-credits { left: 0 !important; top: 56.25vw !important; width: 100% !important; height: calc(100vh - 56.25vw - 7.5rem) !important; background: var(--paper); border-top: 2px solid var(--paper-rule); --credits-rate: 52; }
+  .op-credits .wall-prose { font-size: 1rem; padding: 1.2rem 0.9rem 1.5rem; }
+  .op-credits .wall-credits.static .wall-prose { padding: 1rem 0.9rem 1.5rem; }
+  html[data-text="large"] .op-credits .wall-prose { font-size: 1.1rem; }
+  html[data-text="large"] .op-credits .wall-credits { --credits-rate: 58; }
+}
+
