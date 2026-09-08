@@ -35,7 +35,12 @@ export type Effect =
   | { append_note: { person: string; fact: string } }
   | { goto: string };
 
+/** Presentation triggers; never effects or replay inputs. */
+export type Unlock = { node: string } | { line: string } | { preparation: string } | { start: true };
+
 export interface Line {
+  /** Stable, globally unique mission presentation id when a line is an unlock target. */
+  id?: string;
   /** Review/source metadata; never spoken or applied as an effect. */
   provenance?: { tag: 'procedural' | 'paraphrase' | 'quotation'; sources: string[]; pdf_pages: number[]; printed_pages: number[]; met: string[]; fiction: string[]; note: string };
   /** Character id, or null for narration / director's brief. */
@@ -305,6 +310,8 @@ export interface Character {
 }
 
 export interface Evidence {
+  /** Additional presentation gate; existing acquisition/adoption still applies. */
+  unlocked_by: Unlock;
   id: string;
   kind: 'reference' | 'report' | 'simulated-report';
   title: string;
@@ -317,6 +324,8 @@ export interface Evidence {
 }
 
 export interface Procedure {
+  /** Additional presentation gate; existing acquisition/adoption still applies. */
+  unlocked_by: Unlock;
   id: string;
   title: string;
   text: string;

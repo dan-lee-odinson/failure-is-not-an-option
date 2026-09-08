@@ -1,0 +1,208 @@
+{
+  "baseline_commit": "423e1ec006315b1fdc3ec8b96d9fc00525b32490",
+  "method": "Fresh verification directory initialized with exact baseline Git bytes for every modified path. git apply --check and git apply both passed; all resulting paths compared with candidate.",
+  "paths": 27,
+  "pass": true,
+  "all_lf_normalized_equal": true,
+  "exact_byte_matches": 24,
+  "line_ending_only_differences": [
+    "docs/unlock-review-055.csv",
+    "scripts/lib/content-unlocks.ts",
+    "scripts/lib/validator.ts"
+  ],
+  "original_repository": {
+    "head": "423e1ec006315b1fdc3ec8b96d9fc00525b32490",
+    "clean": true
+  },
+  "files": [
+    {
+      "path": "app/render.ts",
+      "applied_sha256": "e8f9af4ec25094aaf4053fe8bb5eec8cf85d6e54da4bda69700da1d24d25444e",
+      "candidate_sha256": "e8f9af4ec25094aaf4053fe8bb5eec8cf85d6e54da4bda69700da1d24d25444e",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "assets/manifest.json",
+      "applied_sha256": "ed5c5f5ed0671b0ed03c8926583969d0d2654d25764f3ab1fe2617a4ca664dc6",
+      "candidate_sha256": "ed5c5f5ed0671b0ed03c8926583969d0d2654d25764f3ab1fe2617a4ca664dc6",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "content/characters.json",
+      "applied_sha256": "842e9a5df8ae9a1c22e5bee486421be7c52f3acd0d638287eeeebfba249ee651",
+      "candidate_sha256": "842e9a5df8ae9a1c22e5bee486421be7c52f3acd0d638287eeeebfba249ee651",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "content/evidence.json",
+      "applied_sha256": "83da1472c5d63400e9a3433d0a8972b739dd6be20663ce27828e5c38ef35ad0b",
+      "candidate_sha256": "83da1472c5d63400e9a3433d0a8972b739dd6be20663ce27828e5c38ef35ad0b",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "content/followon-gemini-9a.json",
+      "applied_sha256": "cf419375c6f23ae64bd76ad7e49a359c19976cba3a82cf626c8ff4444e1913d8",
+      "candidate_sha256": "cf419375c6f23ae64bd76ad7e49a359c19976cba3a82cf626c8ff4444e1913d8",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "content/mission-gemini-8.json",
+      "applied_sha256": "236c8e81eaf41d6498cefa49b49234c6bf456a9f80ae4c0f44405351c221f4f8",
+      "candidate_sha256": "236c8e81eaf41d6498cefa49b49234c6bf456a9f80ae4c0f44405351c221f4f8",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "content/procedures.json",
+      "applied_sha256": "1a01c0b9b728d986f1ea65fa7a13a9a16b7ca7bf93f25bc14515540af22110ed",
+      "candidate_sha256": "1a01c0b9b728d986f1ea65fa7a13a9a16b7ca7bf93f25bc14515540af22110ed",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "content/registry.json",
+      "applied_sha256": "f98538154595db05b78e55ca6c72222d69d7d14a97e998a2596365e0c38fc81f",
+      "candidate_sha256": "f98538154595db05b78e55ca6c72222d69d7d14a97e998a2596365e0c38fc81f",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "core/types.ts",
+      "applied_sha256": "12bf3e5f19683f8801401a458924e06bd30f0778579f17621c745bf86a000e3c",
+      "candidate_sha256": "12bf3e5f19683f8801401a458924e06bd30f0778579f17621c745bf86a000e3c",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "docs/dialogue-sheet.csv",
+      "applied_sha256": "5685d501566b776bf64b215ea6faeff4c602a2a45dbc20af1d2da021155c591e",
+      "candidate_sha256": "5685d501566b776bf64b215ea6faeff4c602a2a45dbc20af1d2da021155c591e",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "docs/dialogue-sheet.md",
+      "applied_sha256": "56b1f8b9b97e5d5bdb9f633bc155aab033ba17c71e5fbbaafa03e9aaabb3ac9b",
+      "candidate_sha256": "56b1f8b9b97e5d5bdb9f633bc155aab033ba17c71e5fbbaafa03e9aaabb3ac9b",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "docs/unlock-review-055.csv",
+      "applied_sha256": "797c59894aaacecedfee7ed208771ea4db3a1e8558462d7cc575ed5b1469ec65",
+      "candidate_sha256": "c744d3619d9cc27a9fd2f8f8cdb459102353b9c24dfcfbb8169663421268a5bb",
+      "exact_bytes_equal": false,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "docs/unlock-review-055.json",
+      "applied_sha256": "ea4b2789b173ca459c22a85d4cd41d1cdac2b1380e7aec5487a1e91e1b145be3",
+      "candidate_sha256": "ea4b2789b173ca459c22a85d4cd41d1cdac2b1380e7aec5487a1e91e1b145be3",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "docs/unlock-review-055.md",
+      "applied_sha256": "27a6e5a549d417c556ba4eb48dba5c04aa93341794fb1dd4c9bc0c03d66b380b",
+      "candidate_sha256": "27a6e5a549d417c556ba4eb48dba5c04aa93341794fb1dd4c9bc0c03d66b380b",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "schema/defs.schema.json",
+      "applied_sha256": "10473034a117368639dbbd4e5a1cdc3e891c89e20c9f70b76d3d99fd6654f829",
+      "candidate_sha256": "10473034a117368639dbbd4e5a1cdc3e891c89e20c9f70b76d3d99fd6654f829",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "schema/evidence.schema.json",
+      "applied_sha256": "36bbe3f0f807ad49a64597d390afb3cf9527848fe5b64d440785923a54a283d0",
+      "candidate_sha256": "36bbe3f0f807ad49a64597d390afb3cf9527848fe5b64d440785923a54a283d0",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "schema/procedures.schema.json",
+      "applied_sha256": "2f161d86d3f21f0499bbd3ff46fdb19d8399b7b2d9a59fda98d4e09bc62e2de9",
+      "candidate_sha256": "2f161d86d3f21f0499bbd3ff46fdb19d8399b7b2d9a59fda98d4e09bc62e2de9",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "scripts/lib/content-unlocks.ts",
+      "applied_sha256": "ea1bc286e6681cc7836a8d3f8d4af4cd6bbbe426f2b1caffa3723e799e4d6e5d",
+      "candidate_sha256": "8e763385c7f57ff8a4c57be7908a51a4079302c6b14ee77a9906352ce2ac2d79",
+      "exact_bytes_equal": false,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "scripts/lib/validator.ts",
+      "applied_sha256": "18c87c65b460e46eeb758bfb03b31b3646c010b8faf23225beaf4114f2718e74",
+      "candidate_sha256": "a01c20edfe4c62d13304f553268f2b869e2cf8507a69dcdfbde4d48fefb31264",
+      "exact_bytes_equal": false,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "tests/core/ac-05-09.test.ts",
+      "applied_sha256": "989396dcb2e5bdc5958636cb26ec8dd814923fed16b3847fd32cf2774f3e602f",
+      "candidate_sha256": "989396dcb2e5bdc5958636cb26ec8dd814923fed16b3847fd32cf2774f3e602f",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "tests/core/content-055-unlocks.test.ts",
+      "applied_sha256": "48795f69e01e52d4c9f8732871cec37dce7086f44b6a98918b0e8b976280ae0c",
+      "candidate_sha256": "48795f69e01e52d4c9f8732871cec37dce7086f44b6a98918b0e8b976280ae0c",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "tests/core/dialogue-sheet.test.ts",
+      "applied_sha256": "d11a20740afa11b1c504cb9f9f2f5ee08b24af3c57e4395706127a842a624c16",
+      "candidate_sha256": "d11a20740afa11b1c504cb9f9f2f5ee08b24af3c57e4395706127a842a624c16",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "tests/core/presentation-m02.test.ts",
+      "applied_sha256": "2c3bb11ee4d1a351045207b10785029fcbc0ff974d4a819aa3f5fa1248242cc7",
+      "candidate_sha256": "2c3bb11ee4d1a351045207b10785029fcbc0ff974d4a819aa3f5fa1248242cc7",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "tests/core/replay.test.ts",
+      "applied_sha256": "22dcf87c815df515a27fc1ced0f85cae5bdd1a607316c6de5224c5803274fdf8",
+      "candidate_sha256": "22dcf87c815df515a27fc1ced0f85cae5bdd1a607316c6de5224c5803274fdf8",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "tests/core/validator.test.ts",
+      "applied_sha256": "f627a6c9ed06a3c6225727f58b576a4b3db88d9fed2c648366e8decc22de1eb4",
+      "candidate_sha256": "f627a6c9ed06a3c6225727f58b576a4b3db88d9fed2c648366e8decc22de1eb4",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "tests/fixtures/content-055/baseline-content.json",
+      "applied_sha256": "e72b8d251ce79620792db29df7d10a7df2e32ea32855c300871c56b99915e18f",
+      "candidate_sha256": "e72b8d251ce79620792db29df7d10a7df2e32ea32855c300871c56b99915e18f",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    },
+    {
+      "path": "tests/fixtures/content-055/baseline-manifest.json",
+      "applied_sha256": "9df4b10218d6a78e1ace7b8445be20205925b51e5676a5e029ef3c4cfc95fe04",
+      "candidate_sha256": "9df4b10218d6a78e1ace7b8445be20205925b51e5676a5e029ef3c4cfc95fe04",
+      "exact_bytes_equal": true,
+      "lf_normalized_equal": true
+    }
+  ]
+}

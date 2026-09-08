@@ -1,5 +1,5 @@
 {
-  "content_version": "0.5.4",
+  "content_version": "0.5.5",
   "id": "gemini-8",
   "title": "Gemini VIII",
   "subtitle": "The Weight of the Call",
@@ -319,7 +319,8 @@
                 ],
                 "fiction": [],
                 "note": "Crew report relayed through Houston; not a verbatim Lovell utterance. Original C is command pilot Armstrong."
-              }
+              },
+              "id": "g8-line-docking-confirmation"
             }
           ],
           "continue": {
@@ -452,7 +453,8 @@
                 ],
                 "fiction": [],
                 "note": "P identifies pilot Scott, not Armstrong. Quoted clauses retain the scan wording; ellipsis replaces the repeated “we’re”; apostrophe typography normalized. Final sentence paraphrases the same call. Houston relay framing is dramatized, not a recorded Lovell quote."
-              }
+              },
+              "id": "g8-line-crisis-relay"
             }
           ],
           "continue": {
@@ -504,7 +506,8 @@
               "cites": [
                 "g8-ev-stabilized",
                 "g8-ev-rule"
-              ]
+              ],
+              "id": "g8-line-rcs-termination"
             },
             {
               "speaker": "g8-systems",
@@ -609,7 +612,8 @@
               "text": "Two return opportunities. The first gets them down sooner. The second puts the recovery force closer. We can't have both.",
               "cites": [
                 "g8-ev-return"
-              ]
+              ],
+              "id": "g8-line-return-opportunities"
             },
             {
               "speaker": "g8-systems",
@@ -624,6 +628,39 @@
               "cites": [
                 "g8-ev-air"
               ]
+            },
+            {
+              "id": "g8-line-recovery-readback",
+              "speaker": null,
+              "text": "Elias and the DoD coordinator have agreed who sends the final pickup instruction to the ship. The readback is complete. This should prevent confusion during the approach, but the ship still has to reach the capsule.",
+              "when": {
+                "fact": "g8-prepared-recovery"
+              },
+              "cites": [
+                "g8-ev-recovery-readback"
+              ]
+            },
+            {
+              "id": "g8-line-systems-readback",
+              "speaker": null,
+              "text": "Mara has checked the call with FLIGHT and CAPCOM. Both desks know to expect the RCS warning and her recommendation together, so CAPCOM can pass the instruction without waiting for the assessment to be repeated.",
+              "when": {
+                "fact": "g8-prepared-systems"
+              },
+              "cites": [
+                "g8-ev-systems-readback"
+              ]
+            },
+            {
+              "id": "g8-line-contact-readback",
+              "speaker": null,
+              "text": "CAPCOM has identified who sends the next instruction and who confirms its receipt. Until that confirmation comes back, FLIGHT will treat the instruction as pending. The same check applies to either return.",
+              "when": {
+                "fact": "g8-prepared-contact"
+              },
+              "cites": [
+                "g8-ev-contact-readback"
+              ]
             }
           ],
           "questions": [
@@ -635,7 +672,8 @@
                 "text": "The nearest ship is hours away. They'll be waiting in the capsule, in darkness, with the sea wearing them down. Air support helps, but it doesn't make the ship any closer.",
                 "cites": [
                   "g8-ev-air"
-                ]
+                ],
+                "id": "g8-line-recovery-risk-answer"
               }
             },
             {
@@ -646,7 +684,8 @@
                 "text": "They'll spend another orbit in a damaged spacecraft. RCS propellant is already low; they need it to control their attitude during entry. If the warning or our instruction arrives late, they'll have less time to act.",
                 "cites": [
                   "g8-ev-reserve"
-                ]
+                ],
+                "id": "g8-line-reserve-risk-answer"
               }
             },
             {
@@ -1971,6 +2010,16 @@
             {
               "id": "stafford",
               "label": "TOM STAFFORD — ASTRONAUT OFFICE"
+            }
+          ],
+          "lines": [
+            {
+              "id": "g8-line-postflight-context",
+              "speaker": null,
+              "text": "Post-flight analysis has cleared Armstrong and Scott of blame. Walt Cunningham has criticized aspects of their performance; Tom Stafford has argued that undocking from Agena was the wrong decision. Gene Kranz has identified a failure on the ground: too few contingency procedures for the docked phase. Frank Borman and Wally Schirra have defended the crew.",
+              "cites": [
+                "g8-ev-postflight-context"
+              ]
             }
           ]
         },

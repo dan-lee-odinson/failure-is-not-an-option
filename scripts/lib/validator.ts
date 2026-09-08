@@ -4,6 +4,7 @@
  */
 import Ajv2020 from 'ajv/dist/2020';
 import { validatePresentation } from './presentation-contract';
+import { validateUnlocks } from './content-unlocks';
 import addFormats from 'ajv-formats';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -78,6 +79,7 @@ export function validateContent(opts: ValidateOptions): ValidationReport {
     errors.push(`index: ${(e as Error).message}`);
     return report;
   }
+  errors.push(...validateUnlocks(bundle));
   report.contentVersion = bundle.mission.content_version;
   report.fingerprint = contentFingerprint(bundle);
 
@@ -474,3 +476,4 @@ export function readSvgSize(text: string): { width: number; height: number } | n
   if (vb) return { width: Number(vb[3]), height: Number(vb[4]) };
   return null;
 }
+

@@ -1,5 +1,5 @@
 {
-  "content_version": "0.5.5",
+  "content_version": "0.5.4",
   "manifest_version": "1.0.0",
   "task": "FNO-Codex-Content-0.5.3",
   "status": "delivered",
@@ -977,7 +977,7 @@
       "format": "mp4",
       "width": 1920,
       "height": 1080,
-      "duration_s": 138.0,
+      "duration_s": 138,
       "title": "Failure is Not an Option — opening film (deployed cut, 0:00–2:18)",
       "credit": "Assembled from NASA archive footage and the project's own art; see credits",
       "rights": "NASA content is generally not subject to copyright and is used under NASA's media usage guidelines; one National Archives film via Public.Resource.Org (CC0 1.0); the den, smoke and beam layers and the music (Orbit of Hope, Dan Lee-Odinson / Suno Pro) are the project's own. Not affiliated with, authorized, sponsored, or endorsed by NASA. Sources and terms per shot: docs/deploy-inputs/film-edl.json.",

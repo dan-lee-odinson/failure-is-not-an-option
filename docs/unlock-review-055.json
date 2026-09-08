@@ -1,0 +1,192 @@
+[
+  {
+    "id": "g8-ev-rule",
+    "title": "Mission termination after RCS activation",
+    "unlocked_by": {
+      "line": "g8-line-rcs-termination"
+    },
+    "presentation_location": "g8-stabilization-report.lines[0]",
+    "presenting_text": "They've regained control using the reentry thrusters. They've used substantial propellant from both RCS rings. That means we terminate the mission.",
+    "why": "Mara explicitly reports both RCS rings, substantial use and mission termination. Earlier briefing acquisition is internal only; do not expose the title. The earlier optional crew relay does not unlock this card."
+  },
+  {
+    "id": "g8-ev-contact-primer",
+    "title": "Network coverage and report timing",
+    "unlocked_by": {
+      "node": "g8-loss-of-contact"
+    },
+    "presentation_location": "g8-loss-of-contact.text",
+    "presenting_text": "The scheduled tracking pass has ended. There's no new report from the spacecraft.",
+    "why": "The scheduled pass has ended and no new report is available. R2 explicitly selects this loss-of-contact scene; not the briefing or preparation option that cites the primer."
+  },
+  {
+    "id": "g8-ev-contact-worksheet",
+    "title": "Contact drill: instruction and readback",
+    "unlocked_by": {
+      "preparation": "g8-prep-contact"
+    },
+    "presentation_location": "g8-prep-select.text + selected option g8-prep-contact",
+    "presenting_text": "In the contact drill, Houston CAPCOM and a tracking-ship CAPCOM practice sending an instruction, reading it back, and confirming receipt to FLIGHT. In the recovery drill, Elias and the Department of Defense recovery coordinator practice passing the aircraft's location report to the ship and confirming who sends the pickup instruction. In the systems drill, Mara calls a low-propellant warning to FLIGHT and CAPCOM together, then passes her recommended response before the next entry task begins. Selected: Rehearse sending an instruction and confirming its receipt.",
+    "why": "Only the selected contact rehearsal produces this worksheet. Reading the menu is not selecting the drill."
+  },
+  {
+    "id": "g8-ev-recovery-worksheet",
+    "title": "Recovery drill: pickup instruction",
+    "unlocked_by": {
+      "preparation": "g8-prep-recovery"
+    },
+    "presentation_location": "g8-prep-select.text + selected option g8-prep-recovery",
+    "presenting_text": "In the contact drill, Houston CAPCOM and a tracking-ship CAPCOM practice sending an instruction, reading it back, and confirming receipt to FLIGHT. In the recovery drill, Elias and the Department of Defense recovery coordinator practice passing the aircraft's location report to the ship and confirming who sends the pickup instruction. In the systems drill, Mara calls a low-propellant warning to FLIGHT and CAPCOM together, then passes her recommended response before the next entry task begins. Selected: Rehearse passing the pickup instruction from the recovery desk to the ship.",
+    "why": "Apply the same selected-rehearsal rule to the third worksheet; it must never appear on a run without recovery preparation."
+  },
+  {
+    "id": "g8-ev-systems-worksheet",
+    "title": "Systems drill: low-propellant warning",
+    "unlocked_by": {
+      "preparation": "g8-prep-systems"
+    },
+    "presentation_location": "g8-prep-select.text + selected option g8-prep-systems",
+    "presenting_text": "In the contact drill, Houston CAPCOM and a tracking-ship CAPCOM practice sending an instruction, reading it back, and confirming receipt to FLIGHT. In the recovery drill, Elias and the Department of Defense recovery coordinator practice passing the aircraft's location report to the ship and confirming who sends the pickup instruction. In the systems drill, Mara calls a low-propellant warning to FLIGHT and CAPCOM together, then passes her recommended response before the next entry task begins. Selected: Rehearse calling a low RCS propellant warning to FLIGHT and CAPCOM.",
+    "why": "Only the selected systems rehearsal produces this worksheet. Its propellant-warning title is hidden before adoption."
+  },
+  {
+    "id": "g8-ev-docked",
+    "title": "Docking confirmed.",
+    "unlocked_by": {
+      "line": "g8-line-docking-confirmation"
+    },
+    "presentation_location": "g8-docking-report.lines[0]",
+    "presenting_text": "Flight, Rose Knot Victor relays Armstrong's report: they're docked.",
+    "why": "First presented docking confirmation through Lovell. Keep crew attribution and H7 provenance unchanged."
+  },
+  {
+    "id": "g8-ev-crisis",
+    "title": "Emergency report through the tracking ship.",
+    "unlocked_by": {
+      "line": "g8-line-crisis-relay"
+    },
+    "presentation_location": "g8-crisis-report.lines[0]",
+    "presenting_text": "Flight, Coastal Sentry Quebec relays Scott: “We have serious problems here. We’re … tumbling end over end up here.” They’re disengaged from the Agena.",
+    "why": "First emergency relay through Lovell, attributed to Scott via Coastal Sentry Quebec. Not during the contact gap."
+  },
+  {
+    "id": "g8-ev-stabilized",
+    "title": "Crew regain control.",
+    "unlocked_by": {
+      "line": "g8-line-rcs-termination"
+    },
+    "presentation_location": "g8-stabilization-report.lines[0]",
+    "presenting_text": "They've regained control using the reentry thrusters. They've used substantial propellant from both RCS rings. That means we terminate the mission.",
+    "why": "Mara now reports control regained and the use of the reentry thrusters; pair the receipt with that report."
+  },
+  {
+    "id": "g8-ev-return",
+    "title": "Return opportunities",
+    "unlocked_by": {
+      "line": "g8-line-return-opportunities"
+    },
+    "presentation_location": "g8-return-brief.lines[0]",
+    "presenting_text": "Two return opportunities. The first gets them down sooner. The second puts the recovery force closer. We can't have both.",
+    "why": "Elias now describes the two simulated return opportunities. The card summarizes this planning tradeoff."
+  },
+  {
+    "id": "g8-ev-air",
+    "title": "Aircraft and recovery ship positions",
+    "unlocked_by": {
+      "line": "g8-line-recovery-risk-answer"
+    },
+    "presentation_location": "g8-return-brief.questions[g8-q-recovery-risk].answer",
+    "presenting_text": "The nearest ship is hours away. They'll be waiting in the capsule, in darkness, with the sea wearing them down. Air support helps, but it doesn't make the ship any closer.",
+    "why": "The earlier automatic remark says only that ocean time is risky. The optional answer actually explains the ship delay and the limit of air support. If never asked, this card stays hidden even post-flight."
+  },
+  {
+    "id": "g8-ev-reserve",
+    "title": "RCS propellant remaining",
+    "unlocked_by": {
+      "line": "g8-line-reserve-risk-answer"
+    },
+    "presentation_location": "g8-return-brief.questions[g8-q-reserve-risk].answer",
+    "presenting_text": "They'll spend another orbit in a damaged spacecraft. RCS propellant is already low; they need it to control their attitude during entry. If the warning or our instruction arrives late, they'll have less time to act.",
+    "why": "The earlier automatic remark says only that the crew might not stay stable. This optional answer explains the damaged spacecraft, low propellant and warning timing. If never asked, the card stays hidden."
+  },
+  {
+    "id": "g8-ev-recovery-readback",
+    "title": "Pickup instruction confirmed",
+    "unlocked_by": {
+      "line": "g8-line-recovery-readback"
+    },
+    "presentation_location": "g8-return-brief.lines[3]",
+    "presenting_text": "Elias and the DoD coordinator have agreed who sends the final pickup instruction to the ship. The readback is complete. This should prevent confusion during the approach, but the ship still has to reach the capsule.",
+    "why": "Added presenting narration, copied verbatim from this evidence body, conditional on g8-prepared-recovery. Arrival at return planning alone is insufficient."
+  },
+  {
+    "id": "g8-ev-systems-readback",
+    "title": "Warning call checked",
+    "unlocked_by": {
+      "line": "g8-line-systems-readback"
+    },
+    "presentation_location": "g8-return-brief.lines[4]",
+    "presenting_text": "Mara has checked the call with FLIGHT and CAPCOM. Both desks know to expect the RCS warning and her recommendation together, so CAPCOM can pass the instruction without waiting for the assessment to be repeated.",
+    "why": "Added presenting narration, copied verbatim from this evidence body, conditional on g8-prepared-systems. No preparation means no readback line or card."
+  },
+  {
+    "id": "g8-ev-contact-readback",
+    "title": "Instruction receipt checked",
+    "unlocked_by": {
+      "line": "g8-line-contact-readback"
+    },
+    "presentation_location": "g8-return-brief.lines[5]",
+    "presenting_text": "CAPCOM has identified who sends the next instruction and who confirms its receipt. Until that confirmation comes back, FLIGHT will treat the instruction as pending. The same check applies to either return.",
+    "why": "Added presenting narration, copied verbatim from this evidence body, conditional on g8-prepared-contact. No preparation means no readback line or card."
+  },
+  {
+    "id": "g8-ev-recovered",
+    "title": "Both crew members aboard the recovery ship.",
+    "unlocked_by": {
+      "node": "g8-pickup-report"
+    },
+    "presentation_location": "g8-pickup-report / both resolution effect labels",
+    "presenting_text": "Both crew members recovered alive",
+    "why": "Both branch resolutions display this recovery fact at the pickup report. Do not use the earlier splashdown as the trigger."
+  },
+  {
+    "id": "g8-ev-postflight-context",
+    "title": "Disagreement after Gemini VIII",
+    "unlocked_by": {
+      "line": "g8-line-postflight-context"
+    },
+    "presentation_location": "g8-accountability-brief.lines[0]",
+    "presenting_text": "Post-flight analysis has cleared Armstrong and Scott of blame. Walt Cunningham has criticized aspects of their performance; Tom Stafford has argued that undocking from Agena was the wrong decision. Gene Kranz has identified a failure on the ground: too few contingency procedures for the docked phase. Frank Borman and Wally Schirra have defended the crew.",
+    "why": "Added presenting narration, copied verbatim from this card. The old brief only said there was disagreement; it did not present all five attributed positions. This stays in the later accountability scene. H5 is a secondary account, not an air-ground transcript."
+  },
+  {
+    "id": "proc-report-provenance",
+    "title": "Report timing and confirmation",
+    "unlocked_by": {
+      "node": "g8-lesson-decision"
+    },
+    "presentation_location": "g8-lesson-decision.options[g8-adopt-provenance]",
+    "presenting_text": "Make every report say what's been confirmed and what's still unknown. Give the room a clear record of what was known and when.",
+    "why": "The lesson option introduces this practice. Binder display also requires existing ledger adoption via g8-adopt-provenance; merely entering the decision does not add either procedure."
+  },
+  {
+    "id": "proc-recovery-crosscheck",
+    "title": "Recovery cross-check",
+    "unlocked_by": {
+      "node": "g8-lesson-decision"
+    },
+    "presentation_location": "g8-lesson-decision.options[g8-adopt-recovery]",
+    "presenting_text": "Put aircraft support, ship arrival, and confirmation of each on one recovery sheet. Let the recovery desk check available help against the time the crew will spend at sea.",
+    "why": "The lesson option introduces this practice. Binder display also requires existing ledger adoption via g8-adopt-recovery; the unchosen procedure stays hidden."
+  },
+  {
+    "id": "proc-docked-contingencies",
+    "title": "Docked-flight contingency development",
+    "unlocked_by": {
+      "node": "g8-accountability-response"
+    },
+    "presentation_location": "g8-accountability-response / g8-response-ground-accountability.text",
+    "presenting_text": "You accept responsibility for the missing ground procedures. Armstrong and Scott's confidence in you strengthens. The critics haven't withdrawn their objections, but the ground team begins work on docked-flight contingencies.",
+    "why": "Only the ground-accountability response commissions this work. Require ledger adoption from g8-response-ground-accountability as well as the node encounter. Crew-blame response never adds it. It remains a commissioned task, not a finished flight rule."
+  }
+]

@@ -555,7 +555,7 @@ function renderBinder(store: Store): string {
   const rules = run ? describeEvidence(store.content, run.state).filter((e) => e.kind === 'reference' && e.body !== null) : [];
   return `
     <h3>Adopted procedures and commissioned tasks</h3>
-    ${pages.length ? pages.join('') : '<p class="muted">The binder is empty. Procedures are adopted at the end of the mission.</p>'}
+    ${pages.length ? pages.join('') : '<p class="muted">Nothing adopted yet. Reference pages appear as the mission gives you them.</p>'}
     <h3>Reference pages</h3>
     ${rules.length ? rules.map((r) => `<div class="page"><div class="title">${esc(r.title)}</div><div>${esc(r.body ?? '')}</div></div>`).join('') : '<p class="muted">No references acquired yet.</p>'}`;
 }

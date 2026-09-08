@@ -1,0 +1,142 @@
+{
+  "baseline_commit": "423e1ec006315b1fdc3ec8b96d9fc00525b32490",
+  "hash_algorithm": "SHA-256",
+  "baseline_byte_definition": "Exact git show 423e1ec:path bytes (LF). For CRLF checkouts, compare normalized LF bytes or use git blob contents.",
+  "files": [
+    {
+      "path": "app/render.ts",
+      "baseline_sha256_git_bytes": "1a660e0ad1462c8b61fe11875d860259273ad377b16a668cbf6e426ea109144b",
+      "candidate_sha256": "e8f9af4ec25094aaf4053fe8bb5eec8cf85d6e54da4bda69700da1d24d25444e"
+    },
+    {
+      "path": "assets/manifest.json",
+      "baseline_sha256_git_bytes": "5f39542068770c8e1d181d6b6d1296e24fd7932ab31ec6d130cfaf6af52f1001",
+      "candidate_sha256": "ed5c5f5ed0671b0ed03c8926583969d0d2654d25764f3ab1fe2617a4ca664dc6"
+    },
+    {
+      "path": "content/characters.json",
+      "baseline_sha256_git_bytes": "3060066a7e28fa8440f6f96bf2ad9111bc61ecee5963b5bfcd954c8c524d99c8",
+      "candidate_sha256": "842e9a5df8ae9a1c22e5bee486421be7c52f3acd0d638287eeeebfba249ee651"
+    },
+    {
+      "path": "content/evidence.json",
+      "baseline_sha256_git_bytes": "f67cceb4c6ee21447ebe216936935d175b04ac89ebc0a59db6987fac8e95f509",
+      "candidate_sha256": "83da1472c5d63400e9a3433d0a8972b739dd6be20663ce27828e5c38ef35ad0b"
+    },
+    {
+      "path": "content/followon-gemini-9a.json",
+      "baseline_sha256_git_bytes": "5d8815a4c26f118cfe03613cf44759828b8f2c01bc099294c30bdeec043a6170",
+      "candidate_sha256": "cf419375c6f23ae64bd76ad7e49a359c19976cba3a82cf626c8ff4444e1913d8"
+    },
+    {
+      "path": "content/mission-gemini-8.json",
+      "baseline_sha256_git_bytes": "b477931b0d42d64d21ca82a3f1dd6df96be716315bcadc148e75c125f76ae697",
+      "candidate_sha256": "236c8e81eaf41d6498cefa49b49234c6bf456a9f80ae4c0f44405351c221f4f8"
+    },
+    {
+      "path": "content/procedures.json",
+      "baseline_sha256_git_bytes": "76cb59e225315f0900b16b599d5c63adeaa7e72c4d2202804fa347cfd20c5826",
+      "candidate_sha256": "1a01c0b9b728d986f1ea65fa7a13a9a16b7ca7bf93f25bc14515540af22110ed"
+    },
+    {
+      "path": "content/registry.json",
+      "baseline_sha256_git_bytes": "14998426f5e8ddbb710b6d4d49e64e417df6c17d82a53795e2dbf0d04997141d",
+      "candidate_sha256": "f98538154595db05b78e55ca6c72222d69d7d14a97e998a2596365e0c38fc81f"
+    },
+    {
+      "path": "core/types.ts",
+      "baseline_sha256_git_bytes": "1074a8bc657c7fc80c0c90357e3831daec57e6ec614f226c5be0cc5a45f4628f",
+      "candidate_sha256": "12bf3e5f19683f8801401a458924e06bd30f0778579f17621c745bf86a000e3c"
+    },
+    {
+      "path": "docs/dialogue-sheet.csv",
+      "baseline_sha256_git_bytes": "eba3065e0ae11d51400ee20f2885795712d3cd4fa90e7876da167a22902ac054",
+      "candidate_sha256": "5685d501566b776bf64b215ea6faeff4c602a2a45dbc20af1d2da021155c591e"
+    },
+    {
+      "path": "docs/dialogue-sheet.md",
+      "baseline_sha256_git_bytes": "cbedfe855afd89215adecdb4d5293ed96058930c17332e5a0133d1c7fedb85d9",
+      "candidate_sha256": "56b1f8b9b97e5d5bdb9f633bc155aab033ba17c71e5fbbaafa03e9aaabb3ac9b"
+    },
+    {
+      "path": "docs/unlock-review-055.csv",
+      "baseline_sha256_git_bytes": null,
+      "candidate_sha256": "c744d3619d9cc27a9fd2f8f8cdb459102353b9c24dfcfbb8169663421268a5bb"
+    },
+    {
+      "path": "docs/unlock-review-055.json",
+      "baseline_sha256_git_bytes": null,
+      "candidate_sha256": "ea4b2789b173ca459c22a85d4cd41d1cdac2b1380e7aec5487a1e91e1b145be3"
+    },
+    {
+      "path": "docs/unlock-review-055.md",
+      "baseline_sha256_git_bytes": null,
+      "candidate_sha256": "27a6e5a549d417c556ba4eb48dba5c04aa93341794fb1dd4c9bc0c03d66b380b"
+    },
+    {
+      "path": "schema/defs.schema.json",
+      "baseline_sha256_git_bytes": "1676ebc1e11baf674d6e6e2054fcc04c30be7dce311842a803c61ddf741a21f3",
+      "candidate_sha256": "10473034a117368639dbbd4e5a1cdc3e891c89e20c9f70b76d3d99fd6654f829"
+    },
+    {
+      "path": "schema/evidence.schema.json",
+      "baseline_sha256_git_bytes": "e8bb130db21bf2fd8afbd2189e69b99c4002314b49c964ccb829983cbcf8731c",
+      "candidate_sha256": "36bbe3f0f807ad49a64597d390afb3cf9527848fe5b64d440785923a54a283d0"
+    },
+    {
+      "path": "schema/procedures.schema.json",
+      "baseline_sha256_git_bytes": "b28ebf678b1540e129bb8834f122dcdc541940de137076cc65e422615de0642d",
+      "candidate_sha256": "2f161d86d3f21f0499bbd3ff46fdb19d8399b7b2d9a59fda98d4e09bc62e2de9"
+    },
+    {
+      "path": "scripts/lib/content-unlocks.ts",
+      "baseline_sha256_git_bytes": null,
+      "candidate_sha256": "8e763385c7f57ff8a4c57be7908a51a4079302c6b14ee77a9906352ce2ac2d79"
+    },
+    {
+      "path": "scripts/lib/validator.ts",
+      "baseline_sha256_git_bytes": "651f0bf65a03a3b5e613f2d64dec038d3068da4165838bac1828aef98549e0a4",
+      "candidate_sha256": "a01c20edfe4c62d13304f553268f2b869e2cf8507a69dcdfbde4d48fefb31264"
+    },
+    {
+      "path": "tests/core/ac-05-09.test.ts",
+      "baseline_sha256_git_bytes": "1d7a815ccadf395af937f7d88d045fcedbe9d4caf7c8e72271a3e6ca6d784f7d",
+      "candidate_sha256": "989396dcb2e5bdc5958636cb26ec8dd814923fed16b3847fd32cf2774f3e602f"
+    },
+    {
+      "path": "tests/core/content-055-unlocks.test.ts",
+      "baseline_sha256_git_bytes": null,
+      "candidate_sha256": "48795f69e01e52d4c9f8732871cec37dce7086f44b6a98918b0e8b976280ae0c"
+    },
+    {
+      "path": "tests/core/dialogue-sheet.test.ts",
+      "baseline_sha256_git_bytes": "2a0c234adbaac2cdf7e74e316944db074bfc328c065b4e82e32313b181831ea4",
+      "candidate_sha256": "d11a20740afa11b1c504cb9f9f2f5ee08b24af3c57e4395706127a842a624c16"
+    },
+    {
+      "path": "tests/core/presentation-m02.test.ts",
+      "baseline_sha256_git_bytes": "ab6adafeb34bd6e109c527072e738ed79f2d22353fe443c393b2bd9e42841cff",
+      "candidate_sha256": "2c3bb11ee4d1a351045207b10785029fcbc0ff974d4a819aa3f5fa1248242cc7"
+    },
+    {
+      "path": "tests/core/replay.test.ts",
+      "baseline_sha256_git_bytes": "708ce808b5a7b74009dd708f930a4f1b865dc42339a8f78b68c3d2b20978460a",
+      "candidate_sha256": "22dcf87c815df515a27fc1ced0f85cae5bdd1a607316c6de5224c5803274fdf8"
+    },
+    {
+      "path": "tests/core/validator.test.ts",
+      "baseline_sha256_git_bytes": "1bfa5fcf4fba9b063f8072f497a3885744dc23dd216b7db1e79477b8c4295048",
+      "candidate_sha256": "f627a6c9ed06a3c6225727f58b576a4b3db88d9fed2c648366e8decc22de1eb4"
+    },
+    {
+      "path": "tests/fixtures/content-055/baseline-content.json",
+      "baseline_sha256_git_bytes": null,
+      "candidate_sha256": "e72b8d251ce79620792db29df7d10a7df2e32ea32855c300871c56b99915e18f"
+    },
+    {
+      "path": "tests/fixtures/content-055/baseline-manifest.json",
+      "baseline_sha256_git_bytes": null,
+      "candidate_sha256": "9df4b10218d6a78e1ace7b8445be20205925b51e5676a5e029ef3c4cfc95fe04"
+    }
+  ]
+}

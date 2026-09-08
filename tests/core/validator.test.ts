@@ -57,7 +57,7 @@ describe('validator on the real content', () => {
   it('passes, including the on-disk manifest check', () => {
     const r = run(loadRaw(), undefined, false);
     expect(r.errors).toEqual([]);
-    expect(r.contentVersion).toBe('0.5.4');
+    expect(r.contentVersion).toBe('0.5.5');
     expect(r.fingerprint).toMatch(/^[0-9a-f]{64}$/);
     expect(r.sweep.runs).toBe(56);
     expect(r.sweep.outcomes.size).toBe(6);

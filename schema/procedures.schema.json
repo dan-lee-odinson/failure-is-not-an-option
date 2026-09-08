@@ -3,20 +3,48 @@
   "$id": "https://fno.local/schema/procedures.schema.json",
   "title": "Procedures",
   "type": "object",
-  "required": ["content_version", "procedures"],
+  "required": [
+    "content_version",
+    "procedures"
+  ],
   "properties": {
-    "content_version": { "$ref": "defs.schema.json#/$defs/semver" },
+    "content_version": {
+      "$ref": "defs.schema.json#/$defs/semver"
+    },
     "procedures": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "title", "text", "status", "provenance"],
+        "required": [
+          "id",
+          "title",
+          "text",
+          "status",
+          "provenance",
+          "unlocked_by"
+        ],
         "properties": {
-          "id": { "$ref": "defs.schema.json#/$defs/id" },
-          "title": { "$ref": "defs.schema.json#/$defs/text" },
-          "text": { "$ref": "defs.schema.json#/$defs/text" },
-          "status": { "enum": ["adopted-procedure", "commissioned-task"] },
-          "provenance": { "$ref": "defs.schema.json#/$defs/provenance" }
+          "id": {
+            "$ref": "defs.schema.json#/$defs/id"
+          },
+          "title": {
+            "$ref": "defs.schema.json#/$defs/text"
+          },
+          "text": {
+            "$ref": "defs.schema.json#/$defs/text"
+          },
+          "status": {
+            "enum": [
+              "adopted-procedure",
+              "commissioned-task"
+            ]
+          },
+          "provenance": {
+            "$ref": "defs.schema.json#/$defs/provenance"
+          },
+          "unlocked_by": {
+            "$ref": "defs.schema.json#/$defs/unlock"
+          }
         },
         "additionalProperties": false
       }

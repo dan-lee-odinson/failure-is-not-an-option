@@ -1,0 +1,41 @@
+{
+  "baseline_commit": "423e1ec006315b1fdc3ec8b96d9fc00525b32490",
+  "content_version": "0.5.5",
+  "candidate_fingerprint": "4c22b8e7949ba84df3799d692dcec360391919b5b18936e9c141991883efff2d",
+  "evidence_items": 16,
+  "evidence_reference_pages": 6,
+  "procedure_records": 3,
+  "start_exemptions": 0,
+  "added_narrations": 4,
+  "edited_existing_dialogue_lines": 0,
+  "stable_line_ids": 10,
+  "cut_items": 0,
+  "mechanics_comparison": {
+    "routes": 112,
+    "dimensions": "7 prep sets × 2 return routes × 2 lessons × 2 accountability stances × questions asked/not asked",
+    "seed": 1,
+    "state_at_every_input": "equal",
+    "logs_after_run_header": "equal",
+    "followon_view": "equal",
+    "header_exception": "content_version and content_fingerprint necessarily change"
+  },
+  "validator": {
+    "routes": 56,
+    "outcomes": 6,
+    "plan_commits": 112,
+    "random_draws": 0
+  },
+  "tests": {
+    "passed": 299,
+    "failed": 0,
+    "files": 19,
+    "new_contract_and_regression_cases": 145
+  },
+  "sheets": {
+    "rows": 861,
+    "branch_only": 225,
+    "unreachable_strings": 9
+  },
+  "runtime_r2_implemented": false,
+  "baseline_fixtures_compared_to_git_blobs": true
+}

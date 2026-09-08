@@ -103,7 +103,7 @@ describe('dialogue sheet', () => {
     const csv = readFileSync(resolve(ROOT, 'docs', 'dialogue-sheet.csv'), 'utf8').replace(/\r\n/g, '\n');
     expect(md).toBe(toMarkdown(s));
     expect(csv).toBe(toCsv(s));
-    expect(s.version).toBe('0.5.4');
+    expect(s.version).toBe('0.5.5');
     expect(s.fingerprint).toBe(content().fingerprint);
     expect(s.runs).toBe(56);
   });

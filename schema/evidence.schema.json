@@ -3,30 +3,113 @@
   "$id": "https://fno.local/schema/evidence.schema.json",
   "title": "Evidence registry",
   "type": "object",
-  "required": ["content_version", "evidence"],
+  "required": [
+    "content_version",
+    "evidence"
+  ],
   "properties": {
-    "content_version": { "$ref": "defs.schema.json#/$defs/semver" },
+    "content_version": {
+      "$ref": "defs.schema.json#/$defs/semver"
+    },
     "evidence": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "kind", "title", "body", "simulated", "provenance"],
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "body",
+          "simulated",
+          "provenance",
+          "unlocked_by"
+        ],
         "properties": {
-          "id": { "$ref": "defs.schema.json#/$defs/id" },
-          "kind": { "enum": ["reference", "report", "simulated-report"] },
-          "title": { "$ref": "defs.schema.json#/$defs/text" },
-          "body": { "$ref": "defs.schema.json#/$defs/text" },
-          "observation": { "enum": ["known", "unknown"] },
-          "visible_when": { "$ref": "defs.schema.json#/$defs/condition" },
-          "simulated": { "type": "boolean" },
-          "provenance": { "$ref": "defs.schema.json#/$defs/provenance" }
+          "id": {
+            "$ref": "defs.schema.json#/$defs/id"
+          },
+          "kind": {
+            "enum": [
+              "reference",
+              "report",
+              "simulated-report"
+            ]
+          },
+          "title": {
+            "$ref": "defs.schema.json#/$defs/text"
+          },
+          "body": {
+            "$ref": "defs.schema.json#/$defs/text"
+          },
+          "observation": {
+            "enum": [
+              "known",
+              "unknown"
+            ]
+          },
+          "visible_when": {
+            "$ref": "defs.schema.json#/$defs/condition"
+          },
+          "simulated": {
+            "type": "boolean"
+          },
+          "provenance": {
+            "$ref": "defs.schema.json#/$defs/provenance"
+          },
+          "unlocked_by": {
+            "$ref": "defs.schema.json#/$defs/unlock"
+          }
         },
         "additionalProperties": false,
         "allOf": [
-          { "if": { "properties": { "kind": { "const": "simulated-report" } } }, "then": { "properties": { "simulated": { "const": true } } } },
-          { "if": { "properties": { "kind": { "const": "reference" } } }, "then": { "properties": { "observation": false } } },
-          { "if": { "properties": { "kind": { "enum": ["report", "simulated-report"] } } }, "then": { "required": ["observation"] } }
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "simulated-report"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "simulated": {
+                  "const": true
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "reference"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "observation": false
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "report",
+                    "simulated-report"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "observation"
+              ]
+            }
+          }
         ]
       }
     }

@@ -1,5 +1,5 @@
 {
-  "content_version": "0.5.4",
+  "content_version": "0.5.5",
   "evidence": [
     {
       "id": "g8-ev-rule",
@@ -14,7 +14,10 @@
         "fiction": [
           "F7"
         ],
-        "note": "Automatic at briefing; reference. Historical termination principle H2; game selection boundary F7."
+        "note": "Visible only when Mara reports RCS activation and termination at g8-line-rcs-termination. Legacy briefing acquisition remains internal state only; no early title, body, link or History exposure. Historical termination principle H2; game selection boundary F7."
+      },
+      "unlocked_by": {
+        "line": "g8-line-rcs-termination"
       }
     },
     {
@@ -28,7 +31,10 @@
           "H1"
         ],
         "fiction": [],
-        "note": "Automatic at briefing; instructional reference grounded in H1."
+        "note": "Visible at g8-loss-of-contact, when the scheduled tracking pass ends with no new spacecraft report. Legacy briefing acquisition remains internal state only. Instructional reference grounded in H1."
+      },
+      "unlocked_by": {
+        "node": "g8-loss-of-contact"
       }
     },
     {
@@ -43,6 +49,9 @@
           "F1"
         ],
         "note": "Acquired by g8-prep-contact; original F1 reference. Named practice calls and desk roles are original game exercises, not a claim that these exact rehearsals occurred before Gemini VIII."
+      },
+      "unlocked_by": {
+        "preparation": "g8-prep-contact"
       }
     },
     {
@@ -57,6 +66,9 @@
           "F2"
         ],
         "note": "Acquired by g8-prep-recovery; original F2 reference. Named practice calls and desk roles are original game exercises, not a claim that these exact rehearsals occurred before Gemini VIII."
+      },
+      "unlocked_by": {
+        "preparation": "g8-prep-recovery"
       }
     },
     {
@@ -71,6 +83,9 @@
           "F3"
         ],
         "note": "Acquired by g8-prep-systems; original F3 reference. Named practice calls and desk roles are original game exercises, not a claim that these exact rehearsals occurred before Gemini VIII."
+      },
+      "unlocked_by": {
+        "preparation": "g8-prep-systems"
       }
     },
     {
@@ -85,7 +100,10 @@
           "H3"
         ],
         "fiction": [],
-        "note": "Docking event; H3. No roll data appended during gap."
+        "note": "Visible with g8-line-docking-confirmation; docking event H3. No roll data appended during gap."
+      },
+      "unlocked_by": {
+        "line": "g8-line-docking-confirmation"
       }
     },
     {
@@ -100,7 +118,10 @@
           "H1"
         ],
         "fiction": [],
-        "note": "Crisis receipt only; H1."
+        "note": "Visible with g8-line-crisis-relay, not before the emergency report is presented. Crisis receipt only; H1."
+      },
+      "unlocked_by": {
+        "line": "g8-line-crisis-relay"
       }
     },
     {
@@ -115,7 +136,10 @@
           "H2"
         ],
         "fiction": [],
-        "note": "Later stabilization receipt; H2."
+        "note": "Visible with g8-line-rcs-termination. The earlier optional crew question does not unlock this later stabilization receipt; H2."
+      },
+      "unlocked_by": {
+        "line": "g8-line-rcs-termination"
       }
     },
     {
@@ -132,7 +156,10 @@
         "fiction": [
           "F7"
         ],
-        "note": "Automatic at return planning; F7 simulated planning report. Western Pacific historical context only is H2."
+        "note": "Visible with g8-line-return-opportunities at return planning; F7 simulated planning report. Western Pacific historical context only is H2."
+      },
+      "unlocked_by": {
+        "line": "g8-line-return-opportunities"
       }
     },
     {
@@ -148,7 +175,10 @@
           "F4",
           "F7"
         ],
-        "note": "Automatic at return planning; F4/F7. No real coordinates or ships assigned."
+        "note": "Legacy receipt at return planning remains internal. Visible only after the player asks g8-q-recovery-risk and sees g8-line-recovery-risk-answer; F4/F7. No real coordinates or ships assigned."
+      },
+      "unlocked_by": {
+        "line": "g8-line-recovery-risk-answer"
       }
     },
     {
@@ -163,7 +193,10 @@
         "fiction": [
           "F7"
         ],
-        "note": "Automatic at return planning; F7. This is not actual Gemini VIII telemetry."
+        "note": "Legacy receipt at return planning remains internal. Visible only after the player asks g8-q-reserve-risk and sees g8-line-reserve-risk-answer; F7. This is not actual Gemini VIII telemetry."
+      },
+      "unlocked_by": {
+        "line": "g8-line-reserve-risk-answer"
       }
     },
     {
@@ -179,7 +212,10 @@
           "F2",
           "F7"
         ],
-        "note": "Automatic at planning only if recovery preparation selected; F2/F7."
+        "note": "Visible with the conditional narration g8-line-recovery-readback at return planning only if recovery preparation was selected; F2/F7. Receipt alone is not presentation."
+      },
+      "unlocked_by": {
+        "line": "g8-line-recovery-readback"
       }
     },
     {
@@ -195,7 +231,10 @@
           "F3",
           "F7"
         ],
-        "note": "Automatic at planning only if systems preparation selected; F3/F7."
+        "note": "Visible with the conditional narration g8-line-systems-readback at return planning only if systems preparation was selected; F3/F7. Receipt alone is not presentation."
+      },
+      "unlocked_by": {
+        "line": "g8-line-systems-readback"
       }
     },
     {
@@ -211,7 +250,10 @@
           "F1",
           "F7"
         ],
-        "note": "Automatic at planning only if contact preparation selected; F1/F7."
+        "note": "Visible with the conditional narration g8-line-contact-readback at return planning only if contact preparation was selected; F1/F7. Receipt alone is not presentation."
+      },
+      "unlocked_by": {
+        "line": "g8-line-contact-readback"
       }
     },
     {
@@ -228,7 +270,10 @@
         "fiction": [
           "F7"
         ],
-        "note": "Only at actual modeled pickup event. Alive recovery has H3 context; branch details F7."
+        "note": "Visible at g8-pickup-report with the displayed event fact Both crew members recovered alive; never at an earlier splashdown. Alive recovery has H3 context; branch details F7."
+      },
+      "unlocked_by": {
+        "node": "g8-pickup-report"
       }
     },
     {
@@ -242,7 +287,10 @@
           "H5"
         ],
         "fiction": [],
-        "note": "Automatic only in the later post-flight scene. Attributed paraphrase of H5, a secondary account; not a transcript or an investigation document reproduced here."
+        "note": "Visible only with g8-line-postflight-context in the later g8-accountability-brief scene. Attributed paraphrase of H5, a secondary account; not a transcript or an investigation document reproduced here."
+      },
+      "unlocked_by": {
+        "line": "g8-line-postflight-context"
       }
     }
   ]

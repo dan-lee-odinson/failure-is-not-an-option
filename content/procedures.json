@@ -1,5 +1,5 @@
 {
-  "content_version": "0.5.4",
+  "content_version": "0.5.5",
   "procedures": [
     {
       "id": "proc-report-provenance",
@@ -12,6 +12,9 @@
           "F6"
         ],
         "note": "Original standing-procedure choice (F6). Adoption does not reverse the experienced outcome, trust, or compulsory rehearsal."
+      },
+      "unlocked_by": {
+        "node": "g8-lesson-decision"
       }
     },
     {
@@ -25,6 +28,9 @@
           "F6"
         ],
         "note": "Original standing-procedure choice (F6). Adoption does not reverse the experienced outcome, trust, or compulsory rehearsal."
+      },
+      "unlocked_by": {
+        "node": "g8-lesson-decision"
       }
     },
     {
@@ -40,6 +46,9 @@
           "F10"
         ],
         "note": "A commissioned program task, not a completed engineering procedure, flight rule or proven safety improvement. Its wording and adoption are original F10, inspired by the reported Kranz criticism; not an exact historical NASA corrective document."
+      },
+      "unlocked_by": {
+        "node": "g8-accountability-response"
       }
     }
   ]

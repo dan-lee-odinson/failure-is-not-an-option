@@ -268,6 +268,10 @@
         },
         "provenance": {
           "$ref": "#/$defs/line_provenance"
+        },
+        "id": {
+          "$ref": "#/$defs/id",
+          "description": "Optional stable presentation id, unique across the mission. Used by unlocked_by.line; not a new input or event."
         }
       },
       "additionalProperties": false
@@ -491,6 +495,59 @@
         }
       },
       "additionalProperties": false
+    },
+    "unlock": {
+      "description": "Presentation availability only; exactly one trigger. A line means its displayed instance, including its condition and an optional question being asked. Does not replace acquisition/adoption or existing visibility conditions.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "node"
+          ],
+          "properties": {
+            "node": {
+              "$ref": "#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "line"
+          ],
+          "properties": {
+            "line": {
+              "$ref": "#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "preparation"
+          ],
+          "properties": {
+            "preparation": {
+              "$ref": "#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "start"
+          ],
+          "properties": {
+            "start": {
+              "const": true
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
     }
   }
 }
