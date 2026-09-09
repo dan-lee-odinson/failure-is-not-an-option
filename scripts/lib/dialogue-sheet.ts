@@ -680,7 +680,7 @@ export class SheetBuilder {
     const p = this.content.mission.prologue;
     if (!p) return;
     const b = this.bucket('history-note', 'History panel: facility note', UI_PHASE.id, UI_PHASE.title, 9002.5);
-    const html = render(this.store(run, this.ui({ overlay: 'history', screen: 'console' })));
+    const html = render(this.store(run, this.ui({ overlay: 'history', screen: 'console', prologueSeen: true }))); // the plates walked (R2)
     const at = html.indexOf('<div class="overlay-backdrop"');
     this.record(b, {}, [{ kind: 'history.note', speaker: '', id: p.scenario_card.id, text: p.history_note, source: 'content' }], at >= 0 ? html.slice(at) : '');
   }
@@ -735,6 +735,7 @@ export class SheetBuilder {
         if (!r.ok) throw new Error(`plan ${p.id}: ${r.message}`);
         this.capturePlanning(again, null, planDims);
         this.captureOverlay(again, planDims, 'binder');
+        this.captureOverlay(again, planDims, 'history'); // after the mission: every source and note, the explanation, the CAPCOM note (R2); the facility note keeps its own bucket
       }
     }
     return routes.length;

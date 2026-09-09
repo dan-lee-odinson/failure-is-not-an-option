@@ -6,6 +6,7 @@
  * the ledger, the log, a save, or the replay.
  */
 import { Run, describeNode, indexContent, type Input } from '../core';
+import { describeVisibleEvidence, visibleProcedures, describeHistory, deriveEncounters } from '../core';
 import { bundle } from './content-bundle';
 import { DESIGN, esc, render, renderFilmControls } from './render';
 import { describeResolution } from './resolution';
@@ -13,7 +14,7 @@ import { exportFilename, exportText, hasBrowserSave, importFromText, loadFromBro
 import { layoutEmblem } from './plate';
 import { applyTheme } from './theme';
 import { AudioDirector, type MusicMap, type SoundscapeMap } from './audio';
-import { audioUrl, videoUrl } from './assets';
+import { audioUrl, videoUrl , assetUrl } from './assets';
 import { DEFAULT_AUDIO, PREF_KEYS, STAGES, defaultUi, screenId, type AudioPrefs, type Overlay, type Stage, type Store, type UiState } from './ui-state';
 export { FULLSCREEN_LINE } from './render';
 import musicMap from './music-map.json';
@@ -37,7 +38,7 @@ function readAudioPrefs(): AudioPrefs {
   try {
     const p = JSON.parse(raw) as Partial<AudioPrefs>;
     const num = (v: unknown, d: number) => (typeof v === 'number' && v >= 0 && v <= 1 ? v : d);
-    return { enabled: p.enabled === true, master: num(p.master, DEFAULT_AUDIO.master), music: num(p.music, DEFAULT_AUDIO.music), effects: num(p.effects, DEFAULT_AUDIO.effects), beds: num(p.beds, DEFAULT_AUDIO.beds) };
+    return { enabled: p.enabled !== false, master: num(p.master, DEFAULT_AUDIO.master), music: num(p.music, DEFAULT_AUDIO.music), effects: num(p.effects, DEFAULT_AUDIO.effects), beds: num(p.beds, DEFAULT_AUDIO.beds) };
   } catch {
     return { ...DEFAULT_AUDIO };
   }
@@ -63,6 +64,7 @@ const store: Store = {
     reducedMotion: reducedMotionQuery?.matches ?? false,
     debug: /(^|[?&])debug(=|&|$)/.test(location.search),
     hints: readPref(PREF_KEYS.hints) !== '0',
+    prologueSeen: readPref(PREF_KEYS.prologueSeen) === '1',
   }),
 };
 
@@ -73,6 +75,7 @@ director.setPrefs(store.ui.audio);
 function announce(text: string): void {
   const live = document.getElementById('live');
   if (live) live.textContent = text;
+  announcedAt = performance.now();
 }
 
 // ---------------------------------------------------------------------------
@@ -396,7 +399,38 @@ let filmFrameCallback = 0;
 let filmDone = false;
 
 /** Begin: the film, or (reduced motion) straight to the den with the static credits. */
+// Plate preload (doc 49 note 5): decoded ahead of the prologue, the scenario card, the first room screen and the resolution
+// cards, and every plate revealed only once decoded — a fade from black instead of a partially loaded picture.
+const preloaded = new Map<string, HTMLImageElement>();
+function preloadPlates(ids: (string | null | undefined)[]): void {
+  for (const id of ids) {
+    if (!id || preloaded.has(id)) continue;
+    const url = assetUrl(id);
+    if (!url) continue;
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = url;
+    preloaded.set(id, img);
+    img.decode().catch(() => undefined);
+  }
+}
+function preloadOpeningPlates(): void {
+  const p = content.mission.prologue;
+  preloadPlates([...(p?.plates ?? []).flatMap((pl) => [pl.background, pl.moving_element?.asset]), p?.scenario_card.background, p?.scenario_card.moving_element?.asset, 'room-gemini-console', 'emblem-flight-operations']);
+}
+function revealPlate(): void {
+  const scene = document.querySelector<HTMLElement>('.screen-prologue .pl-current, .screen-resolution .pl-scene');
+  const img = scene?.querySelector<HTMLImageElement>('img.pl-bg');
+  if (!scene || !img) return;
+  if (img.complete && img.naturalWidth > 0) return;
+  scene.classList.remove('pl-fade-in');
+  scene.classList.add('pl-pending');
+  const show = (): void => { scene.classList.remove('pl-pending'); };
+  img.decode().then(show, show);
+}
+
 function beginOpening(): void {
+  preloadOpeningPlates();
   if (store.ui.reducedMotion || !videoUrl('video-opening-film')) { enterCredits(true); return; }
   goToStage('film');
   filmDone = false;
@@ -434,7 +468,9 @@ function playFilm(): void {
   const handover = (): void => {
     if (filmVideo !== v || filmDone) return;
     filmDone = true;
-    enterCredits(false);
+    // The den is painted beneath the film (render.ts denUnderlay): the video goes transparent in this frame and is removed on the next (doc 49 note 3).
+    v.style.opacity = '0';
+    requestAnimationFrame(() => enterCredits(false));
   };
   const fail = (): void => {
     if (filmVideo !== v || filmDone) return;
@@ -468,6 +504,8 @@ function enterCredits(staticCredits: boolean): void {
   goToStage('credits');
   denStartedAt = performance.now();
   paint();
+  scrollUnit = creditsUnit();
+  scrollPos = document.getElementById('op-scroll')?.scrollTop ?? 0;
   announce('The credits.');
 }
 
@@ -585,6 +623,15 @@ function persistAudio(): void {
  * note 1). The menu's play keys (New Campaign, Continue, Load, Import) count too (M02): a returning player who never
  * pressed Begin on this browser gets the same default; a persisted setting always wins.
  */
+/** R1: sound is on unless the player turned it off; the first pointer or key gesture anywhere arms the context (a browser rule, not a setting). */
+let audioArmed = false;
+function armAudio(): void {
+  if (audioArmed || !store.ui.audio.enabled) return;
+  audioArmed = true;
+  director.unlock();
+  director.setPrefs(store.ui.audio);
+}
+
 function audioOnAtBegin(): void {
   director.unlock();
   if (!audioPersisted && !store.ui.audio.enabled) {
@@ -636,6 +683,8 @@ function noteInput(repaintIfIdle: boolean): void {
 
 export function dispatch(action: string, arg?: string): void {
   const ui = store.ui;
+  ui.cue = null;
+  ui.cueTick = false;
   switch (action) {
     case 'begin': {
       audioOnAtBegin();
@@ -695,6 +744,7 @@ export function dispatch(action: string, arg?: string): void {
     }
     case 'start-new': {
       audioOnAtBegin();
+      preloadOpeningPlates();
       director.signal('start-new');
       director.event('ui:menu-select');
       startNewCampaign();
@@ -709,6 +759,7 @@ export function dispatch(action: string, arg?: string): void {
     case 'prologue-next': {
       director.event('ui:continue');
       const plates = content.mission.prologue?.plates.length ?? 0;
+      if (plates && ui.prologue.index === plates - 1 && !ui.prologueSeen) { ui.prologueSeen = true; writePref(PREF_KEYS.prologueSeen, '1'); }
       if (ui.prologue.index >= plates) enterRoom();
       else goToPlate(ui.prologue.index + 1);
       break;
@@ -915,6 +966,25 @@ function syncAudio(): void {
 let scrollFrame = 0;
 let scrollLastTs = 0;
 let scrollHold: ReturnType<typeof setTimeout> | null = null;
+/** The credits' position in the wall's pixels, and the design unit it was measured at. */
+let scrollPos = 0;
+let scrollUnit = 0;
+function creditsUnit(): number {
+  const frame = document.querySelector<HTMLElement>('.den-frame');
+  return frame ? frame.getBoundingClientRect().width / DESIGN.width || 1 : 1;
+}
+/** A resize (or full screen in / out) during the credits keeps the same line on the wall: the position scales with the frame, the running state is untouched. */
+function rescaleCredits(): void {
+  if (store.ui.screen !== 'opening' || store.ui.stage !== 'credits') return;
+  const el = document.getElementById('op-scroll');
+  if (!el) return;
+  const unit = creditsUnit();
+  if (!scrollUnit) { scrollUnit = unit; scrollPos = el.scrollTop; return; }
+  if (Math.abs(unit - scrollUnit) < 1e-6) { if (Math.abs(el.scrollTop - scrollPos) > 2) el.scrollTop = scrollPos; return; }
+  scrollPos = scrollPos * (unit / scrollUnit);
+  scrollUnit = unit;
+  el.scrollTop = scrollPos;
+}
 
 function stopProseScroll(): void {
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
@@ -931,13 +1001,15 @@ function driveProseScroll(): void {
   const frame = document.querySelector<HTMLElement>('.den-frame');
   if (!el || !frame) return;
   const lead = Math.max(0, CREDITS_LEAD_MS - (performance.now() - denStartedAt));
-  let pos = el.scrollTop;
+  scrollPos = el.scrollTop;
+  scrollUnit = creditsUnit();
   const step = (ts: number): void => {
     const unit = frame.getBoundingClientRect().width / DESIGN.width || 1;
     const max = el.scrollHeight - el.clientHeight;
-    if (Math.abs(el.scrollTop - pos) > 2) pos = el.scrollTop; // scrolled by hand meanwhile
+    if (Math.abs(unit - scrollUnit) > 1e-6) rescaleCredits(); // resized between frames
+    else if (Math.abs(el.scrollTop - scrollPos) > 2) scrollPos = el.scrollTop; // scrolled by hand meanwhile
     const rate = parseFloat(getComputedStyle(el).getPropertyValue('--credits-rate')) || CREDITS_PX_PER_S * unit; // a phone's paper sheet sets its own pace (styles.css)
-    if (scrollLastTs) { pos = Math.min(max, pos + rate * ((ts - scrollLastTs) / 1000)); el.scrollTop = pos; }
+    if (scrollLastTs) { scrollPos = Math.min(max, scrollPos + rate * ((ts - scrollLastTs) / 1000)); el.scrollTop = scrollPos; }
     scrollLastTs = ts;
     if (el.scrollTop >= max - 0.5) {
       // The last line has cleared the top: a 1.2 s hold, then the run-out (never while the player has paused).
@@ -948,6 +1020,53 @@ function driveProseScroll(): void {
     scrollFrame = requestAnimationFrame(step);
   };
   scrollHold = setTimeout(() => { scrollHold = null; scrollFrame = requestAnimationFrame(step); }, lead);
+}
+
+/**
+ * The unlock cues (R2, doc 49 notes 6–7): what the Evidence list, the Binder and the History panel may show is derived from
+ * the run at every paint; whatever appeared since the last paint of the same run is announced once — the EVIDENCE · n key
+ * ticks, the strip names the additions, the live region reads them — and cleared by the next click. A new or loaded run
+ * starts from what it already shows, so loading never re-announces. Nothing here touches the run.
+ */
+let knownRun: Run | null = null;
+let known = { evidence: new Set<string>(), pages: new Set<string>(), procedures: new Set<string>(), history: new Set<string>() };
+let announcedAt = 0;
+function currentUnlocks(): { evidence: Map<string, string>; pages: Map<string, string>; procedures: Map<string, string>; history: Map<string, string> } | null {
+  const run = store.run;
+  if (!run) return null;
+  const evidence = new Map<string, string>(); const pages = new Map<string, string>(); const procedures = new Map<string, string>(); const history = new Map<string, string>();
+  for (const e of describeVisibleEvidence(run)) (e.kind === 'reference' ? pages : evidence).set(e.id, e.title);
+  for (const id of visibleProcedures(run)) procedures.set(id, content.procedures.get(id)?.title ?? id);
+  const h = describeHistory(content, run, store.ui.prologueSeen);
+  if (h.explanation) history.set('explanation', 'the alternate-history explanation');
+  if (h.prologueNote) history.set('prologue-note', 'the facility note');
+  if (h.capcomNote) history.set('capcom-note', 'the CAPCOM note');
+  for (const s of h.sources) {
+    if (s.title) history.set(`source:${s.id}`, `source ${s.id}`);
+    if (s.note) history.set(`note:${s.id}`, `the note on ${s.id}`);
+  }
+  return { evidence, pages, procedures, history };
+}
+function refreshCues(): void {
+  const cur = currentUnlocks();
+  const run = store.run;
+  if (!cur || !run) { knownRun = null; return; }
+  const snapshot = () => ({ evidence: new Set(cur.evidence.keys()), pages: new Set(cur.pages.keys()), procedures: new Set(cur.procedures.keys()), history: new Set(cur.history.keys()) });
+  if (knownRun !== run) { knownRun = run; known = snapshot(); return; }
+  const added = (m: Map<string, string>, k: Set<string>): string[] => [...m].filter(([id]) => !k.has(id)).map(([, title]) => title);
+  const ev = added(cur.evidence, known.evidence), pg = added(cur.pages, known.pages), pr = added(cur.procedures, known.procedures), hi = added(cur.history, known.history);
+  known = snapshot();
+  if (!ev.length && !pg.length && !pr.length && !hi.length) return;
+  const cue = store.ui.cue ?? { evidence: [], binder: [], history: [] };
+  cue.evidence.push(...ev);
+  cue.binder.push(...pg, ...pr);
+  cue.history.push(...hi);
+  store.ui.cue = cue;
+  if (ev.length || pg.length) store.ui.cueTick = true;
+  const text = [ev.length ? `Added to evidence: ${ev.join(', ')}` : '', pg.length || pr.length ? `Added to the binder: ${[...pg, ...pr].join(', ')}` : '', hi.length ? `Added to History: ${hi.join(', ')}` : ''].filter(Boolean).join('. ') + '.';
+  const live = document.getElementById('live');
+  const recent = performance.now() - announcedAt < 50 && live?.textContent;
+  announce(recent ? `${live!.textContent} ${text}` : text);
 }
 
 function paint(): void {
@@ -977,12 +1096,16 @@ function paint(): void {
   idleDirty = false;
   evaluateStacked(root);
   if (!store.ui.stacked && store.ui.overlay === 'evidence') store.ui.overlay = null; // the column is back: the list lives there again
+  refreshCues();
   root.innerHTML = render(store);
   layoutEmblem();
   driveLayer(layerBefore);
+  revealPlate();
   const newScroll = document.getElementById('op-scroll');
   if (newScroll && keepScroll !== null) newScroll.scrollTop = keepScroll;
+  rescaleCredits();
   driveDen();
+  if (store.ui.screen === 'console' && store.run && store.run.state.mission.cursor && store.run.state.mission.cursor.phase >= content.mission.phases.length - 1) preloadPlates(content.mission.outcomes.map((o) => o.plate));
   // In the stacked layout the page scrolls: a new node is read from the top, and the automatic focus on the next key (below the fold) must not drag the page down to it.
   const stacked = store.ui.stacked;
   const nodeNow = store.ui.screen === 'console' ? store.run?.currentNode()?.node.id ?? null : null;
@@ -1078,6 +1201,13 @@ function wire(): void {
   // Any input resets the idle timer. A pointer press is followed by a click that repaints; other inputs repaint on their own if the highlight was up.
   document.addEventListener('pointerdown', () => noteInput(false), true);
   document.addEventListener('keydown', () => noteInput(true), true);
+  document.addEventListener('pointerdown', armAudio, true);
+  document.addEventListener('keydown', armAudio, true);
+  // The credits' scroll position, remembered in the wall's own pixels for the resize rescale (doc 49 note 4); a clamp during a resize is not a manual scroll.
+  root.addEventListener('scroll', (ev) => {
+    const el = ev.target as HTMLElement | null;
+    if (el && el.id === 'op-scroll' && Math.abs(creditsUnit() - scrollUnit) < 1e-6 && Math.abs(el.scrollTop - scrollPos) > 2) scrollPos = el.scrollTop; // more than rounding: the player scrolled
+  }, true);
   document.addEventListener('wheel', () => noteInput(true), { capture: true, passive: true });
   document.addEventListener('input', () => noteInput(false), true);
 }
@@ -1089,14 +1219,14 @@ function splitAction(s: string): [string, string | undefined] {
 
 declare global {
   interface Window {
-    __fno?: { store: Store; dispatch: typeof dispatch; fingerprint: string; audio: { enabled: () => boolean; unlocked: () => boolean }; idle: () => boolean; guarded: () => boolean; stacked: () => boolean; film: { handoverAt: number; video: () => HTMLVideoElement | null } };
+    __fno?: { store: Store; dispatch: typeof dispatch; fingerprint: string; unlocks: () => unknown; audio: { enabled: () => boolean; unlocked: () => boolean }; idle: () => boolean; guarded: () => boolean; stacked: () => boolean; film: { handoverAt: number; video: () => HTMLVideoElement | null }; credits: () => { pos: number; unit: number; frameUnit: number; preloaded: { id: string; complete: boolean }[] } };
   }
 }
 
 applyTheme(document.documentElement, store.ui.uiMode);
 wire();
 // A resize re-lays the emblem and the layer at once, and repaints a console screen so the stacked layout is re-evaluated.
-window.addEventListener('resize', () => { layoutEmblem(); driveLayer(layerState()); if (store.ui.screen === 'console') schedulePaint(); });
+window.addEventListener('resize', () => { layoutEmblem(); driveLayer(layerState()); rescaleCredits(); if (store.ui.screen === 'console') schedulePaint(); });
 if (store.ui.stage === 'menu') refreshContinueSave();
 paint();
-window.__fno = { store, dispatch, fingerprint: content.fingerprint, audio: { enabled: () => director.enabled, unlocked: () => director.unlocked }, idle: () => store.ui.idle, guarded: () => Date.now() < guardUntil, stacked: () => store.ui.stacked, film: { handoverAt: FILM_HANDOVER_S, video: () => filmVideo } };
+window.__fno = { store, dispatch, fingerprint: content.fingerprint, unlocks: () => { const run = store.run; if (!run) return null; const enc = deriveEncounters(run); return { evidence: describeVisibleEvidence(run).map((e) => e.id), binder: visibleProcedures(run), history: describeHistory(content, run, store.ui.prologueSeen), encounters: { nodes: [...enc.nodes], lines: [...enc.lines], preparations: [...enc.preparations], speakers: [...enc.speakers] } }; }, audio: { enabled: () => director.enabled, unlocked: () => director.unlocked }, idle: () => store.ui.idle, guarded: () => Date.now() < guardUntil, stacked: () => store.ui.stacked, film: { handoverAt: FILM_HANDOVER_S, video: () => filmVideo }, credits: () => ({ pos: scrollPos, unit: scrollUnit, frameUnit: creditsUnit(), preloaded: [...preloaded].map(([id, img]) => ({ id, complete: img.complete && img.naturalWidth > 0 })) }) };

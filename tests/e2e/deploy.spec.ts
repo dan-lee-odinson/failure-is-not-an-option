@@ -144,9 +144,10 @@ test.describe('the opening film and the den', () => {
     await expect(page.getByTestId('den-smoke-a')).toBeAttached();
     // Static credits scroll by keyboard: the wall takes focus and End reaches the last line.
     await page.getByTestId('op-scroll').focus();
-    await page.keyboard.press('End'); // Chromium animates keyboard scrolling: poll for the settled position
-    await expect.poll(() => page.getByTestId('op-scroll').evaluate((el) => el.scrollTop)).toBeGreaterThan(100);
-    const atEnd = await page.getByTestId('op-scroll').evaluate((el) => el.scrollTop);
+    await page.keyboard.press('End'); // Chromium animates keyboard scrolling: wait for the position to settle
+    const top = () => page.getByTestId('op-scroll').evaluate((el) => el.scrollTop);
+    await expect.poll(async () => { const a = await top(); await page.waitForTimeout(150); return (await top()) === a && a > 100; }, { timeout: 10_000 }).toBe(true);
+    const atEnd = await top();
     await page.keyboard.press('PageUp');
     await expect.poll(() => page.getByTestId('op-scroll').evaluate((el) => el.scrollTop)).toBeLessThan(atEnd);
     await shot(page, VP, 'default', '06-credits-static-after-skip');

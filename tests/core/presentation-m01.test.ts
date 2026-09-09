@@ -339,8 +339,11 @@ describe('historical participants', () => {
 describe('History note and About sources', () => {
   it('the facility note appears in History once a run exists, with its sources; About lists H9 and H10', () => {
     const p = prologue();
-    const withRun = render(store(newRun(), { overlay: 'history' }));
+    // R2 (FNO-PT3): the note appears once the plates were walked with Continue (Skip does not count), not merely once a run exists.
+    expect(render(store(newRun(), { overlay: 'history' }))).not.toContain('data-testid="history-note"');
+    const withRun = render(store(newRun(), { overlay: 'history', prologueSeen: true }));
     expect(withRun).toContain(`<p class="history-note" data-testid="history-note">${esc(p.history_note)} <span class="muted">Sources: H10.</span></p>`);
+    expect(withRun).toContain('data-testid="history-source-H10"'); // the renaming source, cited only by the prologue: title and note at once
     expect(p.history_note).toContain('1973');
     expect(render(store(null, { stage: 'menu', overlay: 'history' }))).not.toContain('data-testid="history-note"');
     const about = render(store(null, { stage: 'menu', overlay: 'about' }));

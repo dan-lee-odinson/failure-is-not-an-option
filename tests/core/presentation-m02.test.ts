@@ -12,7 +12,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { describeEvidence, type Run as RunType } from '../../core';
+import { describeVisibleEvidence, type Run as RunType } from '../../core';
 import { assetEntry } from '../../app/assets';
 import { esc, render } from '../../app/render';
 import { describeResolution } from '../../app/resolution';
@@ -102,7 +102,9 @@ describe('content 0.5.3: Jim Lovell as CAPCOM', () => {
   it('the History panel carries the Lovell note; credits and the den are validated data that only the opening credits stage renders (FNO-DEPLOY)', () => {
     const labels = content().bundle.registry.labels;
     expect(labels.capcom_history_note).toContain('Jim Lovell');
-    const history = render(store(newRun(), { overlay: 'history' }));
+    // R2 (FNO-PT3): the note appears once Lovell has spoken a displayed line — at the docking report, not at the briefing.
+    expect(render(store(newRun(), { overlay: 'history' }))).not.toContain('data-testid="capcom-history-note"');
+    const history = render(store(upTo('g8-docking-report'), { overlay: 'history' }));
     expect(history).toContain(`<p class="history-note" data-testid="capcom-history-note">${esc(labels.capcom_history_note!)}</p>`);
     expect(labels.alternate_history_explanation).not.toMatch(/\(F(?:7|10)/);
     const reg = content().bundle.registry;
@@ -144,7 +146,9 @@ describe('stacked play layout (M02)', () => {
 
   it('stacked: the panel takes the content width, the evidence column becomes an EVIDENCE · n key, the key labels shorten, and the rest of the screen is unchanged', () => {
     const run = upTo('g8-return-brief');
-    const n = describeEvidence(content(), run.state).length;
+    const n = describeVisibleEvidence(run).length; // the visible list (R2), never the acquired one
+    expect(n).toBeGreaterThan(0);
+    expect(n).toBeLessThan(Object.keys(run.state.mission.evidence).length);
     const html = render(store(run, { stacked: true }));
     expect(html).toContain('class="console-shell stacked"');
     expect(html).toContain('data-layout="stacked"');
@@ -178,7 +182,7 @@ describe('stacked play layout (M02)', () => {
 
   it('the evidence overlay lists the same items with their pins, pinned first, with the once-only hint, in the translucent panel style', () => {
     const run = upTo('g8-return-brief');
-    const evidence = describeEvidence(content(), run.state);
+    const evidence = describeVisibleEvidence(run);
     const pinned = evidence[evidence.length - 1]!.id;
     const html = render(store(run, { stacked: true, overlay: 'evidence', pinned: [pinned], pinHintOpen: true }));
     expect(html).toContain('data-testid="overlay-evidence"');

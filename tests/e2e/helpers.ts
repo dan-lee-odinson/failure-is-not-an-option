@@ -64,7 +64,7 @@ export async function shot(page: Page, vp: string, text: string, name: string): 
   const key = `${vp}-${text}/${name}`;
   if (await page.getByTestId('plate').count()) {
     contrastLog[key] = await assertRoomVisible(page);
-  } else if (await page.locator('.pl-frame').count()) {
+  } else if (await page.locator('.pl-frame:not(.film-den)').count()) { // the den beneath the film (FNO-PT3) is not a plate with text
     contrastLog[key] = await assertPlateScreen(page);
   } else {
     const kit = await assertKitContrast(page);
@@ -124,9 +124,10 @@ export async function fakeFilm(page: Page): Promise<void> {
   });
 }
 
-/** Move the fake film to `t` seconds. */
+/** Move the fake film to `t` seconds; under a fake clock, run one frame so the hand-over's one-frame swap (FNO-PT3) completes. */
 export async function seekFilm(page: Page, t: number): Promise<void> {
   expect(await page.evaluate((s) => (window as unknown as { __film: { seek(t: number): boolean } }).__film.seek(s), t)).toBe(true);
+  await page.clock.runFor(40).catch(() => undefined); // no fake clock installed: real frames run on their own
 }
 
 export async function toMenu(page: Page): Promise<void> {

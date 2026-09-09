@@ -965,3 +965,49 @@ details summary { cursor: pointer; }
   html[data-text="large"] .op-credits .wall-credits { --credits-rate: 58; }
 }
 
+/* ---------- playtest 3 (FNO-PT3, doc 49) ---------- */
+
+/* The start screen: the full-screen line and key beside the sound control (note 2). */
+.op-fullscreen-line { margin: 0; text-align: center; max-width: 40ch; }
+.op-tools { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0.8rem 1.2rem; }
+
+/* The den beneath the film (note 3): the same design frame as the credits, under the letterboxed video. */
+.op-film .film-den { z-index: 1; }
+.op-film .film-frame { z-index: 2; background: transparent; }
+.op-film .film-controls { z-index: 3; }
+
+/* A plate is revealed only once decoded (note 5): from black, with the same 0.45 s as the crossfade. */
+.pl-scene { transition: opacity 0.45s ease; }
+.pl-scene.pl-pending { opacity: 0; }
+
+/* The unlock cue (R2): the status bar and, when something was added, the strip beneath it; the EVIDENCE key ticks. */
+.status-area { grid-area: status; position: relative; z-index: 1; display: flex; flex-direction: column; }
+.unlock-strip {
+  display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem;
+  padding: 0.45rem 1rem;
+  background: rgba(16, 39, 37, 0.92);
+  backdrop-filter: blur(6px);
+  border-bottom: 2px solid var(--panel-border);
+  color: var(--cream);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+}
+@keyframes k-tick { 0%, 100% { box-shadow: none; } 12%, 88% { box-shadow: 0 0 0 3px var(--amber), 0 0 16px var(--amber); } }
+@keyframes h-tick { 12%, 88% { color: var(--amber); } }
+.k.k-tick { animation: k-tick 1s ease-out 1; }
+.evidence h2.tick { animation: h-tick 1s ease-out 1; }
+
+/* An asked question (note 8): greyed like a closed card, an ASKED stamp, out of the focus order. */
+.question.asked {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.8rem;
+  background: var(--paper-unavailable);
+  box-shadow: none;
+  cursor: default;
+}
+.question.asked:hover { background: var(--paper-unavailable); }
+.stamp.stamp-small { font-size: 0.78rem; padding: 0.12rem 0.45rem; border-width: 2px; transform: rotate(-4deg); flex: 0 0 auto; }
+@media (prefers-reduced-motion: reduce) {
+  .k.k-tick, .evidence h2.tick { animation: none; outline: 3px solid var(--amber); outline-offset: 2px; }
+}
+

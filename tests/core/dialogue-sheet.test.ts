@@ -166,6 +166,7 @@ describe('dialogue sheet', () => {
           note(renderedStrings(run, ui({ idle: true })), reachableRendered);
           note(renderedStrings(run, ui({ overlay: 'binder' })), reachableRendered);
           note(renderedStrings(run, ui({ overlay: 'history' })), reachableRendered);
+          note(renderedStrings(run, ui({ overlay: 'history', prologueSeen: true })), reachableRendered); // the plates walked (R2): the facility note
           // The stacked layout (M02): the status bar's short labels and EVIDENCE key, and the evidence list as an overlay.
           note(renderedStrings(run, ui({ stacked: true })), reachableRendered);
           note(renderedStrings(run, ui({ stacked: true, overlay: 'evidence', pinned: Object.keys(run.state.mission.evidence).slice(0, 1), pinHintOpen: true })), reachableRendered);
@@ -195,6 +196,7 @@ describe('dialogue sheet', () => {
         note(viewStrings(again), reachableView);
         note(renderedStrings(again, ui({ screen: 'planning' })), reachableRendered);
         note(renderedStrings(again, ui({ screen: 'planning', overlay: 'binder' })), reachableRendered);
+        note(renderedStrings(again, ui({ screen: 'planning', overlay: 'history', prologueSeen: true })), reachableRendered); // after the mission: every source and note (R2)
       }
     }
     expect(steps).toBeGreaterThan(56 * 20);

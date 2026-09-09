@@ -30,7 +30,7 @@ export type Overlay = null | 'binder' | 'history' | 'saveload' | 'about' | 'sett
 export type UiMode = 'apollo';
 
 export interface AudioPrefs {
-  /** Off by default: silent until the player turns the master on the first time. */
+  /** On by default (playtest 3, R1): the toggle turns it off, and only a persisted off renders OFF. */
   enabled: boolean;
   master: number;
   music: number;
@@ -103,6 +103,16 @@ export interface UiState {
   stacked: boolean;
   /** The tier's meaning strip on the resolution result card is open (M02). */
   tierInfo: boolean;
+  /**
+   * The unlock cue (R2, doc 49 notes 6–7): what was added to the Evidence list, the Binder and the History panel at the
+   * last presentation boundary — the EVIDENCE · n key ticks and a one-line strip names the additions until the next
+   * click. Presentation only; never a save or log entry.
+   */
+  cue: { evidence: string[]; binder: string[]; history: string[] } | null;
+  /** The EVIDENCE · n key (and the column's heading) takes a one-second highlight: the visible evidence list grew. */
+  cueTick: boolean;
+  /** The prologue's plates were walked with Continue (Skip does not count): the History panel may show the facility note. Persisted per player. */
+  prologueSeen: boolean;
 }
 
 export interface Store {
@@ -111,7 +121,7 @@ export interface Store {
   ui: UiState;
 }
 
-export const DEFAULT_AUDIO: AudioPrefs = { enabled: false, master: 0.8, music: 1, effects: 1, beds: 1 };
+export const DEFAULT_AUDIO: AudioPrefs = { enabled: true, master: 0.8, music: 1, effects: 1, beds: 1 };
 
 export function defaultUi(overrides: Partial<UiState> = {}): UiState {
   return {
@@ -148,6 +158,9 @@ export function defaultUi(overrides: Partial<UiState> = {}): UiState {
     dissolve: false,
     stacked: false,
     tierInfo: false,
+    cue: null,
+    cueTick: false,
+    prologueSeen: false,
     ...overrides,
   };
 }
@@ -159,6 +172,7 @@ export const PREF_KEYS = {
   pinHint: 'fno.pinHintSeen',
   audio: 'fno.audio',
   hints: 'fno.hints',
+  prologueSeen: 'fno.prologueSeen',
 } as const;
 
 /** Screen id used by the cue maps for a UI state: `screen:menu`, `screen:opening-film`, `screen:opening-credits`, `screen:prologue`, `screen:console`, `screen:resolution`, … */

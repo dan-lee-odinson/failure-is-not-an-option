@@ -7,6 +7,8 @@ export { EngineError, Run, emptyLedger, optionAvailability, replay, describeInpu
 export { describeFollowOn, validateFollowOnLedger, trustLabel, holdsOnLedger, type FollowOnView } from './followon';
 export {
   alternateHistoryActive, describeCommittedDecision, describeNode, describeEvidence, describeDebrief, describeFollowOnForRun, conditionHolds,
-  type NodeView, type OptionView, type LineView, type EvidenceView, type DebriefView, type SpeakerView, type EvidenceLink,
+  describeVisibleEvidence, unlockedEvidenceIds, visibleProcedures, describeHistory,
+  type NodeView, type OptionView, type LineView, type EvidenceView, type DebriefView, type SpeakerView, type EvidenceLink, type HistoryVisibility,
 } from './views';
+export { deriveEncounters, unlockMet, type Encounters } from './unlocks';
 export { createSave, verifySave, checkStructure, checkReferences, SAVE_FORMAT, SAVE_VERSION, type SaveFile, type VerifyResult } from './save';

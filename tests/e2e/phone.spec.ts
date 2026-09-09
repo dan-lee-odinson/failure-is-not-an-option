@@ -94,6 +94,7 @@ test.describe('the phone-width layout (FNO-HOTFIX-01)', () => {
         // The opening's static credits (Skip during the film), then the menu and its overlays.
         await fakeFilm(page);
         await fresh(page, false);
+        await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'true'); // sound on before any gesture (R1)
         await click(page, 'begin');
         await click(page, 'film-skip');
         await expect(page.getByTestId('screen-opening')).toHaveAttribute('data-credits', 'static');

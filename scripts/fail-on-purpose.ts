@@ -37,6 +37,16 @@ const PLANTS: Planted[] = [
     expect: /duplicate evidence id: g8-ev-rule/,
   },
   {
+    name: 'evidence item without unlocked_by (content 0.5.5, R2)',
+    plant: (root) => edit(root, CONTENT_FILES.evidence, (d: { evidence: { unlocked_by?: unknown }[] }) => { delete d.evidence[0]!.unlocked_by; }),
+    expect: /unlocked_by/,
+  },
+  {
+    name: 'evidence item unlocked by a line id that no line carries',
+    plant: (root) => edit(root, CONTENT_FILES.evidence, (d: { evidence: { unlocked_by?: unknown }[] }) => { d.evidence[0]!.unlocked_by = { line: 'g8-line-does-not-exist' }; }),
+    expect: /unknown unlock line g8-line-does-not-exist/,
+  },
+  {
     name: 'dangling reference (briefing acquires evidence that does not exist)',
     plant: (root) => edit(root, CONTENT_FILES.mission, (d: { phases: { nodes: { documents?: { evidence: string }[] }[] }[] }) => { d.phases[0]!.nodes[0]!.documents!.push({ evidence: 'g8-ev-does-not-exist' }); }),
     expect: /document references unknown evidence g8-ev-does-not-exist/,

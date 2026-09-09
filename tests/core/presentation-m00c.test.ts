@@ -125,12 +125,21 @@ describe('cards and the conversation panel', () => {
 
 describe('History panel trim', () => {
   it('renders the explanation, the lamp sentence and the sources; no provenance lines, fiction register, people or anchors', () => {
-    const run = upTo('g8-return-brief');
-    const html = render(store(run, { overlay: 'history' }));
+    // R2 (FNO-PT3): mid-mission the panel names only the sources play has cited, without their notes, and the
+    // alternate-history explanation waits for the record to be left; after the mission everything is there.
+    const mid = render(store(upTo('g8-return-brief'), { overlay: 'history' }));
     const reg = content().bundle.registry;
+    expect(mid).toContain('data-testid="lamp-explanation"');
+    expect(mid).not.toContain('data-testid="alt-history-explanation"');
+    expect(mid).toContain('data-testid="history-source-H7"'); // Lovell's relay lines
+    expect(mid).not.toContain('data-testid="history-source-H5"'); // the post-flight account, not yet
+    for (const s of reg.sources) expect(mid).not.toContain(esc(s.note));
+    const run = play(newRun(), script({ prep: ['recovery'], route: 'earlier' }));
+    const html = render(store(run, { overlay: 'history' }));
     expect(html).toContain('data-testid="alt-history-explanation"');
     expect(html).toContain('data-testid="lamp-explanation"');
     for (const s of reg.sources) expect(html).toContain(esc(s.title));
+    for (const s of reg.sources) expect(html).toContain(esc(s.note));
     expect(html).not.toContain('Fiction register');
     expect(html).not.toContain('Report, procedure');
     expect(html).not.toContain('People in this scenario');

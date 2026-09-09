@@ -16,6 +16,7 @@ import {
   alternateHistoryActive, describeCommittedDecision, describeDebrief, describeEvidence, describeFollowOnForRun, describeNode,
   type EvidenceView, type LineView, type MovingElement, type NodeView, type Option, type OptionView, type Participant,
 } from '../core';
+import { describeVisibleEvidence, visibleProcedures, describeHistory } from '../core';
 import { assetEntry, assetUrl, videoUrl } from './assets';
 import { describeResolution } from './resolution';
 import { MODERN_UI_AVAILABLE } from './theme';
@@ -144,7 +145,11 @@ function renderOpening(store: Store): string {
         ${key({ family: 'key', action: 'begin', focus: 'begin', testid: 'begin', focusDefault: true, label: 'BEGIN' })}
         ${key({ family: 'selector', action: 'skip-to-menu', focus: 'skip-to-menu', testid: 'skip-to-menu', label: 'SKIP TO MENU' })}
       </div>
-      ${soundControl(store, 'start')}
+      <p class="menu-subtitle menu-fullscreen op-fullscreen-line" data-testid="fullscreen-line">${esc(FULLSCREEN_LINE)}</p>
+      <div class="op-tools">
+        ${ui.fullscreen === 'unavailable' ? '' : key({ family: 'selector', action: 'fullscreen-toggle', focus: 'fullscreen-toggle', testid: 'fullscreen', pressed: ui.fullscreen === 'active', label: ui.fullscreen === 'active' ? 'EXIT FULL SCREEN' : 'FULL SCREEN' })}
+        ${soundControl(store, 'start')}
+      </div>
       ${message}
     </div>
   </main>`;
@@ -155,6 +160,7 @@ function renderOpening(store: Store): string {
     const src = videoUrl('video-opening-film');
     return `
   <main class="screen-opening op-film" data-testid="screen-opening" data-stage="film">
+    ${denUnderlay(store)}
     <div class="film-frame" data-testid="film-frame">${src ? `<video id="film" class="film" data-testid="film" playsinline preload="auto" src="${src}" aria-label="The opening film"></video>` : ''}</div>
     <div class="op-controls film-controls" data-testid="film-controls">${renderFilmControls(store)}</div>
   </main>`;
@@ -214,6 +220,16 @@ export function renderFilmControls(store: Store): string {
  * the animation is driven in main.ts), and the run-out darkening. Static (Skip, reduced motion): the same block,
  * keyboard-scrollable, no timed scroll. Controls stay outside the wall.
  */
+/** The den at rest beneath the film: the plate, the beam and one smoke instance at their registry placements; decorative, static. */
+function denUnderlay(store: Store): string {
+  const den = store.content.bundle.registry.opening_den;
+  const box = (p: { x: number; y: number; width: number; height: number }) => `left:${pct(p.x, DESIGN.width)};top:${pct(p.y, DESIGN.height)};width:${pct(p.width, DESIGN.width)};height:${pct(p.height, DESIGN.height)}`;
+  const plate = assetUrl(den?.background ?? 'opening-den');
+  const beam = den ? assetUrl(den.beam.asset) : null;
+  const smoke = den ? assetUrl(den.smoke.asset) : null;
+  return `<div class="pl-frame den-frame film-den" data-testid="film-den" aria-hidden="true">${plate ? `<img class="pl-bg den-plate" src="${plate}" alt="" aria-hidden="true" />` : ''}${beam && den ? `<img class="pl-layer den-beam" src="${beam}" alt="" aria-hidden="true" style="${box(den.beam.placement)};opacity:${den.beam.placement.opacity}" />` : ''}${smoke && den ? `<img class="pl-layer den-smoke" src="${smoke}" alt="" aria-hidden="true" style="${box(den.smoke.placement)};opacity:${den.smoke.placement.opacity}" />` : ''}</div>`;
+}
+
 function renderCredits(store: Store): string {
   const { ui } = store;
   const reg = store.content.bundle.registry;
@@ -260,14 +276,14 @@ function renderConsole(store: Store): string {
   const run = store.run!;
   const view = describeNode(run);
   if (!view) return renderDebrief(store);
-  const evidence = describeEvidence(store.content, run.state);
+  const evidence = describeVisibleEvidence(run); // acquired AND met in play (R2)
   if (view.options) IDLE = false; // a choice screen highlights nothing; a hint, when the content carries one, appears instead
   // Stacked layout (M02): the conversation panel takes the content width and the evidence column becomes a status-bar key that opens the list as an overlay.
   const stacked = store.ui.stacked;
   return `
   <div class="console-shell${stacked ? ' stacked' : ''}" data-testid="screen-console" data-node="${esc(view.node.id)}" data-phase="${esc(view.phase.id)}" data-layout="${stacked ? 'stacked' : 'columns'}">
     ${roomLayer()}
-    ${renderStatusBar(store, view, evidence.length)}
+    <div class="status-area">${renderStatusBar(store, view, evidence.length)}${renderCueStrip(store)}</div>
     <div class="stage">
       ${renderConversation(store, view)}
     </div>
@@ -296,6 +312,19 @@ function lamps(store: Store, historical: boolean, alternate: boolean): string {
  * keys keep one row by shortening their labels, an EVIDENCE · n key opens the evidence list as an overlay, and the
  * mission line wraps inside its own group only if it must.
  */
+/** The unlock cue (R2): one line per list that grew at the last presentation boundary, until the next click. */
+function renderCueStrip(store: Store): string {
+  const c = store.ui.cue;
+  if (!c) return '';
+  const parts = [
+    c.evidence.length ? `Added to evidence: ${c.evidence.join(' · ')}` : '',
+    c.binder.length ? `Added to the binder: ${c.binder.join(' · ')}` : '',
+    c.history.length ? `Added to History: ${c.history.join(' · ')}` : '',
+  ].filter(Boolean);
+  if (!parts.length) return '';
+  return `<div class="unlock-strip" role="status" data-testid="unlock-strip">${parts.map((p) => `<span>${esc(p)}</span>`).join('')}</div>`;
+}
+
 function renderStatusBar(store: Store, view: NodeView, evidenceCount: number): string {
   const m = store.content.mission;
   const current = store.content.nodes.get(view.node.id)?.node;
@@ -319,7 +348,7 @@ function renderStatusBar(store: Store, view: NodeView, evidenceCount: number): s
     ${lamps(store, historical, view.phase.alternate_history)}
     </div>
     <div class="status-keys" data-testid="status-keys">
-    ${stacked ? key({ family: 'selector', action: 'open:evidence', testid: 'open-evidence', label: `EVIDENCE · ${evidenceCount}`, ariaLabel: `Evidence: ${evidenceCount} items — open the evidence list` }) : ''}
+    ${stacked ? key({ family: 'selector', action: 'open:evidence', testid: 'open-evidence', cls: store.ui.cueTick ? 'k-tick' : undefined, label: `EVIDENCE · ${evidenceCount}`, ariaLabel: `Evidence: ${evidenceCount} items — open the evidence list` }) : ''}
     ${key({ family: 'selector', action: 'open:binder', testid: 'open-binder', label: 'BINDER' })}
     ${key({ family: 'selector', action: 'open:history', testid: 'open-history', label: 'HISTORY' })}
     ${key({ family: 'selector', action: 'open:saveload', testid: 'open-saveload', label: stacked ? 'SAVE' : 'SAVE / LOAD', ariaLabel: stacked ? 'Save / Load' : undefined })}
@@ -371,9 +400,10 @@ function renderConversation(store: Store, view: NodeView): string {
     parts.push(`<div class="applied" data-testid="applied"><div class="label">Logged at this event</div><ul>${view.applied.map((a) => `<li>${esc(a.label)}</li>`).join('')}</ul></div>`);
   }
   // Glen's question keys sit in the panel's footer, outside the scrolling body, so they are always in view; an asked one shows as such.
-  const questions = view.questions.length
-    ? `<div class="conv-questions"><div class="questions" data-testid="questions">${view.questions.map((q) => `
-      <button type="button" class="question paper" data-action="question:${esc(q.id)}" data-focus="question:${esc(q.id)}" data-testid="question-${esc(q.id)}" aria-expanded="${q.asked}"${q.asked ? ' data-asked' : ''}>${esc(q.text)}</button>`).join('')}</div></div>`
+  const questions = view.questions.length && view.questions.some((q) => !q.asked)
+    ? `<div class="conv-questions"><div class="questions" data-testid="questions">${view.questions.map((q) => q.asked
+      ? `<button type="button" class="question paper asked" data-testid="question-${esc(q.id)}" aria-expanded="true" data-asked disabled><span class="question-text">${esc(q.text)}</span><span class="stamp stamp-small">ASKED</span></button>`
+      : `<button type="button" class="question paper" data-action="question:${esc(q.id)}" data-focus="question:${esc(q.id)}" data-testid="question-${esc(q.id)}" aria-expanded="false">${esc(q.text)}</button>`).join('')}</div></div>`
     : '';
   const active = activeSpeaker(view);
   const activeUrl = active ? assetUrl(active.portrait) : null;
@@ -429,13 +459,13 @@ function evidenceItems(store: Store, evidence: EvidenceView[]): string {
 }
 
 function renderEvidencePanel(store: Store, evidence: EvidenceView[]): string {
-  return `<aside class="evidence panel" aria-label="Evidence" data-testid="evidence-panel"><h2>Evidence · ${evidence.length}</h2>${evidenceItems(store, evidence)}</aside>`;
+  return `<aside class="evidence panel" aria-label="Evidence" data-testid="evidence-panel"><h2${store.ui.cueTick ? ' class="tick"' : ''}>Evidence · ${evidence.length}</h2>${evidenceItems(store, evidence)}</aside>`;
 }
 
 /** The stacked layout's evidence list (M02): the same items and pins in an overlay panel, opened from the status bar's EVIDENCE key. */
 function renderEvidenceOverlay(store: Store): string {
   const run = store.run;
-  const evidence = run ? describeEvidence(store.content, run.state) : [];
+  const evidence = run ? describeVisibleEvidence(run) : [];
   return `<div class="evidence-list" data-testid="evidence-panel">${evidenceItems(store, evidence)}</div>`;
 }
 
@@ -532,7 +562,7 @@ function renderOverlay(store: Store): string {
     case 'saveload': { title = 'Save / Load'; body = renderSaveLoad(store); break; }
     case 'about': { title = 'About / Credits'; body = renderAbout(store); break; }
     case 'settings': { title = 'Settings'; body = renderSettings(store); break; }
-    case 'evidence': { title = `Evidence · ${store.run ? describeEvidence(store.content, store.run.state).length : 0}`; body = renderEvidenceOverlay(store); break; }
+    case 'evidence': { title = `Evidence · ${store.run ? describeVisibleEvidence(store.run).length : 0}`; body = renderEvidenceOverlay(store); break; }
   }
   return `
   <div class="overlay-backdrop" data-testid="overlay-${o}">
@@ -546,13 +576,13 @@ function renderOverlay(store: Store): string {
 
 function renderBinder(store: Store): string {
   const run = store.run;
-  const procs = run ? run.state.ledger.procedures : [];
+  const procs = run ? visibleProcedures(run) : [];
   const pages = procs.map((id) => {
     const p = store.content.procedures.get(id);
     if (!p) return '';
     return `<div class="page" data-testid="binder-${esc(id)}"><div class="status">${p.status === 'commissioned-task' ? 'Commissioned task — not a completed procedure' : 'Adopted procedure'}</div><div class="title">${esc(p.title)}</div><div>${esc(p.text)}</div></div>`;
   });
-  const rules = run ? describeEvidence(store.content, run.state).filter((e) => e.kind === 'reference' && e.body !== null) : [];
+  const rules = run ? describeVisibleEvidence(run).filter((e) => e.kind === 'reference' && e.body !== null) : [];
   return `
     <h3>Adopted procedures and commissioned tasks</h3>
     ${pages.length ? pages.join('') : '<p class="muted">Nothing adopted yet. Reference pages appear as the mission gives you them.</p>'}
@@ -565,21 +595,30 @@ function renderBinder(store: Store): string {
  * The per-item provenance lines, the fiction register, the people list and the anchors are game mechanics
  * and are not rendered; the data is untouched and stays on the dialogue sheet as `history-hidden`.
  */
+export const HISTORY_EMPTY = 'Sources appear here as the mission meets them.';
+
 function renderHistory(store: Store): string {
   const reg = store.content.bundle.registry;
   const labels = reg.labels;
-  // The prologue's facility note (the 1973 renaming) appears once a run exists; its sources resolve through the registry list beneath.
+  // R2: the panel shows what play has presented — the facility note once the plates were walked (Skip does not count), the
+  // CAPCOM note once Lovell has spoken, the alternate-history explanation once play has left the record, each source's
+  // title once something displayed cites it and its note after the mission (at once for a source only the prologue cites).
+  const h = describeHistory(store.content, store.run, store.ui.prologueSeen);
   const prologue = store.content.mission.prologue;
-  const note = store.run && prologue
+  const note = h.prologueNote && prologue
     ? `<p class="history-note" data-testid="history-note">${esc(prologue.history_note)} <span class="muted">Sources: ${esc(prologue.history_sources.join(', '))}.</span></p>`
     : '';
+  const sources = h.sources.filter((s) => s.title).map((s) => ({ ...s, src: reg.sources.find((x) => x.id === s.id)! }));
+  const list = sources.length
+    ? `<ul class="plain">${sources.map(({ id, note: showNote, src }) => `<li data-testid="history-source-${esc(id)}"><b>${esc(id)}</b> — <a href="${esc(src.url)}" target="_blank" rel="noopener">${esc(src.title)}</a>${src.author ? ` (${esc(src.author)})` : ''}.${showNote ? ` <span class="muted">${esc(src.note)}</span>` : ''}</li>`).join('')}</ul>`
+    : `<p class="muted" data-testid="history-empty">${esc(HISTORY_EMPTY)}</p>`;
   return `
-    <p data-testid="alt-history-explanation">${esc(labels.alternate_history_explanation)}</p>
+    ${h.explanation ? `<p data-testid="alt-history-explanation">${esc(labels.alternate_history_explanation)}</p>` : ''}
     <p class="muted" data-testid="lamp-explanation">The status bar shows ${esc(labels.historical_choice_badge ?? 'HISTORICAL CHOICE')} on a decision where one option matches the record, and ${esc(labels.alternate_history_badge)} once play has left it. Neither lamp is a recommendation.</p>
     ${note}
-    ${labels.capcom_history_note ? `<p class="history-note" data-testid="capcom-history-note">${esc(labels.capcom_history_note)}</p>` : ''}
+    ${h.capcomNote && labels.capcom_history_note ? `<p class="history-note" data-testid="capcom-history-note">${esc(labels.capcom_history_note)}</p>` : ''}
     <h3>Historical sources</h3>
-    <ul class="plain">${reg.sources.map((s) => `<li><b>${esc(s.id)}</b> — <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>${s.author ? ` (${esc(s.author)})` : ''}. <span class="muted">${esc(s.note)}</span></li>`).join('')}</ul>`;
+    ${list}`;
 }
 
 function renderSaveLoad(store: Store): string {

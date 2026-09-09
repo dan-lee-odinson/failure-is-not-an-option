@@ -38,8 +38,9 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     await shot(page, vp.name, text, '00-opening-start');
     await expect(page.getByTestId('begin')).toBeVisible();
     await expect(page.getByTestId('skip-to-menu')).toBeVisible();
-    // Silent before the first Begin; the large-text run has already skipped once, which turned the master on.
-    await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', text === 'default' ? 'false' : 'true');
+    // Sound is on by default (playtest 3, R1): the unset state reads SOUND: ON before any gesture; only a persisted off reads OFF.
+    await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('sound-toggle')).toHaveText('SOUND: ON');
 
     // FNO-DEPLOY: Begin plays the film; at 2:18 the den takes over and the credits scroll on its wall.
     await click(page, 'begin');
@@ -216,15 +217,17 @@ for (const vp of VIEWPORTS) for (const text of TEXT) {
     expect(await page.locator('[data-testid="strip"] [data-action^="pin:"]').count()).toBe(0);
     expect(await page.locator('[data-testid="conversation"] [data-action^="pin:"]').count()).toBe(0);
     // The once-only pin hint appears on first hover, dismisses, and stays dismissed; pinning is UI-only (in the column, or in the stacked layout's overlay).
+    // (The planning report is on the list at Return Planning; the reserve card waits for its own question — R2, FNO-PT3.)
     await withEvidence(page, async () => {
-      await page.getByTestId('pin-g8-ev-reserve').hover();
+      await expect(page.getByTestId('evidence-g8-ev-reserve')).toHaveCount(0);
+      await page.getByTestId('pin-g8-ev-return').hover();
       await expect(page.getByTestId('pin-hint')).toBeVisible();
       await click(page, 'pin-hint-dismiss');
       await expect(page.getByTestId('pin-hint')).toHaveCount(0);
-      await page.getByTestId('pin-g8-ev-reserve').hover();
+      await page.getByTestId('pin-g8-ev-return').hover();
       await expect(page.getByTestId('pin-hint')).toHaveCount(0);
-      await click(page, 'pin-g8-ev-reserve');
-      await expect(page.getByTestId('pin-g8-ev-reserve')).toHaveAttribute('aria-pressed', 'true');
+      await click(page, 'pin-g8-ev-return');
+      await expect(page.getByTestId('pin-g8-ev-return')).toHaveAttribute('aria-pressed', 'true');
     });
     expect(await node(page)).toBe('g8-return-brief');
     await shot(page, v, text, '15-return-decision');
@@ -422,7 +425,10 @@ test('keyboard reaches every stage of the opening, the menu, every card and lamp
   await page.getByTestId('open-history').focus();
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('overlay-history')).toBeVisible();
-  await expect(page.getByTestId('alt-history-explanation')).toContainText('H6');
+  // R2 (FNO-PT3): the record has not been left and the post-flight account is not met — no explanation, no H5; only what the briefing's lines cite.
+  await expect(page.getByTestId('lamp-explanation')).toBeVisible();
+  await expect(page.getByTestId('alt-history-explanation')).toHaveCount(0);
+  await expect(page.getByTestId('history-source-H5')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('overlay-history')).toHaveCount(0);
   await expect(page.getByTestId('open-history')).toBeFocused();
@@ -669,15 +675,16 @@ test('idle help is absent under reduced motion', async ({ page }) => {
   expect(await page.evaluate(() => window.__fno!.idle())).toBe(false);
 });
 
-test('audio is silent until Begin, on after Begin, a persisted off stays off, and never enters the log', async ({ page }) => {
+test('sound is on by default (R1) and armed by the first gesture; a persisted off stays off; nothing enters the log', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await fakeFilm(page);
   await fresh(page, false);
   const audio = () => page.evaluate(() => ({ enabled: window.__fno!.audio.enabled(), unlocked: window.__fno!.audio.unlocked() }));
-  expect(await audio()).toEqual({ enabled: false, unlocked: false });
+  expect((await audio()).enabled).toBe(true); // on by default, nothing persisted yet
+  expect(await page.evaluate(() => localStorage.getItem('fno.audio'))).toBeNull();
   expect(await page.locator('audio, video').count()).toBe(0);
   await click(page, 'begin');
-  expect(await audio()).toEqual({ enabled: true, unlocked: true }); // Begin is the player interaction: the master is on
+  expect(await audio()).toEqual({ enabled: true, unlocked: true }); // Begin is the first gesture: the context is armed
   await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'true');
   await click(page, 'skip-to-menu');
   await click(page, 'start-new');

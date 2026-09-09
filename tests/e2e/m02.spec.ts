@@ -153,7 +153,7 @@ test('stacked layout at 1366×768 enlarged on every conversation screen: content
   await page.getByTestId('open-evidence').focus();
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('overlay-evidence')).toBeVisible();
-  await expect(page.getByTestId('overlay-evidence').locator('.ev-item')).toHaveCount(await page.evaluate(() => Object.keys(window.__fno!.store.run!.state.mission.evidence).length));
+  await expect(page.getByTestId('overlay-evidence').locator('.ev-item')).toHaveCount(await page.evaluate(() => (window.__fno!.unlocks() as { evidence: string[] }).evidence.length)); // the visible list (R2)
   await page.getByTestId('pin-g8-ev-reserve').focus();
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('pin-g8-ev-reserve')).toHaveAttribute('aria-pressed', 'true');
@@ -212,7 +212,14 @@ test('the column layout at 1920×1080 default on every conversation screen, with
   await step('continue-g8-crisis-report-continue');
   await step('continue-g8-stabilization-report-continue');
   await step('option-g8-order-return');
-  for (const q of ['g8-q-recovery-risk', 'g8-q-reserve-risk', 'g8-q-crew-return']) await step(`question-${q}`);
+  for (const q of ['g8-q-recovery-risk', 'g8-q-reserve-risk']) await step(`question-${q}`);
+  // Two asked (greyed, stamped) and one live key share the footer's single row at this width (playtest 3, note 8).
+  const rowBefore = await page.getByTestId('conversation').evaluate((el) => {
+    const keys = Array.from(el.querySelectorAll('.conv-questions .question'));
+    return { keys: keys.length, asked: keys.filter((k) => k.hasAttribute('data-asked')).length, rows: new Set(keys.map((q) => Math.round(q.getBoundingClientRect().top))).size };
+  });
+  expect(rowBefore).toEqual({ keys: 3, asked: 2, rows: 1 });
+  await step('question-g8-q-crew-return');
   // The return decision with every answer asked: the answers are in the scrolling body in the order asked, the footer holds the keys alone (in a row), and the dialogue area shows at least six lines of text and three whole speaker tiles before scrolling.
   const m = await page.getByTestId('conversation').evaluate((el) => {
     const body = el.querySelector('.conv-body')!.getBoundingClientRect();
@@ -225,10 +232,10 @@ test('the column layout at 1920×1080 default on every conversation screen, with
     const keys = Array.from(el.querySelectorAll('.conv-questions .question')).map((q) => Math.round(q.getBoundingClientRect().top));
     return { dialogue: body.bottom - Math.max(body.top, l.top), lh, tiles: tiles.length, whole, answers, footerAnswers: el.querySelectorAll('.conv-questions .answer').length, keyRows: new Set(keys).size };
   });
-  expect(m.tiles).toBe(6);
+  expect(m.tiles).toBe(7); // Elias, Mara, Lovell, the recovery readback (content 0.5.5, prepared-recovery) and the three answers
   expect(m.answers).toEqual(['answer-g8-q-recovery-risk', 'answer-g8-q-reserve-risk', 'answer-g8-q-crew-return']);
   expect(m.footerAnswers).toBe(0);
-  expect(m.keyRows).toBe(1);
+  expect(m.keyRows).toBe(0); // every question asked: the row is gone and the answers stand in the body (playtest 3, note 8)
   expect(m.dialogue).toBeGreaterThanOrEqual(6 * m.lh);
   expect(m.whole).toBeGreaterThanOrEqual(3);
   const active = (await page.getByTestId('active-portrait').locator('img').boundingBox())!.height;
@@ -270,9 +277,9 @@ test('the tier meaning: a title on the tier word, the ⓘ key opens the paper st
 
 test('the sound is on after the first play gesture: Begin, or the menu keys of a returning player; a persisted off stays off on the prologue and the resolution screens', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
-  // A returning player (the opening already seen): NEW CAMPAIGN is the gesture.
+  // A returning player (the opening already seen): sound reads ON before any gesture (R1); NEW CAMPAIGN is the gesture that arms it.
   await fresh(page, true);
-  await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'true');
   await click(page, 'start-new');
   await expect(page.getByTestId('screen-prologue')).toBeVisible();
   await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'true');
@@ -285,9 +292,8 @@ test('the sound is on after the first play gesture: Begin, or the menu keys of a
   await click(page, 'skip-to-menu');
   await click(page, 'start-new');
   await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'true');
-  // Turned on and then off on the menu (an explicit, persisted setting), it stays off through the prologue and the cards.
+  // Turned off on the menu (R1: on by default, off is the player's explicit, persisted setting), it stays off through the prologue and the cards.
   await fresh(page, true);
-  await click(page, 'sound-toggle');
   await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'true');
   await click(page, 'sound-toggle');
   await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'false');

@@ -121,9 +121,11 @@ describe('cards, pins and stamps', () => {
     expect(render(store(run, { pinHintOpen: true }))).toContain('data-testid="pin-hint"');
     expect(render(store(run, { pinHintOpen: true, pinHintSeen: true }))).not.toContain('data-testid="pin-hint"');
     // Pinning is presentation only: the same run renders the pinned item first and its Choose keys unchanged.
-    const pinned = render(store(run, { pinned: ['g8-ev-reserve'] }));
-    expect(pinned).toContain('data-testid="evidence-g8-ev-reserve"');
-    expect(pinned.indexOf('evidence-g8-ev-reserve')).toBeLessThan(pinned.indexOf('evidence-g8-ev-crisis'));
+    // (The planning report is on the list at Return Planning; the reserve card waits for its question — R2, FNO-PT3.)
+    const pinned = render(store(run, { pinned: ['g8-ev-return'] }));
+    expect(pinned).toContain('data-testid="evidence-g8-ev-return"');
+    expect(pinned).not.toContain('data-testid="evidence-g8-ev-reserve"');
+    expect(pinned.indexOf('evidence-g8-ev-return')).toBeLessThan(pinned.indexOf('evidence-g8-ev-crisis'));
     expect(pinned).toContain('data-testid="option-g8-return-earlier"');
   });
 

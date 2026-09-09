@@ -8,6 +8,7 @@ import type { ContentIndex } from './content';
 import { optionAvailability, type Run } from './engine';
 import { describeFollowOn, trustLabel, type FollowOnView } from './followon';
 import type { Character, Condition, DecisionNode, Evidence, Line, LogEntry, Node, Option, Phase, RunState } from './types';
+import { deriveEncounters, unlockMet, type Encounters } from './unlocks';
 
 export interface SpeakerView {
   id: string;
@@ -89,8 +90,77 @@ function link(content: ContentIndex, state: RunState, id: string): EvidenceLink 
   return { id, title: e?.title ?? id, acquired: Object.prototype.hasOwnProperty.call(state.mission.evidence, id) };
 }
 
-function lineView(content: ContentIndex, state: RunState, l: Line): LineView {
-  return { speaker: speaker(content, l.speaker), text: l.text, cites: (l.cites ?? []).map((c) => link(content, state, c)) };
+/** Citation links name only items the player can already see (R2): an acquired-but-locked item is absent, not greyed. */
+function lineView(content: ContentIndex, state: RunState, l: Line, unlocked?: Set<string>): LineView {
+  const cites = (l.cites ?? []).filter((c) => !unlocked || unlocked.has(c));
+  return { speaker: speaker(content, l.speaker), text: l.text, cites: cites.map((c) => link(content, state, c)) };
+}
+
+// ---------------------------------------------------------------------------
+// Encounter-based availability (content 0.5.5, R2): what the Binder, the Evidence list, the citation links and the
+// History panel may show is acquisition / adoption AND the encounter that presents the item, derived from the inputs.
+// ---------------------------------------------------------------------------
+
+/** Evidence the player can see: acquired, its unlock met, and eligible under any visible_when. Newest first. */
+export function describeVisibleEvidence(run: Run): EvidenceView[] {
+  const enc = deriveEncounters(run);
+  return describeEvidence(run.content, run.state).filter((e) => e.eligible && unlockMet(run.content.evidence.get(e.id)?.unlocked_by, enc));
+}
+
+/** The ids of the evidence the player can see. */
+export function unlockedEvidenceIds(run: Run): Set<string> {
+  return new Set(describeVisibleEvidence(run).map((e) => e.id));
+}
+
+/** Procedures in the Binder: adopted in the ledger AND their unlock met; the ledger's order. */
+export function visibleProcedures(run: Run): string[] {
+  const enc = deriveEncounters(run);
+  return run.state.ledger.procedures.filter((id) => unlockMet(run.content.procedures.get(id)?.unlocked_by, enc));
+}
+
+export interface HistoryVisibility {
+  /** The alternate-history explanation names later branches: shown once play has left the record, or after the mission. */
+  explanation: boolean;
+  /** The prologue's facility note: shown once the plates were walked (Skip does not count), whatever the run. */
+  prologueNote: boolean;
+  /** The CAPCOM note: shown once a historical person has spoken a displayed line. */
+  capcomNote: boolean;
+  /** Each registry source: its title once something displayed cites it (every source after the mission); its note after the mission, or at once for a source only the prologue cites. */
+  sources: { id: string; title: boolean; note: boolean }[];
+}
+
+/** What the History panel may show now (R2). `prologueSeen` is presentation state the app keeps; `run` may be null before a campaign. */
+export function describeHistory(content: ContentIndex, run: Run | null, prologueSeen: boolean): HistoryVisibility {
+  const enc: Encounters | null = run ? deriveEncounters(run) : null;
+  const completed = !!run?.state.mission.completed;
+  const prologue = content.mission.prologue;
+  const prologueSources = new Set<string>([...(prologue?.history_sources ?? []), ...(prologue?.plates ?? []).flatMap((p) => p.sources ?? [])]);
+  // Sources cited by play material (evidence, lines, the debrief) — anything else is prologue-only or uncited.
+  const playCiters = new Set<string>();
+  for (const e of content.evidence.values()) for (const s of e.provenance.sources) playCiters.add(s);
+  for (const { node } of content.nodes.values()) {
+    const lines: Line[] = node.type === 'briefing' || node.type === 'decision' ? [...(node.lines ?? []), ...(node.questions ?? []).map((q) => q.answer)] : node.type === 'event' ? node.resolutions.flatMap((r) => r.lines ?? []) : [];
+    for (const l of lines) for (const s of l.provenance?.sources ?? []) playCiters.add(s);
+  }
+  for (const d of content.mission.debrief) for (const s of d.provenance?.sources ?? []) playCiters.add(s);
+  const cited = new Set<string>();
+  if (run && enc) {
+    for (const e of describeVisibleEvidence(run)) for (const s of e.provenance.sources) cited.add(s);
+    for (const s of enc.sources) cited.add(s);
+    if (completed) for (const d of content.mission.debrief) if (evaluate(d.when, run.state)) for (const s of d.provenance?.sources ?? []) cited.add(s);
+  }
+  if (prologueSeen) for (const s of prologueSources) cited.add(s);
+  const capcomNote = !!enc && [...enc.speakers].some((id) => content.characters.get(id)?.kind === 'historical');
+  return {
+    explanation: !!run && (completed || alternateHistoryActive(run)),
+    prologueNote: prologueSeen,
+    capcomNote,
+    sources: content.bundle.registry.sources.map((s) => ({
+      id: s.id,
+      title: completed || cited.has(s.id),
+      note: completed || (prologueSeen && prologueSources.has(s.id) && !playCiters.has(s.id)),
+    })),
+  };
 }
 
 /**
@@ -128,14 +198,14 @@ export function alternateHistoryActive(run: Run): boolean {
   return active();
 }
 
-function optionView(content: ContentIndex, state: RunState, node: Node, o: Option): OptionView {
+function optionView(content: ContentIndex, state: RunState, node: Node, o: Option, unlocked?: Set<string>): OptionView {
   const avail = optionAvailability(state, node, o);
   return {
     id: o.id,
     intent: o.intent,
     statement: o.statement ?? null,
     subtitle: o.subtitle ?? null,
-    evidence: o.evidence.map((e) => link(content, state, e)),
+    evidence: o.evidence.filter((e) => !unlocked || unlocked.has(e)).map((e) => link(content, state, e)),
     attraction: o.attraction ?? null,
     cost: o.cost,
     uncertainty: o.uncertainty,
@@ -173,7 +243,8 @@ export function describeCommittedDecision(run: Run): { node: DecisionNode; optio
   const prev = cur.phase.nodes[ref.nodeIndex - 1];
   if (!prev || prev.type !== 'decision') return null;
   if (!run.state.mission.chosen.some((c) => c.node === prev.id)) return null;
-  return { node: prev, options: prev.options.map((o) => optionView(run.content, run.state, prev, o)) };
+  const unlocked = unlockedEvidenceIds(run);
+  return { node: prev, options: prev.options.map((o) => optionView(run.content, run.state, prev, o, unlocked)) };
 }
 
 export function describeNode(run: Run): NodeView | null {
@@ -183,9 +254,10 @@ export function describeNode(run: Run): NodeView | null {
   if (!cur) return null;
   const { phase, node } = cur;
   const phaseIndex = state.mission.cursor!.phase;
+  const unlocked = unlockedEvidenceIds(run);
 
   const lines: Line[] = node.type === 'briefing' || node.type === 'decision' ? node.lines ?? [] : [];
-  const visibleLines = lines.filter((l) => !l.when || evaluate(l.when, state)).map((l) => lineView(content, state, l));
+  const visibleLines = lines.filter((l) => !l.when || evaluate(l.when, state)).map((l) => lineView(content, state, l, unlocked));
 
   let text: string | null = null;
   let status: string[] | null = null;
@@ -203,7 +275,7 @@ export function describeNode(run: Run): NodeView | null {
     if (r) {
       status = r.status ?? null;
       eventText = r.text ?? null;
-      for (const l of r.lines ?? []) visibleLines.push(lineView(content, state, l));
+      for (const l of r.lines ?? []) visibleLines.push(lineView(content, state, l, unlocked));
     }
   }
 
@@ -211,7 +283,7 @@ export function describeNode(run: Run): NodeView | null {
     id: q.id,
     text: q.text,
     asked: state.mission.questions_asked.includes(q.id),
-    answer: lineView(content, state, q.answer),
+    answer: lineView(content, state, q.answer, unlocked),
   }));
 
   const readout = node.type === 'decision' && node.readout
@@ -221,7 +293,7 @@ export function describeNode(run: Run): NodeView | null {
     })
     : null;
 
-  const options = node.type === 'prep_choice' || node.type === 'decision' ? node.options.map((o) => optionView(content, state, node, o)) : null;
+  const options = node.type === 'prep_choice' || node.type === 'decision' ? node.options.map((o) => optionView(content, state, node, o, unlocked)) : null;
   const cont = node.type === 'prep_choice' ? node.finish : node.type === 'decision' ? null : node.continue;
 
   const acquiredHere = Object.entries(state.mission.evidence).filter(([, rec]) => rec.node === node.id).map(([id]) => id);
@@ -356,7 +428,7 @@ export function describeDebrief(run: Run): DebriefView | null {
   const stanceChoice = state.mission.chosen.find((c) => content.nodes.get(c.node)?.node.type === 'decision' && content.options.get(c.option)?.option.statement);
   const stanceOption = stanceChoice ? content.options.get(stanceChoice.option)?.option : undefined;
   const fo = describeFollowOn(content, state.ledger, done, state.followon.committed);
-  const contextEv = describeEvidence(content, state).find((e) => e.id === 'g8-ev-postflight-context') ?? null;
+  const contextEv = describeVisibleEvidence(run).find((e) => e.id === 'g8-ev-postflight-context') ?? null;
 
   const paragraphs = content.mission.debrief.filter((r) => evaluate(r.when, state)).map((r) => ({ id: r.id, text: r.text, section: r.section, provenance: r.provenance }));
 
