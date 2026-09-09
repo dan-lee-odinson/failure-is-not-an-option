@@ -9,8 +9,12 @@
  */
 import type { ContentIndex, Run } from '../core';
 
-/** `prologue` runs once after NEW CAMPAIGN; `resolution` sits between the outcome record and the debrief (FNO-M01). */
-export type Screen = 'opening' | 'prologue' | 'console' | 'resolution' | 'debrief' | 'planning';
+/**
+ * `prologue` runs once after NEW CAMPAIGN; `resolution` sits between the outcome record and the debrief (FNO-M01);
+ * `demo-end` is the demo-complete screen after the committed Gemini IX-A plan (FNO-DEMO-END) — presentation only, the
+ * run untouched.
+ */
+export type Screen = 'opening' | 'prologue' | 'console' | 'resolution' | 'debrief' | 'planning' | 'demo-end';
 
 /**
  * Stages of the opening screen, in order (FNO-DEPLOY, docs 30 §7–8 / 38 §2 / 40): Start (Begin) → the film (the opening
@@ -68,8 +72,8 @@ export interface UiState {
   /** The pin hint is being shown right now (first hover/focus on a pin glyph). */
   pinHintOpen: boolean;
   audio: AudioPrefs;
-  /** Whether CONTINUE on the menu can resume a valid save, with the visible reason when it cannot. */
-  continueSave: { ok: true } | { ok: false; reason: string };
+  /** Whether CONTINUE on the menu can resume a valid save, with the visible reason when it cannot (`complete`: the slot holds a finished campaign, FNO-DEMO-END). */
+  continueSave: { ok: true } | { ok: false; reason: string; complete?: boolean };
   /** The opening has been viewed or skipped once on this browser (persisted per player). */
   openingSeen: boolean;
   uiMode: UiMode;

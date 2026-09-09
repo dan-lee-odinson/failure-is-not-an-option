@@ -3,7 +3,8 @@
  * FNO-LIVE-02, the toolbar overflowing). At 320, 390 and 430 px, default and enlarged text, every screen is walked:
  * the menu and its overlays, the opening's static credits, the prologue plates and the scenario card, every
  * conversation and decision of a full route (with Glen's questions asked, the evidence overlay, the Binder and the
- * History), the resolution cards, the debrief and the IX-A planning. On each screen: no element's right edge beyond
+ * History), the resolution cards, the debrief, the IX-A planning, the demo-complete screen after the committed plan
+ * (FNO-DEMO-END) and the menu after it. On each screen: no element's right edge beyond
  * the viewport, no text clipped by its box or by an overflow ancestor, the toolbar keys inside the viewport and at
  * least 40 px tall, the mode lamp visible, the status text on a row of its own. The contrast samplers run at 390 too.
  * Every screen is photographed; the per-screen result goes to artifacts/phone-sweep/<viewport>-<text>.json.
@@ -11,7 +12,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { ARTIFACTS, TEXT, awaitRoom, click, fakeFilm, fresh, node, setText, shotPath, stage, toMenu, type TextSize } from './helpers';
+import { ARTIFACTS, TEXT, assertVisibleWithinViewport, awaitRoom, click, fakeFilm, fresh, node, setText, shotPath, stage, toMenu, type TextSize } from './helpers';
 import { PLATE_TEXT_SAMPLES, TEXT_SAMPLES, assertKitContrast, assertTextContrast } from './room';
 
 export const PHONES = [
@@ -200,11 +201,28 @@ test.describe('the phone-width layout (FNO-HOTFIX-01)', () => {
         await expect(page.getByTestId('screen-planning')).toBeVisible();
         await screen('planning');
 
+        // The committed plan, then the demo-complete screen (FNO-DEMO-END): the card as the paper sheet below the picture, the keys wrapping; PLAY AGAIN to the menu, where CONTINUE says the campaign is complete.
+        const plan = (await page.locator('[data-testid^="plan-g9"][data-enabled="true"]').first().getAttribute('data-testid'))!.replace(/^plan-/, '');
+        await click(page, `select-${plan}`);
+        await click(page, 'confirm-plan');
+        await expect(page.getByTestId('committed-text')).toBeVisible();
+        await screen('planning-committed');
+        await click(page, 'to-demo-end');
+        await expect(page.getByTestId('screen-demo-end')).toBeVisible();
+        await settled();
+        await screen('demo-complete');
+        if (contrast) { await assertTextContrast(page, ['.de-heading', '.de-line']); await assertKitContrast(page); }
+        for (const id of ['demo-end-card', 'follow-itch', 'exit-home', 'play-again']) await assertVisibleWithinViewport(page, id);
+        await click(page, 'play-again');
+        expect(await stage(page)).toBe('menu');
+        await expect(page.getByTestId('continue-reason')).toContainText('This campaign is complete.');
+        await screen('menu-campaign-complete');
+
         // The report, then the verdict: the briefing, Return Planning, the criticism scene and a resolution card first (doc 47 §2 D), then everything.
         const dir = resolve(ARTIFACTS, 'phone-sweep');
         mkdirSync(dir, { recursive: true });
         writeFileSync(resolve(dir, `${vp.name}-${text}.json`), JSON.stringify({ viewport: vp, text, screens: report }, null, 2) + '\n');
-        for (const key of ['g8-brief', 'g8-return-brief', 'g8-accountability-brief', 'resolution-result']) expect(report[key], key).toEqual([]);
+        for (const key of ['g8-brief', 'g8-return-brief', 'g8-accountability-brief', 'resolution-result', 'demo-complete']) expect(report[key], key).toEqual([]);
         const failing = Object.entries(report).filter(([, v]) => v.length > 0);
         expect(failing, `${failing.length} screen(s) with findings`).toEqual([]);
       });

@@ -28,7 +28,9 @@ import {
 import { loadBundle } from './load-content';
 import { provenanceLine, render } from '../../app/render';
 import { describeResolution } from '../../app/resolution';
+import { CAMPAIGN_COMPLETE_REASON } from '../../app/storage';
 import { STAGES, defaultUi, type Stage, type Store, type UiState } from '../../app/ui-state';
+import { FOLLOW_LINK } from './site';
 
 export type Source = 'content' | 'core' | 'app';
 
@@ -88,13 +90,16 @@ const VOID = new Set(['img', 'input', 'br', 'hr', 'meta', 'link']);
 const INLINE = new Set(['b', 'i', 'em', 'strong', 'code', 'small', 'u', 'sub', 'sup', 'abbr', 'kbd', 'a']);
 
 /**
- * The one place the stylesheet turns an inline element into a block: the
- * field labels on option cards (`.field b`, `.support b`) render on their own
- * line, so they are their own run and never glue onto the sentence beneath.
+ * The places the stylesheet turns an inline element into a block: the field
+ * labels on option cards (`.field b`, `.support b`) render on their own line,
+ * and a link styled as a kit key (`a.k`: HOME, FOLLOW ON ITCH.IO, EXIT) is a
+ * control of its own, so each is its own run and never glues onto its
+ * neighbour.
  */
-function isInline(name: string, parent: { tag: string; cls: string } | undefined): boolean {
+function isInline(name: string, cls: string, parent: { tag: string; cls: string } | undefined): boolean {
   if (!INLINE.has(name)) return false;
   if ((name === 'b' || name === 'strong') && parent && /\b(field|support)\b/.test(parent.cls)) return false;
+  if (name === 'a' && /(^|\s)k(\s|$)/.test(cls)) return false;
   return true;
 }
 
@@ -121,8 +126,9 @@ export function extractRuns(html: string): DomRun[] {
     if (tok.startsWith('</')) {
       const name = /^<\/([a-zA-Z0-9]+)/.exec(tok)?.[1]?.toLowerCase() ?? '';
       let parentIdx = -1;
-      for (let i = stack.length - 1; i >= 0; i--) if (stack[i]!.tag === name) { parentIdx = i - 1; break; }
-      const inline = isInline(name, parentIdx >= 0 ? stack[parentIdx] : undefined);
+      let ownCls = '';
+      for (let i = stack.length - 1; i >= 0; i--) if (stack[i]!.tag === name) { parentIdx = i - 1; ownCls = stack[i]!.cls; break; }
+      const inline = isInline(name, ownCls, parentIdx >= 0 ? stack[parentIdx] : undefined);
       if (!inline) flush();
       for (let i = stack.length - 1; i >= 0; i--) if (stack[i]!.tag === name) { stack.length = i; break; }
       continue;
@@ -130,7 +136,7 @@ export function extractRuns(html: string): DomRun[] {
     if (tok.startsWith('<')) {
       const name = /^<([a-zA-Z0-9]+)/.exec(tok)?.[1]?.toLowerCase() ?? '';
       const cls = /\sclass="([^"]*)"/.exec(tok)?.[1] ?? '';
-      const inline = isInline(name, stack[stack.length - 1]);
+      const inline = isInline(name, cls, stack[stack.length - 1]);
       if (!inline) flush();
       for (const attr of ['title', 'alt', 'aria-label'] as const) {
         const v = new RegExp(`\\s${attr}="([^"]*)"`).exec(tok)?.[1];
@@ -153,7 +159,7 @@ function uiKind(r: DomRun): string {
   if (r.attr === 'alt') return 'ui.alt';
   if (r.attr === 'aria-label') return 'ui.aria';
   const c = ' ' + r.cls + ' ';
-  if (r.tag === 'button') return 'ui.button';
+  if (r.tag === 'button' || (r.tag === 'a' && c.includes(' k '))) return 'ui.button';
   if (r.tag === 'b' || r.tag === 'strong') return 'ui.label';
   if (/^h[1-3]$/.test(r.tag) || r.tag === 'summary' || r.tag === 'figcaption') return c.includes(' prompt ') ? 'ui.prompt' : 'ui.heading';
   if (r.tag === 'text' || c.includes(' hero-title ')) return 'ui.heading';
@@ -589,7 +595,7 @@ export class SheetBuilder {
       for (const textSize of ['default', 'large'] as const) {
         const variants: Partial<UiState>[] = [{ screen: 'opening', stage, textSize }];
         if (stage === 'credits') variants.push({ screen: 'opening', stage, textSize, scrollPaused: true }, { screen: 'opening', stage, textSize, creditsStatic: true }, { screen: 'opening', stage, textSize, reducedMotion: true });
-        if (stage === 'menu') variants.push({ screen: 'opening', stage, textSize, continueSave: { ok: true } }, { screen: 'opening', stage, textSize, fullscreen: 'available' }, { screen: 'opening', stage, textSize, fullscreen: 'active' });
+        if (stage === 'menu') variants.push({ screen: 'opening', stage, textSize, continueSave: { ok: true } }, { screen: 'opening', stage, textSize, continueSave: { ok: false, reason: CAMPAIGN_COMPLETE_REASON, complete: true } }, { screen: 'opening', stage, textSize, fullscreen: 'available' }, { screen: 'opening', stage, textSize, fullscreen: 'active' });
         for (const v of variants) this.record(b, {}, structured, render(this.store(null, this.ui(v))));
       }
     });
@@ -696,6 +702,13 @@ export class SheetBuilder {
     this.record(b, dims, structuredPlanning(run), render(this.store(run, this.ui({ screen: 'planning', highlightPlan: highlight }))));
   }
 
+  /** The demo-complete screen (FNO-DEMO-END) after the committed plan: app copy, its own stage on the sheet, reached on every route. */
+  captureDemoEnd(run: Run, dims: Dims): void {
+    const b = this.bucket('demo-end', 'Demo complete', 'demo-end', 'Demo complete', 6500);
+    this.record(b, dims, [], render(this.store(run, this.ui({ screen: 'demo-end' }))));
+    this.record(b, dims, [], render(this.store(run, this.ui({ screen: 'demo-end', reducedMotion: true, idle: true }))));
+  }
+
   captureMessages(root: string): void {
     const b = this.bucket('messages', 'Status and error messages (app/main.ts, app/storage.ts, core/save.ts)', UI_PHASE.id, UI_PHASE.title, 9100);
     b.universe.set('', {});
@@ -734,6 +747,7 @@ export class SheetBuilder {
         const r = again.apply({ kind: 'confirm_plan', id: this.content.followon.confirm_input, plan: p.id });
         if (!r.ok) throw new Error(`plan ${p.id}: ${r.message}`);
         this.capturePlanning(again, null, planDims);
+        this.captureDemoEnd(again, planDims);
         this.captureOverlay(again, planDims, 'binder');
         this.captureOverlay(again, planDims, 'history'); // after the mission: every source and note, the explanation, the CAPCOM note (R2); the facility note keeps its own bucket
       }
@@ -780,6 +794,8 @@ export class SheetBuilder {
           id: `registry.site.${block.id}.${item.id}${texts.length > 1 ? '.' + i : ''}${item.notice_id ? ' -> registry.notices.' + item.notice_id : ''}`, text,
         }));
       }
+      // The coming-soon block's itch.io link (FNO-DEMO-END): app copy the renderer supplies, shown after the block's own items.
+      if (block.id === 'coming_soon') rows.push({ order: ++order, phase: 'site', phaseTitle: 'Homepage — authored copy for deployment', node: 'site-' + block.id, nodeTitle: block.id, kind: 'site.link', speaker: '', branch: '', source: 'app', id: 'scripts/lib/site.ts FOLLOW_LINK', text: FOLLOW_LINK.text });
     }
     return { version: this.content.mission.content_version, fingerprint: this.content.fingerprint, rows, runs, unreachable: unreachableContent(this.content, rows) };
   }

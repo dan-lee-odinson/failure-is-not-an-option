@@ -18,6 +18,7 @@ import {
 } from '../core';
 import { describeVisibleEvidence, visibleProcedures, describeHistory } from '../core';
 import { assetEntry, assetUrl, videoUrl } from './assets';
+import { ITCH_URL, SITE_HOME_URL } from './links';
 import { describeResolution } from './resolution';
 import { MODERN_UI_AVAILABLE } from './theme';
 import type { Store } from './ui-state';
@@ -116,6 +117,7 @@ export function render(store: Store): string {
     case 'resolution': body = renderResolution(store); break;
     case 'debrief': body = renderDebrief(store); break;
     case 'planning': body = renderPlanning(store); break;
+    case 'demo-end': body = renderDemoEnd(store); break;
   }
   return body + renderOverlay(store);
 }
@@ -661,7 +663,7 @@ function renderAbout(store: Store): string {
   const sfxIds = new Set<string>([...soundscapeMap.beds.map((b) => b.asset), ...soundscapeMap.one_shots.map((o) => o.asset)]);
   const sfx = [...sfxIds].map((id) => assetEntry(id)).filter((e): e is NonNullable<typeof e> => !!e);
   return `
-    <div class="actions">${key({ family: 'selector', action: 'replay-opening', testid: 'replay-opening', label: 'REPLAY OPENING' })}<a class="k k-selector k-link" href="${HOME_HREF}" data-testid="home-link">HOME</a></div>
+    <div class="actions">${key({ family: 'selector', action: 'replay-opening', testid: 'replay-opening', label: 'REPLAY OPENING' })}<a class="k k-selector k-link" href="${HOME_HREF}" data-testid="home-link">HOME</a><a class="k k-selector k-link" href="${ITCH_URL}" target="_blank" rel="noopener noreferrer" data-testid="about-itch">${esc(DEMO_END.follow)}</a></div>
     <div class="dedication">${reg.notices.dedication.map((d) => `<p>${esc(d)}</p>`).join('')}</div>
     <h3>Project disclaimer</h3><p>${esc(reg.notices.project_disclaimer)}</p>
     <h3>Generative AI disclosure</h3><p>${esc(reg.notices.ai_disclosure)}</p>
@@ -909,8 +911,10 @@ function renderPlanning(store: Store): string {
       }).join('')}
     </div>
     <div class="continue-row">
-      ${key({ family: 'action', action: 'confirm-plan', testid: 'confirm-plan', focusDefault: true, disabled: !canConfirm, label: 'COMMIT THIS PLAN' })}
-      ${fo.committed ? `<span class="committed-text" data-testid="committed-text">${esc(fo.committed_text)}</span>` : '<span class="hint">Selecting a plan highlights it; only Commit records the plan.</span>'}
+      ${key({ family: 'action', action: 'confirm-plan', testid: 'confirm-plan', focusDefault: !fo.committed, disabled: !canConfirm, label: 'COMMIT THIS PLAN' })}
+      ${fo.committed
+        ? `<span class="committed-text" data-testid="committed-text">${esc(fo.committed_text)}</span>${key({ family: 'key', action: 'demo-end', focus: 'demo-end', testid: 'to-demo-end', focusDefault: true, label: 'CONTINUE' })}` // the demo's last Continue: the demo-complete screen (FNO-DEMO-END)
+        : '<span class="hint">Selecting a plan highlights it; only Commit records the plan.</span>'}
       ${store.ui.message ? `<span class="message" role="alert">${esc(store.ui.message)}</span>` : ''}
     </div>
     <div class="actions">
@@ -918,6 +922,56 @@ function renderPlanning(store: Store): string {
       ${key({ family: 'selector', action: 'open:saveload', testid: 'open-saveload', label: 'SAVE / LOAD' })}
       ${key({ family: 'selector', action: 'open:history', testid: 'open-history', label: 'HISTORY' })}
       ${key({ family: 'selector', action: 'open:settings', testid: 'open-settings', label: 'SETTINGS' })}
+    </div>
+  </main>`;
+}
+
+// ---------------------------------------------------------------------------
+// Demo complete (FNO-DEMO-END)
+// ---------------------------------------------------------------------------
+
+/** The demo-complete screen's copy: app copy, on the dialogue sheet under `demo-end`. */
+export const DEMO_END = {
+  heading: 'DEMO COMPLETE',
+  lines: [
+    'Thank you for flying Gemini VIII with us.',
+    'Failure is Not an Option is in development. The full game is coming.',
+    'Follow the game on itch.io for updates.',
+  ],
+  follow: 'FOLLOW ON ITCH.IO',
+  exit: 'EXIT TO FINAOGAME.COM',
+  again: 'PLAY AGAIN',
+} as const;
+
+/**
+ * After the last node of the demo — the committed Gemini IX-A plan's CONTINUE — on every route: the room plate dimmed,
+ * one paper card centred, the keys below. EXIT is the primary (raised) key and the exit button to the site's home
+ * page; FOLLOW opens the itch.io page in a new tab; PLAY AGAIN returns to the menu. Keyboard order Follow, Exit,
+ * Play again; Escape does nothing here. Presentation only: nothing enters the log, the outcome, the debrief and the
+ * planning are unchanged. On a phone the card is the HOTFIX-01 paper sheet below the picture and the keys wrap.
+ */
+function renderDemoEnd(store: Store): string {
+  const { ui } = store;
+  const room = assetUrl('room-gemini-console');
+  const message = ui.message ? `<p class="message" role="alert" data-testid="message">${esc(ui.message)}</p>` : '';
+  return `
+  <main class="screen-demo-end${ui.reducedMotion ? '' : ' de-fade'}" data-testid="screen-demo-end">
+    <div class="room-layer de-room" aria-hidden="true">${room ? `<img id="plate" class="plate" src="${room}" alt="" data-backdrop data-testid="demo-end-plate" />` : ''}</div>
+    <div class="de-dim" aria-hidden="true"></div>
+    <div class="de-body">
+      <section class="de-card paper" data-testid="demo-end-card" aria-labelledby="demo-end-title">
+        <h1 id="demo-end-title" class="de-heading" data-testid="demo-end-heading">${esc(DEMO_END.heading)}</h1>
+        ${DEMO_END.lines.map((l, i) => `<p class="de-line" data-testid="demo-end-line-${i + 1}">${esc(l)}</p>`).join('')}
+      </section>
+      <div class="de-keys" data-testid="demo-end-keys">
+        <a class="k k-selector k-link" href="${ITCH_URL}" target="_blank" rel="noopener noreferrer" data-focus="follow-itch" data-testid="follow-itch">${esc(DEMO_END.follow)}</a>
+        <a class="k k-key k-link${IDLE ? ' idle-hint' : ''}" href="${SITE_HOME_URL}" data-focus="exit-home" data-focus-default data-testid="exit-home">${esc(DEMO_END.exit)}</a>
+        ${key({ family: 'selector', action: 'play-again', focus: 'play-again', testid: 'play-again', label: DEMO_END.again })}
+      </div>
+      <div class="de-tools">
+        ${soundControl(store, 'demo-end')}
+        ${message}
+      </div>
     </div>
   </main>`;
 }

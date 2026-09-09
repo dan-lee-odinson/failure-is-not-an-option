@@ -10,7 +10,7 @@ import { describeVisibleEvidence, visibleProcedures, describeHistory, deriveEnco
 import { bundle } from './content-bundle';
 import { DESIGN, esc, render, renderFilmControls } from './render';
 import { describeResolution } from './resolution';
-import { exportFilename, exportText, hasBrowserSave, importFromText, loadFromBrowser, saveToBrowser } from './storage';
+import { campaignComplete, continueState, exportFilename, exportText, hasBrowserSave, importFromText, loadFromBrowser, saveToBrowser } from './storage';
 import { layoutEmblem } from './plate';
 import { applyTheme } from './theme';
 import { AudioDirector, type MusicMap, type SoundscapeMap } from './audio';
@@ -203,6 +203,24 @@ function toDebrief(): void {
   announce('Debrief.');
 }
 
+/**
+ * The demo-complete screen (FNO-DEMO-END): after the committed Gemini IX-A plan, on every route. Presentation only —
+ * nothing enters the log and the run is untouched. Reaching it writes the browser slot, so the campaign the menu knows
+ * is the finished one and CONTINUE says so instead of silently reopening the planning screen; export still works.
+ */
+function enterDemoEnd(): void {
+  const run = store.run;
+  if (!run || store.ui.screen !== 'planning' || !campaignComplete(run)) return;
+  store.ui.screen = 'demo-end';
+  store.ui.overlay = null;
+  store.ui.tierInfo = false;
+  store.ui.saveMessage = null;
+  const r = saveToBrowser(run);
+  store.ui.message = r.ok ? null : r.message;
+  refreshContinueSave();
+  announce('Demo complete.');
+}
+
 // ---------------------------------------------------------------------------
 // Stacked play layout (M02, Part 2): presentation only, never persisted
 // ---------------------------------------------------------------------------
@@ -304,12 +322,10 @@ function driveLayer(before: { plate: string | null; time: number }): void {
   anim.currentTime = before.plate === main.dataset.plate ? Math.min(duration, before.time) : 0;
 }
 
-/** Whether CONTINUE on the menu can resume the browser slot, with the visible reason when it cannot. */
+/** Whether CONTINUE on the menu can resume the browser slot, with the visible reason when it cannot (an empty slot, a save that fails, a completed campaign). */
 function refreshContinueSave(): void {
   store.ui.hasBrowserSave = hasBrowserSave();
-  if (!store.ui.hasBrowserSave) { store.ui.continueSave = { ok: false, reason: 'No saved campaign in this browser yet. New Campaign starts one; Load imports a file.' }; return; }
-  const r = loadFromBrowser(content);
-  store.ui.continueSave = r.ok ? { ok: true } : { ok: false, reason: `The saved campaign cannot be resumed: ${r.message}` };
+  store.ui.continueSave = continueState(store.ui.hasBrowserSave ? loadFromBrowser(content) : null);
 }
 
 function downloadText(filename: string, text: string): void {
@@ -919,6 +935,21 @@ export function dispatch(action: string, arg?: string): void {
       if (ui.highlightPlan) { director.event('ui:commit'); applyInput({ kind: 'confirm_plan', id: content.followon.confirm_input, plan: ui.highlightPlan }); }
       break;
     }
+    case 'demo-end': {
+      if (ui.screen !== 'planning' || !store.run || !campaignComplete(store.run)) break;
+      director.event('ui:continue');
+      enterDemoEnd();
+      break;
+    }
+    case 'play-again': {
+      // PLAY AGAIN: the menu, with NEW CAMPAIGN available; the finished run stays loaded until a new one replaces it (export still works from Load).
+      if (ui.screen !== 'demo-end') break;
+      director.event('ui:menu-select');
+      ui.overlay = null;
+      ui.idle = false;
+      goToStage('menu');
+      break;
+    }
     default:
       break;
   }
@@ -941,8 +972,8 @@ function syncAudio(): void {
   const ui = store.ui;
   const sid = screenId(ui);
   if (sid !== lastScreenId) { lastScreenId = sid; director.signal(sid); }
-  // The room bed runs from the first console screen through the resolution cards, the debrief and planning; never under the prologue.
-  const consoleLike = ui.screen === 'console' || ui.screen === 'resolution' || ui.screen === 'debrief' || ui.screen === 'planning';
+  // The room bed runs from the first console screen through the resolution cards, the debrief, planning and the demo-complete screen; never under the prologue.
+  const consoleLike = ui.screen === 'console' || ui.screen === 'resolution' || ui.screen === 'debrief' || ui.screen === 'planning' || ui.screen === 'demo-end';
   const node = ui.screen === 'console' ? store.run?.currentNode() : null;
   const phaseId = node?.phase.id ?? (consoleLike ? store.content.mission.phases[store.content.mission.phases.length - 1]?.id ?? null : null);
   director.setRoom(consoleLike, phaseId);
@@ -1219,7 +1250,7 @@ function splitAction(s: string): [string, string | undefined] {
 
 declare global {
   interface Window {
-    __fno?: { store: Store; dispatch: typeof dispatch; fingerprint: string; unlocks: () => unknown; audio: { enabled: () => boolean; unlocked: () => boolean }; idle: () => boolean; guarded: () => boolean; stacked: () => boolean; film: { handoverAt: number; video: () => HTMLVideoElement | null }; credits: () => { pos: number; unit: number; frameUnit: number; preloaded: { id: string; complete: boolean }[] } };
+    __fno?: { store: Store; dispatch: typeof dispatch; fingerprint: string; unlocks: () => unknown; audio: { enabled: () => boolean; unlocked: () => boolean }; idle: () => boolean; guarded: () => boolean; stacked: () => boolean; film: { handoverAt: number; video: () => HTMLVideoElement | null }; credits: () => { pos: number; unit: number; frameUnit: number; preloaded: { id: string; complete: boolean }[] }; complete: () => boolean };
   }
 }
 
@@ -1229,4 +1260,4 @@ wire();
 window.addEventListener('resize', () => { layoutEmblem(); driveLayer(layerState()); rescaleCredits(); if (store.ui.screen === 'console') schedulePaint(); });
 if (store.ui.stage === 'menu') refreshContinueSave();
 paint();
-window.__fno = { store, dispatch, fingerprint: content.fingerprint, unlocks: () => { const run = store.run; if (!run) return null; const enc = deriveEncounters(run); return { evidence: describeVisibleEvidence(run).map((e) => e.id), binder: visibleProcedures(run), history: describeHistory(content, run, store.ui.prologueSeen), encounters: { nodes: [...enc.nodes], lines: [...enc.lines], preparations: [...enc.preparations], speakers: [...enc.speakers] } }; }, audio: { enabled: () => director.enabled, unlocked: () => director.unlocked }, idle: () => store.ui.idle, guarded: () => Date.now() < guardUntil, stacked: () => store.ui.stacked, film: { handoverAt: FILM_HANDOVER_S, video: () => filmVideo }, credits: () => ({ pos: scrollPos, unit: scrollUnit, frameUnit: creditsUnit(), preloaded: [...preloaded].map(([id, img]) => ({ id, complete: img.complete && img.naturalWidth > 0 })) }) };
+window.__fno = { store, dispatch, fingerprint: content.fingerprint, unlocks: () => { const run = store.run; if (!run) return null; const enc = deriveEncounters(run); return { evidence: describeVisibleEvidence(run).map((e) => e.id), binder: visibleProcedures(run), history: describeHistory(content, run, store.ui.prologueSeen), encounters: { nodes: [...enc.nodes], lines: [...enc.lines], preparations: [...enc.preparations], speakers: [...enc.speakers] } }; }, audio: { enabled: () => director.enabled, unlocked: () => director.unlocked }, idle: () => store.ui.idle, guarded: () => Date.now() < guardUntil, stacked: () => store.ui.stacked, film: { handoverAt: FILM_HANDOVER_S, video: () => filmVideo }, credits: () => ({ pos: scrollPos, unit: scrollUnit, frameUnit: creditsUnit(), preloaded: [...preloaded].map(([id, img]) => ({ id, complete: img.complete && img.naturalWidth > 0 })) }), complete: () => (store.run ? campaignComplete(store.run) : false) };

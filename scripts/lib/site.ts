@@ -8,6 +8,7 @@
  * Used by vite.config.ts (the root index.html is generated at dev and build time) and by the tests.
  */
 import type { Registry, SiteBlockId, SiteItem } from '../../core/types';
+import { ITCH_URL } from '../../app/links';
 
 export const SITE_ORIGIN = 'https://finaogame.com';
 export const DEMO_HREF = './demo/';
@@ -16,6 +17,8 @@ const PRESENTATION_LINKS: Record<string, string> = {
   'nasa_marks/paragraph-03': 'https://www.nasa.gov/nasa-brand-center/images-and-media/',
   'open_source/paragraph-02': 'https://github.com/dan-lee-odinson',
 };
+/** The coming-soon block's second link (FNO-DEMO-END): the game's itch.io page, text and destination both presentation constants, so registry.site is unchanged; on the sheet's site section as app copy. */
+export const FOLLOW_LINK = { text: 'Follow on itch.io ↗', href: ITCH_URL } as const;
 /** The screenshots of the gallery in order, with the 960-px inline versions (public/site-assets/, from homepage v001). */
 const SHOTS = [
   { full: '/site-assets/screenshot-program.webp', small: '/site-assets/screenshot-program-960.webp' },
@@ -183,7 +186,7 @@ export function renderSite(registry: Registry, opts: SiteRenderOptions = {}): st
       </div>
     </section>
 
-    <section class="coming-soon" aria-labelledby="coming-heading"><div class="wrap coming-inner"><img src="/site-assets/emblem.svg" alt="" width="68" height="90" loading="lazy"><div><p class="eyebrow">${esc(t.text('coming_soon', 'paragraph-01'))}</p><h2 id="coming-heading">${split(t.text('coming_soon', 'heading-01'), 'FULL GAME')}</h2><p>${esc(t.text('coming_soon', 'paragraph-02'))}</p></div><a class="text-link" href="${esc(t.href('coming_soon', 'link-01'))}">${arrow(t.text('coming_soon', 'link-01'))}</a></div></section>
+    <section class="coming-soon" aria-labelledby="coming-heading"><div class="wrap coming-inner"><img src="/site-assets/emblem.svg" alt="" width="68" height="90" loading="lazy"><div><p class="eyebrow">${esc(t.text('coming_soon', 'paragraph-01'))}</p><h2 id="coming-heading">${split(t.text('coming_soon', 'heading-01'), 'FULL GAME')}</h2><p>${esc(t.text('coming_soon', 'paragraph-02'))}</p></div><div class="coming-links"><a class="text-link" href="${esc(t.href('coming_soon', 'link-01'))}">${arrow(t.text('coming_soon', 'link-01'))}</a><a class="text-link" href="${FOLLOW_LINK.href}" data-follow="itch">${arrow(FOLLOW_LINK.text)}</a></div></div></section>
 
     <section class="developer-section" id="developer" aria-labelledby="developer-heading"><div class="wrap developer-grid">
       <figure class="dev-photo"><img src="/site-assets/dan-at-ksc.jpg" width="400" height="400" loading="lazy" alt="${esc(t.text('bio', 'alt-01'))}"><figcaption>${esc(t.text('bio', 'label-01'))}</figcaption></figure>

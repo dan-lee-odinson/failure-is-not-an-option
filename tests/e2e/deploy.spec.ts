@@ -278,6 +278,11 @@ test.describe('the home page and /demo/', () => {
       const launch = page.locator('a.launch').first();
       await expect(launch).toHaveAttribute('href', './demo/');
       expect(await page.locator('a[href="./demo/"]').count()).toBeGreaterThanOrEqual(4);
+      // FNO-DEMO-END: the coming-soon block's itch.io link, a presentation constant beside the block's own link (registry.site unchanged).
+      const follow = page.locator('.coming-soon a[data-follow="itch"]');
+      await expect(follow).toHaveAttribute('href', 'https://danleeodinson.itch.io/failure-is-not-an-option');
+      await expect(follow).toContainText('Follow on itch.io');
+      await expect(page.locator('.coming-soon a[href="./demo/"]')).toHaveCount(1);
       // Every image resolves; the OG card and the icons are declared.
       // (the viewer's image has no src until a screenshot is opened)
       const broken = await page.evaluate(() => Array.from(document.images).filter((i) => i.getAttribute('src') && i.complete && i.naturalWidth === 0).map((i) => i.src));

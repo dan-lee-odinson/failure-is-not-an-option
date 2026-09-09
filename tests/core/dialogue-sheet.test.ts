@@ -13,6 +13,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { describeDebrief, describeEvidence, describeFollowOnForRun, describeNode, type Run } from '../../core';
 import { render } from '../../app/render';
+import { CAMPAIGN_COMPLETE_REASON } from '../../app/storage';
 import { STAGES, defaultUi, type Store, type UiState } from '../../app/ui-state';
 import { MESSAGE_SOURCES, buildSheet, dedupeKey, extractRuns, historyHiddenStrings, norm, provenanceText, toCsv, toMarkdown, type Sheet } from '../../scripts/lib/dialogue-sheet';
 import { PREP_SETS, ROOT, content, newRun, play, script, type Lesson, type Route, type Stance } from './helpers';
@@ -138,6 +139,7 @@ describe('dialogue sheet', () => {
       note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, scrollPaused: true })), reachableRendered);
       note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, reducedMotion: true })), reachableRendered);
       note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, continueSave: { ok: true } })), reachableRendered);
+      note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, continueSave: { ok: false, reason: CAMPAIGN_COMPLETE_REASON, complete: true } })), reachableRendered); // a finished campaign in the slot (FNO-DEMO-END)
       note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, fullscreen: 'available' })), reachableRendered);
       note(renderedStrings(null, ui({ screen: 'opening', stage, textSize, fullscreen: 'active' })), reachableRendered);
     }
@@ -195,6 +197,7 @@ describe('dialogue sheet', () => {
         play(again, [{ kind: 'confirm_plan', id: 'g9-confirm-plan', plan: p.id }]);
         note(viewStrings(again), reachableView);
         note(renderedStrings(again, ui({ screen: 'planning' })), reachableRendered);
+        note(renderedStrings(again, ui({ screen: 'demo-end' })), reachableRendered); // the demo-complete screen after the committed plan (FNO-DEMO-END)
         note(renderedStrings(again, ui({ screen: 'planning', overlay: 'binder' })), reachableRendered);
         note(renderedStrings(again, ui({ screen: 'planning', overlay: 'history', prologueSeen: true })), reachableRendered); // after the mission: every source and note (R2)
       }
@@ -253,6 +256,7 @@ describe('dialogue sheet', () => {
     expect(s.rows.filter((r) => r.kind === 'history.note')).toHaveLength(1);
     expect(firstIndex.get('debrief')!).toBeGreaterThan(firstIndex.get(missionNodes[missionNodes.length - 1]!)!);
     expect(firstIndex.get('g9-plan-decision')!).toBeGreaterThan(firstIndex.get('debrief')!);
+    expect(firstIndex.get('demo-end')!).toBeGreaterThan(firstIndex.get('g9-plan-decision')!); // the demo-complete screen follows the committed plan (FNO-DEMO-END)
     expect(firstIndex.has('overlay-settings')).toBe(true);
     expect(s.rows.filter((r) => r.kind === 'notice')).toHaveLength(5); // two dedication paragraphs and three notices, as content
     // Every history-hidden row is a content string History used to show; every such string is on the sheet.

@@ -46,6 +46,28 @@ export function exportText(run: Run): string {
   return JSON.stringify(save, null, 2);
 }
 
+/**
+ * The demo's campaign is complete once the mission is closed and the Gemini IX-A plan is committed (FNO-DEMO-END): the
+ * demo-complete screen follows the planning screen, and the menu's CONTINUE no longer resumes the slot. Derived from
+ * the run's own state; nothing is added to a save.
+ */
+export function campaignComplete(run: Run): boolean {
+  return run.state.mission.completed !== null && run.state.followon.committed !== null;
+}
+
+export const NO_SAVE_REASON = 'No saved campaign in this browser yet. New Campaign starts one; Load imports a file.';
+export const CAMPAIGN_COMPLETE_REASON = 'This campaign is complete. New Campaign starts another; Load imports a save file.';
+
+export type ContinueState = { ok: true } | { ok: false; reason: string; complete?: boolean };
+
+/** Whether CONTINUE on the menu may resume the browser slot: never an empty slot, a save that fails verification, or a completed campaign (it would silently reopen the last screen). */
+export function continueState(slot: VerifyResult | null): ContinueState {
+  if (!slot) return { ok: false, reason: NO_SAVE_REASON };
+  if (!slot.ok) return { ok: false, reason: `The saved campaign cannot be resumed: ${slot.message}` };
+  if (campaignComplete(slot.run)) return { ok: false, reason: CAMPAIGN_COMPLETE_REASON, complete: true };
+  return { ok: true };
+}
+
 export function exportFilename(run: Run): string {
   const n = run.identity.inputs.length;
   const done = run.state.mission.completed ? '-complete' : '';

@@ -5,6 +5,7 @@ import type { Registry } from '../../core/types';
 import { CONTENT_FILES, loadBundle, readJson } from '../../scripts/lib/load-content';
 import { validateContent } from '../../scripts/lib/validator';
 import { buildSheet, extractRuns, norm } from '../../scripts/lib/dialogue-sheet';
+import { FOLLOW_LINK } from '../../scripts/lib/site';
 
 const ROOT = resolve(__dirname, '../..');
 const FIX = resolve(ROOT, 'tests/fixtures/content-054');
@@ -72,7 +73,8 @@ describe('content 0.5.4 Archive and homepage contract', () => {
   it('puts every site occurrence and resolved notice on the review sheet without numeric deduplication', {timeout:20000}, () => {
     const r=loadBundle(ROOT).registry;
     const rows=buildSheet(ROOT).rows.filter(row=>row.phase==='site');
-    expect(rows.map(row=>row.text)).toEqual(textItems(r));
+    expect(rows.filter(row=>row.source==='content').map(row=>row.text)).toEqual(textItems(r));
+    expect(rows.filter(row=>row.source==='app').map(row=>row.text)).toEqual([FOLLOW_LINK.text]); // the coming-soon block's itch.io link (FNO-DEMO-END): app copy beside the registry's items
     expect(new Set(rows.map(row=>row.id)).size).toBe(rows.length);
     expect([...new Set(rows.map(row=>row.node))]).toEqual(r.site!.blocks.map(b=>'site-'+b.id));
     expect(rows.filter(row=>row.branch)).toEqual([]);
