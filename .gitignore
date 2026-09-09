@@ -1,5 +1,6 @@
 node_modules/
 dist/
+dist-itch/
 test-results/
 artifacts/
 playwright-report/
